@@ -51,28 +51,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "2e8ad510-aa53-472d-bccf-42c6136f2783",
+                            Id = "b7c52333-bd2c-4b41-a682-44717397b6f8",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "2d5bbb92-22b9-45da-805f-9279b882ea81",
+                            Id = "18fcad63-f99b-4eb6-8e48-1d16d2d6f3fe",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "daf58c7f-5035-4976-b4fe-dc091e231c13",
+                            Id = "e5e10a8c-be6c-4ea6-9575-295aaa2e2c8b",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "341928f1-45ce-442e-b5f0-836764894ee5",
+                            Id = "0f41e179-23bb-4fd4-bb9d-dade8d9769b4",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"

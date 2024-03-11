@@ -51,8 +51,14 @@ public class AuthenticateController: ControllerBase
 
             //Add roel to user
             await _userManager.AddToRoleAsync(user, role);
+            // Add token to verify email
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var confirmationslink = Url.Action(nameof(ConfirmEmail), "Authenticate", new { token, email = user.Email }, Request.Scheme);
+            var message = new Message(new string[] { user.Email }, "Email Confirmation", confirmationslink);
+            _emailService.SendEmail(message);
+            
             return StatusCode(StatusCodes.Status200OK, 
-                new Response { Status ="Success", Message = "User create success" });
+                new Response { Status ="Success", Message = $"User created & Email Sent To {user.Email} Successfully" });
         }
         else
         {
@@ -61,12 +67,20 @@ public class AuthenticateController: ControllerBase
         }
     }
 
-    [HttpGet]
-    public async Task<IActionResult> TestEmail()
+    [HttpGet("confirmEmail")]
+    public async Task<IActionResult> ConfirmEmail(string token, string email)
     {
-        var message = new Message(new string[] { "tltkhanh1501@gmail.com" }, "Test Email", " <h1>This is a test email</h1>");
-        _emailService.SendEmail(message);
-        return StatusCode(StatusCodes.Status200OK,
-        new Response{Status = "Success", Message = "Email sent"});
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user != null)
+        {
+          var result = await _userManager.ConfirmEmailAsync(user, token);
+          if (!result.Succeeded)
+          {
+              return StatusCode(StatusCodes.Status200OK,
+                  new Response { Status ="Success", Message = "Email Verified Successfully" });
+          }
+        }
+        return StatusCode(StatusCodes.Status500InternalServerError,
+            new Response{Status = "Error", Message = "This User Doesnot Exist"});
     }
 }
