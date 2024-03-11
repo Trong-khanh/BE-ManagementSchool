@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagementSchool", "ManagementSchool\ManagementSchool.csproj", "{10F9FCC8-59FF-4B7C-875A-91C829356710}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "User.ManagementSchool.Service", "User.ManagementSchool.Service\User.ManagementSchool.Service.csproj", "{534A4A36-6C41-4969-99D7-0F19B7F59707}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{10F9FCC8-59FF-4B7C-875A-91C829356710}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10F9FCC8-59FF-4B7C-875A-91C829356710}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10F9FCC8-59FF-4B7C-875A-91C829356710}.Release|Any CPU.Build.0 = Release|Any CPU
+		{534A4A36-6C41-4969-99D7-0F19B7F59707}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{534A4A36-6C41-4969-99D7-0F19B7F59707}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{534A4A36-6C41-4969-99D7-0F19B7F59707}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{534A4A36-6C41-4969-99D7-0F19B7F59707}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -2,6 +2,8 @@
 using ManagementSchool.Models.SignUp;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using User.ManagementSchool.Service.Models;
+using User.ManagementSchool.Service.Service;
 
 namespace ManagementSchool.Controllers;
 [Route("api/[controller]")]
@@ -10,14 +12,14 @@ public class AuthenticateController: ControllerBase
 {
     private readonly UserManager<IdentityUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly IConfiguration _configuration;
+    private readonly IEmailService _emailService;
     
     public AuthenticateController(UserManager<IdentityUser> userManager,
-        RoleManager< IdentityRole> roleManager, IConfiguration configuration)
+        RoleManager< IdentityRole> roleManager, IEmailService emailService)
     {
         _roleManager = roleManager;
         _userManager = userManager;
-        _configuration = configuration;
+        _emailService = emailService;
     }
     
     [HttpPost]
@@ -57,5 +59,14 @@ public class AuthenticateController: ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, 
                 new Response { Status ="Error", Message = "Role does not exist" });
         }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> TestEmail()
+    {
+        var message = new Message(new string[] { "tltkhanh1501@gmail.com" }, "Test Email", " <h1>This is a test email</h1>");
+        _emailService.SendEmail(message);
+        return StatusCode(StatusCodes.Status200OK,
+        new Response{Status = "Success", Message = "Email sent"});
     }
 }
