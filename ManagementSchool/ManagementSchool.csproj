@@ -19,7 +19,8 @@
 
     <ItemGroup>
       <Folder Include="Controllers\Service\" />
-      <Folder Include="Models\Authentication\Login\" />
+      <Folder Include="Models\Authentication\" />
+      <Folder Include="Models\Login\" />
     </ItemGroup>
 
 </Project>
