@@ -22,6 +22,298 @@ namespace ManagementSchool.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("ManagementSchool.Entities.Class", b =>
+                {
+                    b.Property<int>("ClassId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClassId"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SchoolYearId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ClassId");
+
+                    b.HasIndex("SchoolYearId");
+
+                    b.ToTable("Class");
+
+                    b.HasData(
+                        new
+                        {
+                            ClassId = 101,
+                            Name = "10/1",
+                            SchoolYearId = 1
+                        },
+                        new
+                        {
+                            ClassId = 102,
+                            Name = "10/2",
+                            SchoolYearId = 1
+                        },
+                        new
+                        {
+                            ClassId = 103,
+                            Name = "10/3",
+                            SchoolYearId = 1
+                        },
+                        new
+                        {
+                            ClassId = 104,
+                            Name = "10/4",
+                            SchoolYearId = 1
+                        },
+                        new
+                        {
+                            ClassId = 105,
+                            Name = "10/5",
+                            SchoolYearId = 1
+                        },
+                        new
+                        {
+                            ClassId = 106,
+                            Name = "10/6",
+                            SchoolYearId = 1
+                        },
+                        new
+                        {
+                            ClassId = 107,
+                            Name = "10/7",
+                            SchoolYearId = 1
+                        },
+                        new
+                        {
+                            ClassId = 108,
+                            Name = "10/8",
+                            SchoolYearId = 1
+                        },
+                        new
+                        {
+                            ClassId = 109,
+                            Name = "10/9",
+                            SchoolYearId = 1
+                        },
+                        new
+                        {
+                            ClassId = 110,
+                            Name = "10/10",
+                            SchoolYearId = 1
+                        },
+                        new
+                        {
+                            ClassId = 111,
+                            Name = "10/11",
+                            SchoolYearId = 1
+                        },
+                        new
+                        {
+                            ClassId = 112,
+                            Name = "10/12",
+                            SchoolYearId = 1
+                        },
+                        new
+                        {
+                            ClassId = 113,
+                            Name = "10/13",
+                            SchoolYearId = 1
+                        },
+                        new
+                        {
+                            ClassId = 201,
+                            Name = "11/1",
+                            SchoolYearId = 2
+                        },
+                        new
+                        {
+                            ClassId = 202,
+                            Name = "11/2",
+                            SchoolYearId = 2
+                        },
+                        new
+                        {
+                            ClassId = 203,
+                            Name = "11/3",
+                            SchoolYearId = 2
+                        },
+                        new
+                        {
+                            ClassId = 204,
+                            Name = "11/4",
+                            SchoolYearId = 2
+                        },
+                        new
+                        {
+                            ClassId = 205,
+                            Name = "11/5",
+                            SchoolYearId = 2
+                        },
+                        new
+                        {
+                            ClassId = 206,
+                            Name = "11/6",
+                            SchoolYearId = 2
+                        },
+                        new
+                        {
+                            ClassId = 207,
+                            Name = "11/7",
+                            SchoolYearId = 2
+                        },
+                        new
+                        {
+                            ClassId = 208,
+                            Name = "11/8",
+                            SchoolYearId = 2
+                        },
+                        new
+                        {
+                            ClassId = 209,
+                            Name = "11/9",
+                            SchoolYearId = 2
+                        },
+                        new
+                        {
+                            ClassId = 210,
+                            Name = "11/10",
+                            SchoolYearId = 2
+                        },
+                        new
+                        {
+                            ClassId = 211,
+                            Name = "11/11",
+                            SchoolYearId = 2
+                        },
+                        new
+                        {
+                            ClassId = 212,
+                            Name = "11/12",
+                            SchoolYearId = 2
+                        },
+                        new
+                        {
+                            ClassId = 213,
+                            Name = "11/13",
+                            SchoolYearId = 2
+                        },
+                        new
+                        {
+                            ClassId = 301,
+                            Name = "12/1",
+                            SchoolYearId = 3
+                        },
+                        new
+                        {
+                            ClassId = 302,
+                            Name = "12/2",
+                            SchoolYearId = 3
+                        },
+                        new
+                        {
+                            ClassId = 303,
+                            Name = "12/3",
+                            SchoolYearId = 3
+                        },
+                        new
+                        {
+                            ClassId = 304,
+                            Name = "12/4",
+                            SchoolYearId = 3
+                        },
+                        new
+                        {
+                            ClassId = 305,
+                            Name = "12/5",
+                            SchoolYearId = 3
+                        },
+                        new
+                        {
+                            ClassId = 306,
+                            Name = "12/6",
+                            SchoolYearId = 3
+                        },
+                        new
+                        {
+                            ClassId = 307,
+                            Name = "12/7",
+                            SchoolYearId = 3
+                        },
+                        new
+                        {
+                            ClassId = 308,
+                            Name = "12/8",
+                            SchoolYearId = 3
+                        },
+                        new
+                        {
+                            ClassId = 309,
+                            Name = "12/9",
+                            SchoolYearId = 3
+                        },
+                        new
+                        {
+                            ClassId = 310,
+                            Name = "12/10",
+                            SchoolYearId = 3
+                        },
+                        new
+                        {
+                            ClassId = 311,
+                            Name = "12/11",
+                            SchoolYearId = 3
+                        },
+                        new
+                        {
+                            ClassId = 312,
+                            Name = "12/12",
+                            SchoolYearId = 3
+                        },
+                        new
+                        {
+                            ClassId = 313,
+                            Name = "12/13",
+                            SchoolYearId = 3
+                        });
+                });
+
+            modelBuilder.Entity("ManagementSchool.Entities.SchoolYear", b =>
+                {
+                    b.Property<int>("SchoolYearId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SchoolYearId"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SchoolYearId");
+
+                    b.ToTable("SchoolYear");
+
+                    b.HasData(
+                        new
+                        {
+                            SchoolYearId = 1,
+                            Name = "10"
+                        },
+                        new
+                        {
+                            SchoolYearId = 2,
+                            Name = "11"
+                        },
+                        new
+                        {
+                            SchoolYearId = 3,
+                            Name = "12"
+                        });
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -51,28 +343,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b7c52333-bd2c-4b41-a682-44717397b6f8",
+                            Id = "3863048c-f882-4a9a-a1a3-ed985296aa7f",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "18fcad63-f99b-4eb6-8e48-1d16d2d6f3fe",
+                            Id = "c7833d2e-84e9-4013-9f76-16aa910f591c",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "e5e10a8c-be6c-4ea6-9575-295aaa2e2c8b",
+                            Id = "739c30c4-d840-40e1-b2f8-5819b8c9b2ee",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "0f41e179-23bb-4fd4-bb9d-dade8d9769b4",
+                            Id = "00dab23b-a152-42cc-a9ed-50f4591ab775",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
@@ -248,6 +540,17 @@ namespace ManagementSchool.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("ManagementSchool.Entities.Class", b =>
+                {
+                    b.HasOne("ManagementSchool.Entities.SchoolYear", "SchoolYear")
+                        .WithMany()
+                        .HasForeignKey("SchoolYearId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SchoolYear");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
