@@ -10,16 +10,51 @@ public class ApplicationDbContext: IdentityDbContext<IdentityUser>
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext>options): base(options)
     {
     }
-    public  DbSet<Class> Classes { get; set; }
+    public DbSet<Class> Classes { get; set; }
     public DbSet<SchoolYear> SchoolYears { get; set; }
-
+    public DbSet<Student> Students { get; set; }
+    public DbSet<Teacher> Teachers { get; set; }
+    public DbSet<Parent> Parents { get; set; }
+    public DbSet<TeacherClass> TeacherClasses { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         SeedRoles(modelBuilder);
         
        // Configuration realtionship between Class 
-        
+       // Configure the primary keys
+       modelBuilder.Entity<SchoolYear>().HasKey(sy => sy.SchoolYearId);
+       modelBuilder.Entity<Class>().HasKey(c => c.ClassId);
+       modelBuilder.Entity<Parent>().HasKey(p => p.ParentId);
+       modelBuilder.Entity<Student>().HasKey(s => s.StudentId);
+       modelBuilder.Entity<Teacher>().HasKey(t => t.TeacherId);
+       modelBuilder.Entity<TeacherClass>().HasKey(tc => new { tc.TeacherId, tc.ClassId });
+
+       // Configure the relationships
+       modelBuilder.Entity<Class>()
+           .HasOne(c => c.SchoolYear)
+           .WithMany(sy => sy.Classes)
+           .HasForeignKey(c => c.SchoolYearId);
+
+       modelBuilder.Entity<Student>()
+           .HasOne(s => s.Class)
+           .WithMany(c => c.Students)
+           .HasForeignKey(s => s.ClassId);
+
+       modelBuilder.Entity<Student>()
+           .HasOne(s => s.Parent)
+           .WithMany(p => p.Students)
+           .HasForeignKey(s => s.ParentId);
+
+       modelBuilder.Entity<TeacherClass>()
+           .HasOne(tc => tc.Teacher)
+           .WithMany(t => t.TeacherClasses)
+           .HasForeignKey(tc => tc.TeacherId);
+
+       modelBuilder.Entity<TeacherClass>()
+           .HasOne(tc => tc.Class)
+           .WithMany(c => c.TeacherClasses)
+           .HasForeignKey(tc => tc.ClassId);
         // Seed date for grade
         modelBuilder.Entity<SchoolYear>().HasData(
             new SchoolYear { SchoolYearId = 1, Name = "10" },
