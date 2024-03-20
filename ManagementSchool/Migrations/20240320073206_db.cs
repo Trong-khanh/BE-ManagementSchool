@@ -49,7 +49,7 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SchoolYear",
+                name: "SchoolYears",
                 columns: table => new
                 {
                     SchoolYearId = table.Column<int>(type: "int", nullable: false)
@@ -58,7 +58,7 @@ namespace ManagementSchool.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SchoolYear", x => x.SchoolYearId);
+                    table.PrimaryKey("PK_SchoolYears", x => x.SchoolYearId);
                 });
 
             migrationBuilder.CreateTable(
@@ -168,7 +168,7 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Class",
+                name: "Classes",
                 columns: table => new
                 {
                     ClassId = table.Column<int>(type: "int", nullable: false)
@@ -178,11 +178,11 @@ namespace ManagementSchool.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Class", x => x.ClassId);
+                    table.PrimaryKey("PK_Classes", x => x.ClassId);
                     table.ForeignKey(
-                        name: "FK_Class_SchoolYear_SchoolYearId",
+                        name: "FK_Classes_SchoolYears_SchoolYearId",
                         column: x => x.SchoolYearId,
-                        principalTable: "SchoolYear",
+                        principalTable: "SchoolYears",
                         principalColumn: "SchoolYearId",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -192,14 +192,14 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "00dab23b-a152-42cc-a9ed-50f4591ab775", "4", "Parent", "PARENT" },
-                    { "3863048c-f882-4a9a-a1a3-ed985296aa7f", "1", "Admin", "ADMIN" },
-                    { "739c30c4-d840-40e1-b2f8-5819b8c9b2ee", "3", "Teacher", "TEACHER" },
-                    { "c7833d2e-84e9-4013-9f76-16aa910f591c", "2", "Student", "STUDENT" }
+                    { "43a24e6d-dfdd-4c79-96cc-852c32d7ad9b", "1", "Admin", "ADMIN" },
+                    { "babec2cb-206c-49f8-885b-3a0a0537040d", "3", "Teacher", "TEACHER" },
+                    { "c150c278-251e-4d03-a3b0-9366d439cd4f", "4", "Parent", "PARENT" },
+                    { "c477cea6-0abc-4271-800f-9cf59576ab38", "2", "Student", "STUDENT" }
                 });
 
             migrationBuilder.InsertData(
-                table: "SchoolYear",
+                table: "SchoolYears",
                 columns: new[] { "SchoolYearId", "Name" },
                 values: new object[,]
                 {
@@ -209,7 +209,7 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Class",
+                table: "Classes",
                 columns: new[] { "ClassId", "Name", "SchoolYearId" },
                 values: new object[,]
                 {
@@ -294,8 +294,8 @@ namespace ManagementSchool.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Class_SchoolYearId",
-                table: "Class",
+                name: "IX_Classes_SchoolYearId",
+                table: "Classes",
                 column: "SchoolYearId");
         }
 
@@ -317,7 +317,7 @@ namespace ManagementSchool.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Class");
+                name: "Classes");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -326,7 +326,7 @@ namespace ManagementSchool.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "SchoolYear");
+                name: "SchoolYears");
         }
     }
 }
