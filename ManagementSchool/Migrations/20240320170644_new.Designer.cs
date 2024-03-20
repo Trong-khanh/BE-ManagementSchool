@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ManagementSchool.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240320162757_db")]
-    partial class db
+    [Migration("20240320170644_new")]
+    partial class @new
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -32,7 +32,7 @@ namespace ManagementSchool.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClassId"), 1L, 1);
 
-                    b.Property<string>("Name")
+                    b.Property<string>("ClassName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -49,235 +49,235 @@ namespace ManagementSchool.Migrations
                         new
                         {
                             ClassId = 101,
-                            Name = "10/1",
+                            ClassName = "10/1",
                             SchoolYearId = 1
                         },
                         new
                         {
                             ClassId = 102,
-                            Name = "10/2",
+                            ClassName = "10/2",
                             SchoolYearId = 1
                         },
                         new
                         {
                             ClassId = 103,
-                            Name = "10/3",
+                            ClassName = "10/3",
                             SchoolYearId = 1
                         },
                         new
                         {
                             ClassId = 104,
-                            Name = "10/4",
+                            ClassName = "10/4",
                             SchoolYearId = 1
                         },
                         new
                         {
                             ClassId = 105,
-                            Name = "10/5",
+                            ClassName = "10/5",
                             SchoolYearId = 1
                         },
                         new
                         {
                             ClassId = 106,
-                            Name = "10/6",
+                            ClassName = "10/6",
                             SchoolYearId = 1
                         },
                         new
                         {
                             ClassId = 107,
-                            Name = "10/7",
+                            ClassName = "10/7",
                             SchoolYearId = 1
                         },
                         new
                         {
                             ClassId = 108,
-                            Name = "10/8",
+                            ClassName = "10/8",
                             SchoolYearId = 1
                         },
                         new
                         {
                             ClassId = 109,
-                            Name = "10/9",
+                            ClassName = "10/9",
                             SchoolYearId = 1
                         },
                         new
                         {
                             ClassId = 110,
-                            Name = "10/10",
+                            ClassName = "10/10",
                             SchoolYearId = 1
                         },
                         new
                         {
                             ClassId = 111,
-                            Name = "10/11",
+                            ClassName = "10/11",
                             SchoolYearId = 1
                         },
                         new
                         {
                             ClassId = 112,
-                            Name = "10/12",
+                            ClassName = "10/12",
                             SchoolYearId = 1
                         },
                         new
                         {
                             ClassId = 113,
-                            Name = "10/13",
+                            ClassName = "10/13",
                             SchoolYearId = 1
                         },
                         new
                         {
                             ClassId = 201,
-                            Name = "11/1",
+                            ClassName = "11/1",
                             SchoolYearId = 2
                         },
                         new
                         {
                             ClassId = 202,
-                            Name = "11/2",
+                            ClassName = "11/2",
                             SchoolYearId = 2
                         },
                         new
                         {
                             ClassId = 203,
-                            Name = "11/3",
+                            ClassName = "11/3",
                             SchoolYearId = 2
                         },
                         new
                         {
                             ClassId = 204,
-                            Name = "11/4",
+                            ClassName = "11/4",
                             SchoolYearId = 2
                         },
                         new
                         {
                             ClassId = 205,
-                            Name = "11/5",
+                            ClassName = "11/5",
                             SchoolYearId = 2
                         },
                         new
                         {
                             ClassId = 206,
-                            Name = "11/6",
+                            ClassName = "11/6",
                             SchoolYearId = 2
                         },
                         new
                         {
                             ClassId = 207,
-                            Name = "11/7",
+                            ClassName = "11/7",
                             SchoolYearId = 2
                         },
                         new
                         {
                             ClassId = 208,
-                            Name = "11/8",
+                            ClassName = "11/8",
                             SchoolYearId = 2
                         },
                         new
                         {
                             ClassId = 209,
-                            Name = "11/9",
+                            ClassName = "11/9",
                             SchoolYearId = 2
                         },
                         new
                         {
                             ClassId = 210,
-                            Name = "11/10",
+                            ClassName = "11/10",
                             SchoolYearId = 2
                         },
                         new
                         {
                             ClassId = 211,
-                            Name = "11/11",
+                            ClassName = "11/11",
                             SchoolYearId = 2
                         },
                         new
                         {
                             ClassId = 212,
-                            Name = "11/12",
+                            ClassName = "11/12",
                             SchoolYearId = 2
                         },
                         new
                         {
                             ClassId = 213,
-                            Name = "11/13",
+                            ClassName = "11/13",
                             SchoolYearId = 2
                         },
                         new
                         {
                             ClassId = 301,
-                            Name = "12/1",
+                            ClassName = "12/1",
                             SchoolYearId = 3
                         },
                         new
                         {
                             ClassId = 302,
-                            Name = "12/2",
+                            ClassName = "12/2",
                             SchoolYearId = 3
                         },
                         new
                         {
                             ClassId = 303,
-                            Name = "12/3",
+                            ClassName = "12/3",
                             SchoolYearId = 3
                         },
                         new
                         {
                             ClassId = 304,
-                            Name = "12/4",
+                            ClassName = "12/4",
                             SchoolYearId = 3
                         },
                         new
                         {
                             ClassId = 305,
-                            Name = "12/5",
+                            ClassName = "12/5",
                             SchoolYearId = 3
                         },
                         new
                         {
                             ClassId = 306,
-                            Name = "12/6",
+                            ClassName = "12/6",
                             SchoolYearId = 3
                         },
                         new
                         {
                             ClassId = 307,
-                            Name = "12/7",
+                            ClassName = "12/7",
                             SchoolYearId = 3
                         },
                         new
                         {
                             ClassId = 308,
-                            Name = "12/8",
+                            ClassName = "12/8",
                             SchoolYearId = 3
                         },
                         new
                         {
                             ClassId = 309,
-                            Name = "12/9",
+                            ClassName = "12/9",
                             SchoolYearId = 3
                         },
                         new
                         {
                             ClassId = 310,
-                            Name = "12/10",
+                            ClassName = "12/10",
                             SchoolYearId = 3
                         },
                         new
                         {
                             ClassId = 311,
-                            Name = "12/11",
+                            ClassName = "12/11",
                             SchoolYearId = 3
                         },
                         new
                         {
                             ClassId = 312,
-                            Name = "12/12",
+                            ClassName = "12/12",
                             SchoolYearId = 3
                         },
                         new
                         {
                             ClassId = 313,
-                            Name = "12/13",
+                            ClassName = "12/13",
                             SchoolYearId = 3
                         });
                 });
@@ -298,7 +298,7 @@ namespace ManagementSchool.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("ParentName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -360,7 +360,7 @@ namespace ManagementSchool.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -445,28 +445,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "8d24dfa6-03cd-4fba-8fa4-1c0e5b8030b6",
+                            Id = "0c43c36e-1bb5-4331-a0d8-13ef0b7b5335",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "ae21e73a-c83b-4e17-9c0d-11277ce746b3",
+                            Id = "eac5c733-083f-41bc-9604-9f1bbf23e1ac",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "48449506-f170-438a-b432-2891124f96cc",
+                            Id = "d60ac276-e286-48cf-a4d4-7e69c0683c4e",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "aeeae83e-b7f4-4d37-ad68-a92cb991a9a4",
+                            Id = "d2302017-18e8-41c0-9b89-ba826b4ad0e3",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"

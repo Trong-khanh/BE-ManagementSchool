@@ -71,7 +71,7 @@ public class ApplicationDbContext: IdentityDbContext<IdentityUser>
                     new Class 
                     { 
                         ClassId = year * 100 + classNum, 
-                        Name = $"{year + 9}/{classNum}", // This will result in "10/1", "10/2", ..., "12/13"
+                        ClassName = $"{year + 9}/{classNum}", // This will result in "10/1", "10/2", ..., "12/13"
                         SchoolYearId = year 
                     }
                 );

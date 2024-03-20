@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ManagementSchool.Migrations
 {
-    public partial class db : Migration
+    public partial class @new : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -54,7 +54,7 @@ namespace ManagementSchool.Migrations
                 {
                     ParentId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ParentName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
@@ -203,7 +203,7 @@ namespace ManagementSchool.Migrations
                 {
                     ClassId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ClassName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SchoolYearId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -223,7 +223,7 @@ namespace ManagementSchool.Migrations
                 {
                     StudentId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ClassId = table.Column<int>(type: "int", nullable: false),
@@ -275,10 +275,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "48449506-f170-438a-b432-2891124f96cc", "3", "Teacher", "TEACHER" },
-                    { "8d24dfa6-03cd-4fba-8fa4-1c0e5b8030b6", "1", "Admin", "ADMIN" },
-                    { "ae21e73a-c83b-4e17-9c0d-11277ce746b3", "2", "Student", "STUDENT" },
-                    { "aeeae83e-b7f4-4d37-ad68-a92cb991a9a4", "4", "Parent", "PARENT" }
+                    { "0c43c36e-1bb5-4331-a0d8-13ef0b7b5335", "1", "Admin", "ADMIN" },
+                    { "d2302017-18e8-41c0-9b89-ba826b4ad0e3", "4", "Parent", "PARENT" },
+                    { "d60ac276-e286-48cf-a4d4-7e69c0683c4e", "3", "Teacher", "TEACHER" },
+                    { "eac5c733-083f-41bc-9604-9f1bbf23e1ac", "2", "Student", "STUDENT" }
                 });
 
             migrationBuilder.InsertData(
@@ -293,7 +293,7 @@ namespace ManagementSchool.Migrations
 
             migrationBuilder.InsertData(
                 table: "Classes",
-                columns: new[] { "ClassId", "Name", "SchoolYearId" },
+                columns: new[] { "ClassId", "ClassName", "SchoolYearId" },
                 values: new object[,]
                 {
                     { 101, "10/1", 1 },
