@@ -288,14 +288,6 @@ namespace ManagementSchool.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ParentId"), 1L, 1);
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ParentName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -354,10 +346,6 @@ namespace ManagementSchool.Migrations
                     b.Property<int>("ClassId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -381,10 +369,6 @@ namespace ManagementSchool.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeacherId"), 1L, 1);
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -443,28 +427,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "0c43c36e-1bb5-4331-a0d8-13ef0b7b5335",
+                            Id = "bdb90264-3596-4199-b74d-f7e17b97ad88",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "eac5c733-083f-41bc-9604-9f1bbf23e1ac",
+                            Id = "64688d76-85f9-4b0e-8124-8506ef8d3acd",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "d60ac276-e286-48cf-a4d4-7e69c0683c4e",
+                            Id = "649f7f09-3747-4352-8432-fe27073691a6",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "d2302017-18e8-41c0-9b89-ba826b4ad0e3",
+                            Id = "43cceed5-0047-4bea-a699-ec1e1b62a5b2",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"

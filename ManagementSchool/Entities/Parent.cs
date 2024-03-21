@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace ManagementSchool.Entities;
 
 public class Parent

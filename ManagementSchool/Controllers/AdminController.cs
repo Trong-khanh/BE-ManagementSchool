@@ -10,24 +10,18 @@ namespace ManagementSchool.Controllers;
 [ApiController]
 public class AdminController: ControllerBase
 {
-    private readonly StudentService _studentService;
+    private readonly IStudentService _studentService;
 
-    public AdminController(StudentService studentService)
+    public AdminController(IStudentService studentService)
     {
         _studentService = studentService;
     }
-
+    
     [HttpPost("AddStudent")]
-    public async Task<IActionResult> AddStudent([FromBody] StudentDtos studentDto)
+    public async Task<IActionResult> AddStudent([FromBody] StudentDtos studentDtos)
     {
-        try
-        {
-            var student = await _studentService.AddStudentAsync(studentDto);
-            return Ok(student);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var student = await _studentService.AddStudentWithParentAsync(studentDtos);
+        return Ok(student);
     }
+    
 }

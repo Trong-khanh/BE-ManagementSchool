@@ -55,6 +55,11 @@ public class ApplicationDbContext: IdentityDbContext<IdentityUser>
            .HasOne(tc => tc.Class)
            .WithMany(c => c.TeacherClasses)
            .HasForeignKey(tc => tc.ClassId);
+       modelBuilder.Entity<Parent>()
+           .HasMany(p => p.Students)
+           .WithOne(s => s.Parent)
+           .HasForeignKey(s => s.ParentId)
+           .OnDelete(DeleteBehavior.Restrict);
         // Seed date for grade
         modelBuilder.Entity<SchoolYear>().HasData(
             new SchoolYear { SchoolYearId = 1, Name = "10" },
