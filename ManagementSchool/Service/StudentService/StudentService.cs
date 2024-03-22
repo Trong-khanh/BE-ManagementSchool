@@ -1,10 +1,12 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 using ManagementSchool.Dto;
 using ManagementSchool.Entities;
-using ManagementSchool.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using ManagementSchool.Models;
 
 namespace ManagementSchool.Service
 {
@@ -89,6 +91,62 @@ namespace ManagementSchool.Service
                     throw new ValidateException($"An error occurred while adding the student and parent: {ex.Message}");
                 }
             }
+        }
+
+        public async Task<bool> DeleteStudentAsync(int studentId)
+        {
+            var student = await _context.Students.FindAsync(studentId);
+            if (student == null) return false;
+
+            _context.Students.Remove(student);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<Student> UpdateStudentAsync(int studentId, StudentDtos studentDto)
+        {
+            var student = await _context.Students.Include(s => s.Parent).FirstOrDefaultAsync(s => s.StudentId == studentId);
+            if (student == null) throw new ValidateException("Student not found.");
+
+            // Update student and parent details
+            student.FullName = studentDto.FullName;
+            student.Address = studentDto.Address;
+            student.ClassId = await _context.Classes.Where(c => c.ClassName == studentDto.ClassName).Select(c => c.ClassId).FirstOrDefaultAsync();
+            student.Parent.ParentName = studentDto.ParentName;
+
+            await _context.SaveChangesAsync();
+            return student;
+        }
+
+        public async Task<IEnumerable<Student>> GetStudentsByClassAsync(string className)
+        {
+            if (string.IsNullOrWhiteSpace(className))
+                throw new ArgumentException("Class name cannot be empty.");
+
+            // Mã hóa className trước khi gửi nó tới phương thức service
+            className = Uri.EscapeDataString(className);
+            var classInDb = await _context.Classes
+                .FirstOrDefaultAsync(c => c.ClassName == className);
+    
+            if (classInDb == null)
+                throw new ArgumentException($"Class '{className}' not found.");
+
+            return await _context.Students
+                .Where(s => s.ClassId == classInDb.ClassId)
+                .ToListAsync();
+        }
+
+
+        public async Task<IEnumerable<Student>> GetStudentsBySchoolYearAsync(string YearName)
+        {
+            if (string.IsNullOrWhiteSpace(YearName))
+                throw new ArgumentException("Year name cannot be empty.");
+
+            return await _context.Students
+                .Include(s => s.Class)
+                .ThenInclude(c => c.SchoolYear) // Nạp thông tin năm học của lớp
+                .Where(s => s.Class.SchoolYear.YearName == YearName)
+                .ToListAsync();
         }
 
     }

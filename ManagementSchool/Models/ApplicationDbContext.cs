@@ -62,9 +62,9 @@ public class ApplicationDbContext: IdentityDbContext<IdentityUser>
            .OnDelete(DeleteBehavior.Restrict);
         // Seed date for grade
         modelBuilder.Entity<SchoolYear>().HasData(
-            new SchoolYear { SchoolYearId = 1, Name = "10" },
-            new SchoolYear { SchoolYearId = 2, Name = "11" },
-            new SchoolYear { SchoolYearId = 3, Name = "12" }
+            new SchoolYear { SchoolYearId = 1, YearName = "10" },
+            new SchoolYear { SchoolYearId = 2, YearName = "11" },
+            new SchoolYear { SchoolYearId = 3, YearName = "12" }
         );
         
 // Seed data for class, one grade have 13 class
@@ -84,8 +84,6 @@ public class ApplicationDbContext: IdentityDbContext<IdentityUser>
         }
         
     }
-    
-    
 
     private  void SeedRoles(ModelBuilder builder)
     {
