@@ -11,4 +11,6 @@ public class Student
     public Class Class { get; set; }
     public int ParentId { get; set; }
     public Parent Parent { get; set; }
+    public ICollection<Subject> Subjects { get; set; }
+    public ICollection<StudentSubject> StudentSubjects { get; set; }
 }

@@ -10,4 +10,5 @@ public class Class
     public SchoolYear SchoolYear { get; set; }
     public ICollection<Student> Students { get; set; }
     public ICollection<TeacherClass> TeacherClasses { get; set; }
+    public ICollection<ClassSubject> ClassSubjects { get; set; }
 }

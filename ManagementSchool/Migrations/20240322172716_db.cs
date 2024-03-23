@@ -67,25 +67,11 @@ namespace ManagementSchool.Migrations
                 {
                     SchoolYearId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    YearName = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SchoolYears", x => x.SchoolYearId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Teachers",
-                columns: table => new
-                {
-                    TeacherId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Teachers", x => x.TeacherId);
                 });
 
             migrationBuilder.CreateTable(
@@ -243,15 +229,109 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Subjects",
+                columns: table => new
+                {
+                    SubjectId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SubjectName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StudentId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Subjects", x => x.SubjectId);
+                    table.ForeignKey(
+                        name: "FK_Subjects_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "StudentId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ClassSubjects",
+                columns: table => new
+                {
+                    ClassSubjectId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ClassId = table.Column<int>(type: "int", nullable: false),
+                    SubjectId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClassSubjects", x => x.ClassSubjectId);
+                    table.ForeignKey(
+                        name: "FK_ClassSubjects_Classes_ClassId",
+                        column: x => x.ClassId,
+                        principalTable: "Classes",
+                        principalColumn: "ClassId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ClassSubjects_Subjects_SubjectId",
+                        column: x => x.SubjectId,
+                        principalTable: "Subjects",
+                        principalColumn: "SubjectId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StudentSubjects",
+                columns: table => new
+                {
+                    StudentSubjectId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StudentId = table.Column<int>(type: "int", nullable: false),
+                    SubjectId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentSubjects", x => x.StudentSubjectId);
+                    table.ForeignKey(
+                        name: "FK_StudentSubjects_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "StudentId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StudentSubjects_Subjects_SubjectId",
+                        column: x => x.SubjectId,
+                        principalTable: "Subjects",
+                        principalColumn: "SubjectId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Teachers",
+                columns: table => new
+                {
+                    TeacherId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SubjectId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Teachers", x => x.TeacherId);
+                    table.ForeignKey(
+                        name: "FK_Teachers_Subjects_SubjectId",
+                        column: x => x.SubjectId,
+                        principalTable: "Subjects",
+                        principalColumn: "SubjectId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TeacherClasses",
                 columns: table => new
                 {
+                    TeacherClassId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     TeacherId = table.Column<int>(type: "int", nullable: false),
                     ClassId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TeacherClasses", x => new { x.TeacherId, x.ClassId });
+                    table.PrimaryKey("PK_TeacherClasses", x => x.TeacherClassId);
                     table.ForeignKey(
                         name: "FK_TeacherClasses_Classes_ClassId",
                         column: x => x.ClassId,
@@ -271,20 +351,36 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "43cceed5-0047-4bea-a699-ec1e1b62a5b2", "4", "Parent", "PARENT" },
-                    { "64688d76-85f9-4b0e-8124-8506ef8d3acd", "2", "Student", "STUDENT" },
-                    { "649f7f09-3747-4352-8432-fe27073691a6", "3", "Teacher", "TEACHER" },
-                    { "bdb90264-3596-4199-b74d-f7e17b97ad88", "1", "Admin", "ADMIN" }
+                    { "0f7c170c-20f2-4e12-92cd-1418fe53b162", "4", "Parent", "PARENT" },
+                    { "28507071-8b3f-4143-a9a1-918c692ae472", "1", "Admin", "ADMIN" },
+                    { "628f0aca-3fe8-4125-a051-94e8d4680780", "3", "Teacher", "TEACHER" },
+                    { "b67ab37e-0124-4f81-98d6-90fceee79591", "2", "Student", "STUDENT" }
                 });
 
             migrationBuilder.InsertData(
                 table: "SchoolYears",
-                columns: new[] { "SchoolYearId", "Name" },
+                columns: new[] { "SchoolYearId", "YearName" },
                 values: new object[,]
                 {
                     { 1, "10" },
                     { 2, "11" },
                     { 3, "12" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Subjects",
+                columns: new[] { "SubjectId", "StudentId", "SubjectName" },
+                values: new object[,]
+                {
+                    { 1, null, "Mathematics" },
+                    { 2, null, "Science" },
+                    { 3, null, "History" },
+                    { 4, null, "Geography" },
+                    { 5, null, "Physical Education" },
+                    { 6, null, "Art" },
+                    { 7, null, "Music" },
+                    { 8, null, "English" },
+                    { 9, null, "Foreign Languages" }
                 });
 
             migrationBuilder.InsertData(
@@ -378,6 +474,16 @@ namespace ManagementSchool.Migrations
                 column: "SchoolYearId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ClassSubjects_ClassId",
+                table: "ClassSubjects",
+                column: "ClassId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClassSubjects_SubjectId",
+                table: "ClassSubjects",
+                column: "SubjectId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Students_ClassId",
                 table: "Students",
                 column: "ClassId");
@@ -388,9 +494,34 @@ namespace ManagementSchool.Migrations
                 column: "ParentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_StudentSubjects_StudentId",
+                table: "StudentSubjects",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentSubjects_SubjectId",
+                table: "StudentSubjects",
+                column: "SubjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Subjects_StudentId",
+                table: "Subjects",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TeacherClasses_ClassId",
                 table: "TeacherClasses",
                 column: "ClassId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TeacherClasses_TeacherId",
+                table: "TeacherClasses",
+                column: "TeacherId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Teachers_SubjectId",
+                table: "Teachers",
+                column: "SubjectId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -411,7 +542,10 @@ namespace ManagementSchool.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Students");
+                name: "ClassSubjects");
+
+            migrationBuilder.DropTable(
+                name: "StudentSubjects");
 
             migrationBuilder.DropTable(
                 name: "TeacherClasses");
@@ -423,13 +557,19 @@ namespace ManagementSchool.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Parents");
+                name: "Teachers");
+
+            migrationBuilder.DropTable(
+                name: "Subjects");
+
+            migrationBuilder.DropTable(
+                name: "Students");
 
             migrationBuilder.DropTable(
                 name: "Classes");
 
             migrationBuilder.DropTable(
-                name: "Teachers");
+                name: "Parents");
 
             migrationBuilder.DropTable(
                 name: "SchoolYears");
