@@ -105,13 +105,15 @@ namespace ManagementSchool.Service
 
         public async Task<Student> UpdateStudentAsync(int studentId, StudentDtos studentDto)
         {
-            var student = await _context.Students.Include(s => s.Parent).FirstOrDefaultAsync(s => s.StudentId == studentId);
+            var student = await _context.Students.Include(s => s.Parent)
+                .FirstOrDefaultAsync(s => s.StudentId == studentId);
             if (student == null) throw new ValidateException("Student not found.");
 
             // Update student and parent details
             student.FullName = studentDto.FullName;
             student.Address = studentDto.Address;
-            student.ClassId = await _context.Classes.Where(c => c.ClassName == studentDto.ClassName).Select(c => c.ClassId).FirstOrDefaultAsync();
+            student.ClassId = await _context.Classes.Where(c => c.ClassName == studentDto.ClassName)
+                .Select(c => c.ClassId).FirstOrDefaultAsync();
             student.Parent.ParentName = studentDto.ParentName;
 
             await _context.SaveChangesAsync();
@@ -127,7 +129,7 @@ namespace ManagementSchool.Service
             className = Uri.EscapeDataString(className);
             var classInDb = await _context.Classes
                 .FirstOrDefaultAsync(c => c.ClassName == className);
-    
+
             if (classInDb == null)
                 throw new ArgumentException($"Class '{className}' not found.");
 
@@ -147,6 +149,14 @@ namespace ManagementSchool.Service
                 .ThenInclude(c => c.SchoolYear) // Nạp thông tin năm học của lớp
                 .Where(s => s.Class.SchoolYear.YearName == YearName)
                 .ToListAsync();
+        }
+
+        public async Task<Student> GetStudentByIdAsync(int studentId)
+        {
+            return await _context.Students
+                .Include(s => s.Class)
+                .Include(s => s.Parent)
+                .FirstOrDefaultAsync(s => s.StudentId == studentId);
         }
 
     }
