@@ -15,17 +15,20 @@ namespace ManagementSchool.Controllers;
 public class AuthenticateController: ControllerBase
 {
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly SignInManager<IdentityUser> _signInManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
     
     public AuthenticateController(UserManager<IdentityUser> userManager,
-        RoleManager< IdentityRole> roleManager, IEmailService emailService, IConfiguration configuration)
+        RoleManager< IdentityRole> roleManager, IEmailService emailService, IConfiguration configuration,
+        SignInManager<IdentityUser> signInManager)
     {
         _roleManager = roleManager;
         _userManager = userManager;
         _emailService = emailService;
         _configuration = configuration;
+        _signInManager = signInManager;
     }
     
     [HttpPost]
@@ -43,7 +46,8 @@ public class AuthenticateController: ControllerBase
         { 
             Email = registerUser.Email,
             SecurityStamp = Guid.NewGuid().ToString(),
-            UserName = registerUser.UserName
+            UserName = registerUser.UserName,
+            TwoFactorEnabled = true
         };
 
         if (await _roleManager.RoleExistsAsync(role))
@@ -59,7 +63,8 @@ public class AuthenticateController: ControllerBase
             await _userManager.AddToRoleAsync(user, role);
             // Add token to verify email
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var confirmationslink = Url.Action(nameof(ConfirmEmail), "Authenticate", new { token, email = user.Email }, Request.Scheme);
+            var confirmationslink = Url.Action(nameof(ConfirmEmail), "Authenticate", 
+                new { token, email = user.Email }, Request.Scheme);
             var message = new Message(new string[] { user.Email }, "Email Confirmation", confirmationslink);
             _emailService.SendEmail(message);
             
@@ -95,6 +100,18 @@ public class AuthenticateController: ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginUser loginUser)
     {
         var user = await _userManager.FindByNameAsync(loginUser.UserName);
+        if (user.TwoFactorEnabled)
+        {
+            await _signInManager.SignOutAsync();
+            await _signInManager.PasswordSignInAsync(user, loginUser.Password, false, false);
+            var token = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
+            
+            var message = new Message(new string[] { user.Email }, "OTP Confirmation", token);
+            _emailService.SendEmail(message);
+                
+            return StatusCode(StatusCodes.Status200OK,
+                new Response { Status ="Success", Message = $"We have sent an OTP email to {user.Email}" });
+        }
         if (user != null && await _userManager.CheckPasswordAsync(user,loginUser.Password))
         {
             var authClaims = new List<Claim>
@@ -107,7 +124,7 @@ public class AuthenticateController: ControllerBase
             {
                 authClaims.Add(new Claim(ClaimTypes.Role,role));
             }
-
+            
             var jwtToken = GetToken(authClaims);
             return Ok(new
             {
@@ -118,6 +135,40 @@ public class AuthenticateController: ControllerBase
         return Unauthorized();
     }
 
+    [HttpPost]
+    [Route("Login- 2FA")]
+    public async Task<IActionResult> LoginWithOTP(string code,string username)
+    {
+        var user = await _userManager.FindByNameAsync(username);
+        var SignIn = await _signInManager.TwoFactorSignInAsync("Email", code, false, false);
+        if (SignIn.Succeeded)
+        {
+            if (user != null )
+            {
+                var authClaims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                };
+                var userRoles = await _userManager.GetRolesAsync(user);
+                foreach (var role in userRoles)
+                {
+                    authClaims.Add(new Claim(ClaimTypes.Role,role));
+                }
+            
+                var jwtToken = GetToken(authClaims);
+                return Ok(new
+                {
+                    token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
+                    expiration = jwtToken.ValidTo
+                });
+            }
+        }
+        
+        return StatusCode(StatusCodes.Status403Forbidden,
+            new Response() { Status ="Error", Message = "Invalid OTP" });
+    }
+    
     private JwtSecurityToken GetToken(List<Claim> authClaims)
     {
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
@@ -125,7 +176,7 @@ public class AuthenticateController: ControllerBase
         var token = new JwtSecurityToken(
         issuer: _configuration["JWT:ValidIssuer"],
         audience: _configuration["JWT:ValidAudience"],
-        expires: DateTime.Now.AddHours(100),
+        expires: DateTime.Now.AddHours(400),
         claims: authClaims,
         signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
         return token;
