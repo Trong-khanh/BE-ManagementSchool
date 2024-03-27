@@ -95,13 +95,47 @@ namespace ManagementSchool.Service
 
         public async Task<bool> DeleteStudentAsync(int studentId)
         {
-            var student = await _context.Students.FindAsync(studentId);
+            var student = await _context.Students.Include(s => s.Parent)
+                .FirstOrDefaultAsync(s => s.StudentId == studentId);
             if (student == null) return false;
 
-            _context.Students.Remove(student);
-            await _context.SaveChangesAsync();
-            return true;
+            // Check if the parent is associated with any other students
+            var otherStudents = await _context.Students
+                .Where(s => s.ParentId == student.ParentId && s.StudentId != studentId)
+                .ToListAsync();
+
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    // If the parent is not associated with any other students, delete the parent
+                    if (!otherStudents.Any())
+                    {
+                        var parent = await _context.Parents.FindAsync(student.ParentId);
+                        if (parent != null)
+                        {
+                            _context.Parents.Remove(parent);
+                        }
+                    }
+
+                    // Delete the student
+                    _context.Students.Remove(student);
+                    await _context.SaveChangesAsync();
+
+                    // Commit transaction if all commands succeed
+                    await transaction.CommitAsync();
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    // Rollback the transaction if any exception occurs
+                    await transaction.RollbackAsync();
+                    throw; // or log the exception as needed
+                }
+            }
         }
+
 
         public async Task<Student> UpdateStudentAsync(int studentId, StudentDtos studentDto)
         {
@@ -146,7 +180,7 @@ namespace ManagementSchool.Service
 
             return await _context.Students
                 .Include(s => s.Class)
-                .ThenInclude(c => c.SchoolYear) // Nạp thông tin năm học của lớp
+                .ThenInclude(c => c.SchoolYear) 
                 .Where(s => s.Class.SchoolYear.YearName == YearName)
                 .ToListAsync();
         }
