@@ -47,6 +47,7 @@ public class AuthenticateController: ControllerBase
             Email = registerUser.Email,
             SecurityStamp = Guid.NewGuid().ToString(),
             UserName = registerUser.UserName,
+            PhoneNumber = registerUser.PhoneNumber,
             TwoFactorEnabled = true
         };
 

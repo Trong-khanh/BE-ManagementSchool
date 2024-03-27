@@ -64,8 +64,6 @@ namespace ManagementSchool.Service.TeacherService
             };
         }
 
-        
-
         public async Task<bool> DeleteTeacherAsync(int teacherId)
         {
             var teacher = await _dbContext.Teachers.FindAsync(teacherId);
