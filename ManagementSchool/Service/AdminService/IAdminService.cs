@@ -17,4 +17,6 @@ public interface IAdminService
     Task<IEnumerable<TeacherDto>> GetAllTeachersAsync();
     Task<bool> DeleteTeacherByNameAsync(string teacherName);
     Task<IEnumerable<TeacherDto>> GetTeachersBySubjectAsync(string subjectName);
+    Task AssignTeacherToClassAsync(TeacherClassAssignmentDto assignmentDto);
+    Task<List<TeacherClassAssignmentDto>> GetTeacherClassAssignmentsAsync();
 }

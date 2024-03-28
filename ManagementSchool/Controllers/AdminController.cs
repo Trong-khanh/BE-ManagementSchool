@@ -182,4 +182,42 @@ public class AdminController : ControllerBase
     }
 
     // END CRUD TEACHER
+    
+    //====================================================================================================
+    //====================================================================================================
+    
+    // ASSIGN TEACHER TO CLASS
+    
+    [HttpPost("AssignTeacherToClass")]
+    public async Task<IActionResult> AssignTeacherToClass([FromBody] TeacherClassAssignmentDto assignmentDto)
+    {
+        try
+        {
+            await _adminService.AssignTeacherToClassAsync(assignmentDto);
+            return Ok("Teacher assigned to class successfully.");
+        }
+        catch (AdminService.ValidateException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
+    }
+    
+    [HttpGet("GetTeacherClassAssignments")]
+    public async Task<IActionResult> GetTeacherClassAssignments()
+    {
+        try
+        {
+            var assignments = await _adminService.GetTeacherClassAssignmentsAsync();
+            return Ok(assignments);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
+    }
+
 }

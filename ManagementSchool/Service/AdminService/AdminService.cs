@@ -329,4 +329,48 @@ public class AdminService : IAdminService
             SubjectName = t.Subject.SubjectName
         });
     }
+    
+    public async Task AssignTeacherToClassAsync(TeacherClassAssignmentDto assignmentDto)
+    {
+        // Find the teacher by full name and email
+        var teacher = await _context.Teachers
+            .Include(t => t.TeacherClasses)
+            .ThenInclude(tc => tc.Class)
+            .FirstOrDefaultAsync(t => t.Name == assignmentDto.TeacherFullName && t.Email == assignmentDto.TeacherEmail);
+        if (teacher == null)
+            throw new ValidateException("Teacher with the provided full name and email not found.");
+
+        var classEntity = await _context.Classes
+            .FirstOrDefaultAsync(c => c.ClassName == assignmentDto.ClassName);
+        if (classEntity == null)
+            throw new ValidateException("Class not found.");
+
+        // Check if the teacher is already assigned to the class for that subject
+        if (teacher.TeacherClasses.Any(tc => tc.Class.ClassName == assignmentDto.ClassName))
+            throw new ValidateException("Teacher is already assigned to this class for their subject.");
+
+        // Assign the teacher to the class
+        var teacherClass = new TeacherClass
+        {
+            TeacherId = teacher.TeacherId,
+            ClassId = classEntity.ClassId // Use the ClassId of the retrieved class entity
+        };
+        _context.TeacherClasses.Add(teacherClass);
+        await _context.SaveChangesAsync();
+    }
+
+
+    public async Task<List<TeacherClassAssignmentDto>> GetTeacherClassAssignmentsAsync()
+    {
+        return await _context.TeacherClasses
+            .Include(tc => tc.Teacher)
+            .Include(tc => tc.Class)
+            .Select(tc => new TeacherClassAssignmentDto()
+            {
+                TeacherFullName = tc.Teacher.Name,
+                TeacherEmail = tc.Teacher.Email,
+                ClassName = tc.Class.ClassName
+            })
+            .ToListAsync();
+    }
 }
