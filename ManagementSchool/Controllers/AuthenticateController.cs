@@ -10,18 +10,19 @@ using User.ManagementSchool.Service.Models;
 using User.ManagementSchool.Service.Service;
 
 namespace ManagementSchool.Controllers;
+
 [Route("api/[controller]")]
 [ApiController]
-public class AuthenticateController: ControllerBase
+public class AuthenticateController : ControllerBase
 {
     private readonly UserManager<IdentityUser> _userManager;
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
-    
+
     public AuthenticateController(UserManager<IdentityUser> userManager,
-        RoleManager< IdentityRole> roleManager, IEmailService emailService, IConfiguration configuration,
+        RoleManager<IdentityRole> roleManager, IEmailService emailService, IConfiguration configuration,
         SignInManager<IdentityUser> signInManager)
     {
         _roleManager = roleManager;
@@ -30,24 +31,21 @@ public class AuthenticateController: ControllerBase
         _configuration = configuration;
         _signInManager = signInManager;
     }
-    
+
     [HttpPost]
-    public async Task<IActionResult> Register([FromBody] RegisterUser registerUser, string role )
+    public async Task<IActionResult> Register([FromBody] RegisterUser registerUser, string role)
     {
         // check user exist or not
         var userExsit = await _userManager.FindByNameAsync(registerUser.Email);
         if (userExsit != null)
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, 
-                new Response { Status ="Error", Message = "User already exist" });
-        }
+            return StatusCode(StatusCodes.Status403Forbidden,
+                new Response { Status = "Error", Message = "User already exist" });
         // Add the user in db
         IdentityUser user = new()
-        { 
+        {
             Email = registerUser.Email,
             SecurityStamp = Guid.NewGuid().ToString(),
             UserName = registerUser.UserName,
-            PhoneNumber = registerUser.PhoneNumber,
             TwoFactorEnabled = true
         };
 
@@ -55,27 +53,26 @@ public class AuthenticateController: ControllerBase
         {
             var result = await _userManager.CreateAsync(user, registerUser.Password);
             if (!result.Succeeded)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, 
-                    new Response { Status ="Error", Message = "User failed to create" });
-            }
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new Response { Status = "Error", Message = "User failed to create" });
 
             //Add roel to user
             await _userManager.AddToRoleAsync(user, role);
             // Add token to verify email
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var confirmationslink = Url.Action(nameof(ConfirmEmail), "Authenticate", 
+            var confirmationslink = Url.Action(nameof(ConfirmEmail), "Authenticate",
                 new { token, email = user.Email }, Request.Scheme);
             var message = new Message(new string[] { user.Email }, "Email Confirmation", confirmationslink);
             _emailService.SendEmail(message);
-            
-            return StatusCode(StatusCodes.Status200OK, 
-                new Response { Status ="Success", Message = $"User created & Email Sent To {user.Email} Successfully" });
+
+            return StatusCode(StatusCodes.Status200OK,
+                new Response
+                    { Status = "Success", Message = $"User created & Email Sent To {user.Email} Successfully" });
         }
         else
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, 
-                new Response { Status ="Error", Message = "Role does not exist" });
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new Response { Status = "Error", Message = "Role does not exist" });
         }
     }
 
@@ -85,15 +82,14 @@ public class AuthenticateController: ControllerBase
         var user = await _userManager.FindByEmailAsync(email);
         if (user != null)
         {
-          var result = await _userManager.ConfirmEmailAsync(user, token);
-          if (result.Succeeded)
-          {
-              return StatusCode(StatusCodes.Status200OK,
-                  new Response { Status ="Success", Message = "Email Verified Successfully" });
-          }
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+                return StatusCode(StatusCodes.Status200OK,
+                    new Response { Status = "Success", Message = "Email Verified Successfully" });
         }
+
         return StatusCode(StatusCodes.Status500InternalServerError,
-            new Response{Status = "Error", Message = "This User Doesnot Exist"});
+            new Response { Status = "Error", Message = "This User Doesnot Exist" });
     }
 
     [HttpPost]
@@ -106,26 +102,24 @@ public class AuthenticateController: ControllerBase
             await _signInManager.SignOutAsync();
             await _signInManager.PasswordSignInAsync(user, loginUser.Password, false, false);
             var token = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
-            
+
             var message = new Message(new string[] { user.Email }, "OTP Confirmation", token);
             _emailService.SendEmail(message);
-                
+
             return StatusCode(StatusCodes.Status200OK,
-                new Response { Status ="Success", Message = $"We have sent an OTP email to {user.Email}" });
+                new Response { Status = "Success", Message = $"We have sent an OTP email to {user.Email}" });
         }
-        if (user != null && await _userManager.CheckPasswordAsync(user,loginUser.Password))
+
+        if (user != null && await _userManager.CheckPasswordAsync(user, loginUser.Password))
         {
             var authClaims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new(ClaimTypes.Name, user.UserName),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
             var userRoles = await _userManager.GetRolesAsync(user);
-            foreach (var role in userRoles)
-            {
-                authClaims.Add(new Claim(ClaimTypes.Role,role));
-            }
-            
+            foreach (var role in userRoles) authClaims.Add(new Claim(ClaimTypes.Role, role));
+
             var jwtToken = GetToken(authClaims);
             return Ok(new
             {
@@ -133,30 +127,27 @@ public class AuthenticateController: ControllerBase
                 expiration = jwtToken.ValidTo
             });
         }
+
         return Unauthorized();
     }
 
     [HttpPost]
     [Route("Login- 2FA")]
-    public async Task<IActionResult> LoginWithOTP(string code,string username)
+    public async Task<IActionResult> LoginWithOTP(string code, string username)
     {
         var user = await _userManager.FindByNameAsync(username);
         var SignIn = await _signInManager.TwoFactorSignInAsync("Email", code, false, false);
         if (SignIn.Succeeded)
-        {
-            if (user != null )
+            if (user != null)
             {
                 var authClaims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new(ClaimTypes.Name, user.UserName),
+                    new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 };
                 var userRoles = await _userManager.GetRolesAsync(user);
-                foreach (var role in userRoles)
-                {
-                    authClaims.Add(new Claim(ClaimTypes.Role,role));
-                }
-            
+                foreach (var role in userRoles) authClaims.Add(new Claim(ClaimTypes.Role, role));
+
                 var jwtToken = GetToken(authClaims);
                 return Ok(new
                 {
@@ -164,22 +155,21 @@ public class AuthenticateController: ControllerBase
                     expiration = jwtToken.ValidTo
                 });
             }
-        }
-        
+
         return StatusCode(StatusCodes.Status403Forbidden,
-            new Response() { Status ="Error", Message = "Invalid OTP" });
+            new Response() { Status = "Error", Message = "Invalid OTP" });
     }
-    
+
     private JwtSecurityToken GetToken(List<Claim> authClaims)
     {
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-        
+
         var token = new JwtSecurityToken(
-        issuer: _configuration["JWT:ValidIssuer"],
-        audience: _configuration["JWT:ValidAudience"],
-        expires: DateTime.Now.AddHours(400),
-        claims: authClaims,
-        signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
+            _configuration["JWT:ValidIssuer"],
+            _configuration["JWT:ValidAudience"],
+            expires: DateTime.Now.AddHours(400),
+            claims: authClaims,
+            signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
         return token;
     }
 }

@@ -4,10 +4,15 @@ using User.ManagementSchool.Service.Models;
 
 namespace User.ManagementSchool.Service.Service;
 
-public class EmailService: IEmailService
+public class EmailService : IEmailService
 {
     private readonly EmailConfiguration _emailConfiguration;
-    public EmailService(EmailConfiguration emailConfiguration) => _emailConfiguration = emailConfiguration;
+
+    public EmailService(EmailConfiguration emailConfiguration)
+    {
+        _emailConfiguration = emailConfiguration;
+    }
+
     public void SendEmail(Message message)
     {
         var emailMessage = CreateEmailMessage(message);
@@ -17,12 +22,13 @@ public class EmailService: IEmailService
     private MimeMessage CreateEmailMessage(Message message)
     {
         var emailMessage = new MimeMessage();
-        emailMessage.From.Add(new MailboxAddress("Email confirmation",_emailConfiguration.From));
+        emailMessage.From.Add(new MailboxAddress("Email confirmation", _emailConfiguration.From));
         emailMessage.To.AddRange(message.To);
         emailMessage.Subject = message.Subject;
         emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message.Content };
         return emailMessage;
     }
+
     private void Send(MimeMessage mailMessage)
     {
         using var client = new SmtpClient();

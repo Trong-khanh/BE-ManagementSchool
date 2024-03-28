@@ -1,11 +1,9 @@
 using System.Text;
 using ManagementSchool.Models;
 using ManagementSchool.Service;
-using ManagementSchool.Service.TeacherService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using User.ManagementSchool.Service.Models;
@@ -35,7 +33,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}). AddJwtBearer(options =>
+}).AddJwtBearer(options =>
 {
     options.SaveToken = true;
     options.RequireHttpsMetadata = false;
@@ -54,10 +52,8 @@ var emailConfig = configuration.GetSection("EmailConfiguration").Get<EmailConfig
 builder.Services.AddSingleton(emailConfig);
 
 // Add service
-builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<ITeacherService, TeacherService>();
-
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -68,7 +64,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo{ Title = "Auth API " , Version = "v1"});
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Auth API ", Version = "v1" });
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -91,10 +87,8 @@ builder.Services.AddSwaggerGen(options =>
             },
             new string[] { }
         }
-
     });
 });
-
 
 
 var app = builder.Build();

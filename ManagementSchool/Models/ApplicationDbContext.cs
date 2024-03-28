@@ -37,13 +37,13 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .WithMany(s => s.Students)
             .HasForeignKey(c => c.ClassId);
 
-         // Relationship with TeacherClass
+        // Relationship with TeacherClass
         modelBuilder.Entity<TeacherClass>()
             .HasOne(c => c.Class)
             .WithMany(tc => tc.TeacherClasses)
             .HasForeignKey(c => c.ClassId);
 
-         // Relationship with ClassSubject
+        // Relationship with ClassSubject
         modelBuilder.Entity<ClassSubject>()
             .HasOne(c => c.Class)
             .WithMany(cs => cs.ClassSubjects)
@@ -100,7 +100,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
                     SchoolYearId = year
                 }
             );
-        
+
         // Seed data for Subject 
         modelBuilder.Entity<Subject>().HasData(
             new Subject { SubjectId = 1, SubjectName = "Math" },
