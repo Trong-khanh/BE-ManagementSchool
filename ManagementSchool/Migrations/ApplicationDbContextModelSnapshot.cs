@@ -280,6 +280,26 @@ namespace ManagementSchool.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ManagementSchool.Entities.ClassSemester", b =>
+                {
+                    b.Property<int>("ClassId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SemesterId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ClassId", "SemesterId");
+
+                    b.HasIndex("SemesterId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("ClassSemesters");
+                });
+
             modelBuilder.Entity("ManagementSchool.Entities.ClassSubject", b =>
                 {
                     b.Property<int>("ClassSubjectId")
@@ -352,6 +372,29 @@ namespace ManagementSchool.Migrations
                             SchoolYearId = 3,
                             YearName = "12"
                         });
+                });
+
+            modelBuilder.Entity("ManagementSchool.Entities.Semester", b =>
+                {
+                    b.Property<int>("SemesterId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SemesterId"), 1L, 1);
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("SemesterId");
+
+                    b.ToTable("Semesters");
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.Student", b =>
@@ -560,28 +603,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b8da9d95-2122-4496-b3e9-1ae305e17970",
+                            Id = "76ecaec2-d2fa-454b-9795-0ed8b436cf3b",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "5a1d1d9a-fd9b-489e-a49f-2b0dff905764",
+                            Id = "dee47561-9c6f-409e-b2d7-1dcc0fbdd21e",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "d412e280-f9a1-4eca-afad-24e40672dc7b",
+                            Id = "fc17f065-ce8a-4077-91d0-095f2f777a45",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "d468df2c-ef8c-418d-bc50-065ebd075e18",
+                            Id = "a9ead909-0a56-4dc8-b42d-b3e351c5e7c3",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
@@ -770,6 +813,29 @@ namespace ManagementSchool.Migrations
                     b.Navigation("SchoolYear");
                 });
 
+            modelBuilder.Entity("ManagementSchool.Entities.ClassSemester", b =>
+                {
+                    b.HasOne("ManagementSchool.Entities.Class", "Class")
+                        .WithMany("ClassSemesters")
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ManagementSchool.Entities.Semester", "Semester")
+                        .WithMany("ClassSemesters")
+                        .HasForeignKey("SemesterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ManagementSchool.Entities.Student", null)
+                        .WithMany("ClassSemesters")
+                        .HasForeignKey("StudentId");
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Semester");
+                });
+
             modelBuilder.Entity("ManagementSchool.Entities.ClassSubject", b =>
                 {
                     b.HasOne("ManagementSchool.Entities.Class", "Class")
@@ -917,6 +983,8 @@ namespace ManagementSchool.Migrations
 
             modelBuilder.Entity("ManagementSchool.Entities.Class", b =>
                 {
+                    b.Navigation("ClassSemesters");
+
                     b.Navigation("ClassSubjects");
 
                     b.Navigation("Students");
@@ -934,8 +1002,15 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Classes");
                 });
 
+            modelBuilder.Entity("ManagementSchool.Entities.Semester", b =>
+                {
+                    b.Navigation("ClassSemesters");
+                });
+
             modelBuilder.Entity("ManagementSchool.Entities.Student", b =>
                 {
+                    b.Navigation("ClassSemesters");
+
                     b.Navigation("StudentSubjects");
 
                     b.Navigation("Subjects");

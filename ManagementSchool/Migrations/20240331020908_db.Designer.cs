@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ManagementSchool.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240327082348_PhoneNumberParent")]
-    partial class PhoneNumberParent
+    [Migration("20240331020908_db")]
+    partial class db
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -282,6 +282,26 @@ namespace ManagementSchool.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ManagementSchool.Entities.ClassSemester", b =>
+                {
+                    b.Property<int>("ClassId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SemesterId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ClassId", "SemesterId");
+
+                    b.HasIndex("SemesterId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("ClassSemesters");
+                });
+
             modelBuilder.Entity("ManagementSchool.Entities.ClassSubject", b =>
                 {
                     b.Property<int>("ClassSubjectId")
@@ -314,10 +334,6 @@ namespace ManagementSchool.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ParentId"), 1L, 1);
 
                     b.Property<string>("ParentName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ParentPhoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -358,6 +374,29 @@ namespace ManagementSchool.Migrations
                             SchoolYearId = 3,
                             YearName = "12"
                         });
+                });
+
+            modelBuilder.Entity("ManagementSchool.Entities.Semester", b =>
+                {
+                    b.Property<int>("SemesterId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SemesterId"), 1L, 1);
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("SemesterId");
+
+                    b.ToTable("Semesters");
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.Student", b =>
@@ -566,28 +605,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "daea4cbf-a02a-43b0-ab7e-3d9b0eadc1cc",
+                            Id = "76ecaec2-d2fa-454b-9795-0ed8b436cf3b",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "066042df-7708-4262-b8f2-674324cba854",
+                            Id = "dee47561-9c6f-409e-b2d7-1dcc0fbdd21e",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "ee7e52e6-e270-4ed5-b8b0-3a2dba58a285",
+                            Id = "fc17f065-ce8a-4077-91d0-095f2f777a45",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "933f1592-b005-4425-b9e1-4781c8115fcb",
+                            Id = "a9ead909-0a56-4dc8-b42d-b3e351c5e7c3",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
@@ -776,6 +815,29 @@ namespace ManagementSchool.Migrations
                     b.Navigation("SchoolYear");
                 });
 
+            modelBuilder.Entity("ManagementSchool.Entities.ClassSemester", b =>
+                {
+                    b.HasOne("ManagementSchool.Entities.Class", "Class")
+                        .WithMany("ClassSemesters")
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ManagementSchool.Entities.Semester", "Semester")
+                        .WithMany("ClassSemesters")
+                        .HasForeignKey("SemesterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ManagementSchool.Entities.Student", null)
+                        .WithMany("ClassSemesters")
+                        .HasForeignKey("StudentId");
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Semester");
+                });
+
             modelBuilder.Entity("ManagementSchool.Entities.ClassSubject", b =>
                 {
                     b.HasOne("ManagementSchool.Entities.Class", "Class")
@@ -923,6 +985,8 @@ namespace ManagementSchool.Migrations
 
             modelBuilder.Entity("ManagementSchool.Entities.Class", b =>
                 {
+                    b.Navigation("ClassSemesters");
+
                     b.Navigation("ClassSubjects");
 
                     b.Navigation("Students");
@@ -940,8 +1004,15 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Classes");
                 });
 
+            modelBuilder.Entity("ManagementSchool.Entities.Semester", b =>
+                {
+                    b.Navigation("ClassSemesters");
+                });
+
             modelBuilder.Entity("ManagementSchool.Entities.Student", b =>
                 {
+                    b.Navigation("ClassSemesters");
+
                     b.Navigation("StudentSubjects");
 
                     b.Navigation("Subjects");

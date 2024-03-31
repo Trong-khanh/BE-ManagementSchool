@@ -219,5 +219,65 @@ public class AdminController : ControllerBase
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
+    
+    [HttpPost("AddSemester")]
+    public async Task<IActionResult> AddSemester([FromBody] SemesterDto semesterDto)
+    {
+        try
+        {
+            var semester = await _adminService.AddSemesterAsync(semesterDto);
+            return Ok(semester);
+        }
+        catch (AdminService.ValidateException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPut("UpdateSemester/{semesterId}")]
+    public async Task<IActionResult> UpdateSemester(int semesterId, [FromBody] SemesterDto semesterDto)
+    {
+        try
+        {
+            var updatedSemester = await _adminService.UpdateSemesterAsync(semesterId, semesterDto);
+            return Ok(updatedSemester);
+        }
+        catch (AdminService.ValidateException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpDelete("DeleteSemester/{semesterId}")]
+    public async Task<IActionResult> DeleteSemester(int semesterId)
+    {
+        var success = await _adminService.DeleteSemesterAsync(semesterId);
+        if (!success)
+        {
+            return NotFound("Semester not found.");
+        }
+        return Ok();
+    }
+
+    [HttpGet("GetAllSemesters")]
+    public async Task<IActionResult> GetAllSemesters()
+    {
+        var semesters = await _adminService.GetAllSemestersAsync();
+        return Ok(semesters);
+    }
+
+    [HttpGet("GetSemesterById/{semesterId}")]
+    public async Task<IActionResult> GetSemesterById(int semesterId)
+    {
+        try
+        {
+            var semester = await _adminService.GetSemesterByIdAsync(semesterId);
+            return Ok(semester);
+        }
+        catch (AdminService.ValidateException ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
 
 }

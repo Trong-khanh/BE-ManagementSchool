@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ManagementSchool.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ManagementSchool.Service;
 
@@ -358,8 +359,7 @@ public class AdminService : IAdminService
         _context.TeacherClasses.Add(teacherClass);
         await _context.SaveChangesAsync();
     }
-
-
+    
     public async Task<List<TeacherClassAssignmentDto>> GetTeacherClassAssignmentsAsync()
     {
         return await _context.TeacherClasses
@@ -372,5 +372,104 @@ public class AdminService : IAdminService
                 ClassName = tc.Class.ClassName
             })
             .ToListAsync();
+    }
+    public async Task<Semester> AddSemesterAsync(SemesterDto semesterDto)
+    {
+        if (semesterDto == null)
+        {
+            throw new ValidateException("The semesterDto field is required.");
+        }
+
+        if (semesterDto.EndDate <= semesterDto.StartDate)
+        {
+            throw new ValidateException("EndDate must be greater than StartDate.");
+        }
+
+        // Check the count of existing semesters
+        var existingSemestersCount = await _context.Semesters.CountAsync();
+        if (existingSemestersCount >= 2)
+        {
+            throw new ValidateException("Cannot create more than two semesters.");
+        }
+
+        var semester = new Semester
+        {
+            Name = semesterDto.Name,
+            StartDate = semesterDto.StartDate,
+            EndDate = semesterDto.EndDate
+        };
+
+        _context.Semesters.Add(semester);
+        await _context.SaveChangesAsync();
+
+        return semester;
+    }
+    public async Task<Semester> UpdateSemesterAsync(int semesterId, SemesterDto semesterDto)
+    {
+        if (semesterDto == null)
+        {
+            throw new ValidateException("The semesterDto object must be provided.");
+        }
+    
+        var semester = await _context.Semesters.FindAsync(semesterId);
+        if (semester == null)
+        {
+            throw new ValidateException("Semester not found.");
+        }
+
+        // Assuming you want to keep the name unique,
+        // check if the updated name is already taken by another semester.
+        if (!string.Equals(semester.Name, semesterDto.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            var nameExists = await _context.Semesters
+                .AnyAsync(s => s.Name == semesterDto.Name);
+            if (nameExists)
+            {
+                throw new ValidateException("A semester with the same name already exists.");
+            }
+        }
+
+        if (semesterDto.StartDate >= semesterDto.EndDate)
+        {
+            throw new ValidateException("StartDate must be before EndDate.");
+        }
+
+        semester.Name = semesterDto.Name;
+        semester.StartDate = semesterDto.StartDate;
+        semester.EndDate = semesterDto.EndDate;
+
+        await _context.SaveChangesAsync();
+
+        return semester;
+    }
+
+    public async Task<bool> DeleteSemesterAsync(int semesterId)
+    {
+        var semester = await _context.Semesters.FindAsync(semesterId);
+        if (semester == null)
+        {
+            return false;
+        }
+
+        _context.Semesters.Remove(semester);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<IEnumerable<Semester>> GetAllSemestersAsync()
+    {
+        return await _context.Semesters.ToListAsync();
+    }
+
+    public async Task<Semester> GetSemesterByIdAsync(int semesterId)
+    {
+        var semester = await _context.Semesters.FindAsync(semesterId);
+        if (semester == null)
+        {
+            throw new ValidateException("Semester not found.");
+        }
+
+        return semester;
     }
 }

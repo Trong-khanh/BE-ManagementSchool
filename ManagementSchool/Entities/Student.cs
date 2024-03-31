@@ -13,4 +13,5 @@ public class Student
     public Parent Parent { get; set; }
     public ICollection<Subject> Subjects { get; set; }
     public ICollection<StudentSubject> StudentSubjects { get; set; }
+    public ICollection<ClassSemester> ClassSemesters { get; set; }
 }

@@ -20,7 +20,8 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<StudentSubject> StudentSubjects { get; set; }
     public DbSet<ClassSubject> ClassSubjects { get; set; }
-
+    public DbSet<ClassSemester> ClassSemesters { get; set; }
+    public DbSet<Semester> Semesters { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -77,10 +78,26 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .HasOne(s => s.Subject)
             .WithMany(cs => cs.ClassSubjects)
             .HasForeignKey(s => s.SubjectId);
+
         modelBuilder.Entity<TeacherClass>()
             .HasOne(t => t.Teacher)
             .WithMany(tc => tc.TeacherClasses)
             .HasForeignKey(t => t.TeacherId);
+        
+        // Cấu hình mối quan hệ nhiều-nhiều giữa Class và Semester thông qua ClassSemester
+        modelBuilder.Entity<ClassSemester>()
+            .HasKey(cs => new { cs.ClassId, cs.SemesterId });
+
+        modelBuilder.Entity<ClassSemester>()
+            .HasOne(cs => cs.Class)
+            .WithMany(c => c.ClassSemesters)
+            .HasForeignKey(cs => cs.ClassId);
+
+        modelBuilder.Entity<ClassSemester>()
+            .HasOne(cs => cs.Semester)
+            .WithMany(s => s.ClassSemesters)
+            .HasForeignKey(cs => cs.SemesterId);
+        
 
         // Seed date for grade
         modelBuilder.Entity<SchoolYear>().HasData(

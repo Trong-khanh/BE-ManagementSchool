@@ -75,6 +75,21 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Semesters",
+                columns: table => new
+                {
+                    SemesterId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Semesters", x => x.SemesterId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -229,6 +244,36 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ClassSemesters",
+                columns: table => new
+                {
+                    ClassId = table.Column<int>(type: "int", nullable: false),
+                    SemesterId = table.Column<int>(type: "int", nullable: false),
+                    StudentId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClassSemesters", x => new { x.ClassId, x.SemesterId });
+                    table.ForeignKey(
+                        name: "FK_ClassSemesters_Classes_ClassId",
+                        column: x => x.ClassId,
+                        principalTable: "Classes",
+                        principalColumn: "ClassId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ClassSemesters_Semesters_SemesterId",
+                        column: x => x.SemesterId,
+                        principalTable: "Semesters",
+                        principalColumn: "SemesterId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ClassSemesters_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "StudentId");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Subjects",
                 columns: table => new
                 {
@@ -351,10 +396,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "0f7c170c-20f2-4e12-92cd-1418fe53b162", "4", "Parent", "PARENT" },
-                    { "28507071-8b3f-4143-a9a1-918c692ae472", "1", "Admin", "ADMIN" },
-                    { "628f0aca-3fe8-4125-a051-94e8d4680780", "3", "Teacher", "TEACHER" },
-                    { "b67ab37e-0124-4f81-98d6-90fceee79591", "2", "Student", "STUDENT" }
+                    { "76ecaec2-d2fa-454b-9795-0ed8b436cf3b", "1", "Admin", "ADMIN" },
+                    { "a9ead909-0a56-4dc8-b42d-b3e351c5e7c3", "4", "Parent", "PARENT" },
+                    { "dee47561-9c6f-409e-b2d7-1dcc0fbdd21e", "2", "Student", "STUDENT" },
+                    { "fc17f065-ce8a-4077-91d0-095f2f777a45", "3", "Teacher", "TEACHER" }
                 });
 
             migrationBuilder.InsertData(
@@ -372,15 +417,16 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "SubjectId", "StudentId", "SubjectName" },
                 values: new object[,]
                 {
-                    { 1, null, "Mathematics" },
-                    { 2, null, "Science" },
-                    { 3, null, "History" },
-                    { 4, null, "Geography" },
-                    { 5, null, "Physical Education" },
-                    { 6, null, "Art" },
-                    { 7, null, "Music" },
-                    { 8, null, "English" },
-                    { 9, null, "Foreign Languages" }
+                    { 1, null, "Math" },
+                    { 2, null, "Literature" },
+                    { 3, null, "English" },
+                    { 4, null, "Physics" },
+                    { 5, null, "Chemistry" },
+                    { 6, null, "Biology" },
+                    { 7, null, "History" },
+                    { 8, null, "Geography" },
+                    { 9, null, "Civics" },
+                    { 10, null, "Computer Science" }
                 });
 
             migrationBuilder.InsertData(
@@ -474,6 +520,16 @@ namespace ManagementSchool.Migrations
                 column: "SchoolYearId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ClassSemesters_SemesterId",
+                table: "ClassSemesters",
+                column: "SemesterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClassSemesters_StudentId",
+                table: "ClassSemesters",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ClassSubjects_ClassId",
                 table: "ClassSubjects",
                 column: "ClassId");
@@ -542,6 +598,9 @@ namespace ManagementSchool.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "ClassSemesters");
+
+            migrationBuilder.DropTable(
                 name: "ClassSubjects");
 
             migrationBuilder.DropTable(
@@ -555,6 +614,9 @@ namespace ManagementSchool.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Semesters");
 
             migrationBuilder.DropTable(
                 name: "Teachers");
