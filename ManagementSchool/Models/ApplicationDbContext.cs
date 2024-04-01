@@ -21,6 +21,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<StudentSubject> StudentSubjects { get; set; }
     public DbSet<ClassSubject> ClassSubjects { get; set; }
     public DbSet<ClassSemester> ClassSemesters { get; set; }
+    public DbSet<Score> Scores { get; set; }
     public DbSet<Semester> Semesters { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -97,6 +98,17 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .HasOne(cs => cs.Semester)
             .WithMany(s => s.ClassSemesters)
             .HasForeignKey(cs => cs.SemesterId);
+        // Cấu hình quan hệ Score với Student
+        modelBuilder.Entity<Score>()
+            .HasOne(s => s.Student)
+            .WithMany(st => st.Scores) 
+            .HasForeignKey(s => s.StudentId);
+
+        // Cấu hình quan hệ Score với Subject
+        modelBuilder.Entity<Score>()
+            .HasOne(s => s.Subject)
+            .WithMany(sub => sub.Scores) 
+            .HasForeignKey(s => s.SubjectId);
         
 
         // Seed date for grade

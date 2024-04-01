@@ -1,6 +1,7 @@
 using System.Text;
 using ManagementSchool.Models;
 using ManagementSchool.Service;
+using ManagementSchool.Service.TeacherService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +55,7 @@ builder.Services.AddSingleton(emailConfig);
 // Add service
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ITeacherService, TeacherService>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {

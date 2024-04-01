@@ -14,4 +14,6 @@ public class Student
     public ICollection<Subject> Subjects { get; set; }
     public ICollection<StudentSubject> StudentSubjects { get; set; }
     public ICollection<ClassSemester> ClassSemesters { get; set; }
+    public ICollection<Score> Scores { get; set; }
+
 }
