@@ -205,12 +205,6 @@ public class AdminService : IAdminService
         if (teacherDto.SubjectId == null)
             throw new ArgumentException("SubjectId cannot be null.");
 
-        // Check if teachers have been assigned to teach any subjects that are not yet available
-        var existingTeacher = await _context.Teachers.FirstOrDefaultAsync(t => t.SubjectId == teacherDto.SubjectId);
-        if (existingTeacher != null)
-            // If there is already a teacher assigned to this subject, report an error
-            throw new InvalidOperationException("A teacher is already assigned to teach this subject.");
-
         // Check if the subject exists
         var subject = await _context.Subjects.FirstOrDefaultAsync(s => s.SubjectId == teacherDto.SubjectId);
         if (subject == null)
@@ -234,6 +228,7 @@ public class AdminService : IAdminService
             SubjectName = subject.SubjectName
         };
     }
+
 
     public async Task<bool> DeleteTeacherAsync(int teacherId)
     {
