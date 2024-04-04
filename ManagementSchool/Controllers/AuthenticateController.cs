@@ -1,6 +1,10 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
+using ManagementSchool.Models;
+using ManagementSchool.Models.Authentication.RefreshToken;
+using ManagementSchool.Models.Authentication.RefreshToken.Service;
 using ManagementSchool.Models.Login;
 using ManagementSchool.Models.SignUp;
 using Microsoft.AspNetCore.Identity;
@@ -16,20 +20,24 @@ namespace ManagementSchool.Controllers;
 public class AuthenticateController : ControllerBase
 {
     private readonly UserManager<IdentityUser> _userManager;
+    private readonly ITokenService _tokenService;
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
+    private readonly ApplicationDbContext _context;
 
     public AuthenticateController(UserManager<IdentityUser> userManager,
         RoleManager<IdentityRole> roleManager, IEmailService emailService, IConfiguration configuration,
-        SignInManager<IdentityUser> signInManager)
+        SignInManager<IdentityUser> signInManager, ApplicationDbContext context, ITokenService tokenService)
     {
         _roleManager = roleManager;
         _userManager = userManager;
         _emailService = emailService;
         _configuration = configuration;
+        _tokenService = tokenService;
         _signInManager = signInManager;
+        _context = context;
     }
 
     [HttpPost]
@@ -121,10 +129,13 @@ public class AuthenticateController : ControllerBase
             foreach (var role in userRoles) authClaims.Add(new Claim(ClaimTypes.Role, role));
 
             var jwtToken = GetToken(authClaims);
+            var refreshToken = await _tokenService.GenerateRefreshToken(HttpContext.Connection.RemoteIpAddress.ToString(), user);
             return Ok(new
             {
                 token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
-                expiration = jwtToken.ValidTo
+                expiration = jwtToken.ValidTo,
+                refreshToken = refreshToken.Token,
+                refreshTokenExpiration = refreshToken.Expires
             });
         }
 
@@ -159,17 +170,79 @@ public class AuthenticateController : ControllerBase
         return StatusCode(StatusCodes.Status403Forbidden,
             new Response() { Status = "Error", Message = "Invalid OTP" });
     }
+    
 
     private JwtSecurityToken GetToken(List<Claim> authClaims)
     {
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
 
         var token = new JwtSecurityToken(
-            _configuration["JWT:ValidIssuer"],
-            _configuration["JWT:ValidAudience"],
-            expires: DateTime.Now.AddHours(400),
+            issuer: _configuration["JWT:ValidIssuer"],
+            audience: _configuration["JWT:ValidAudience"],
+            expires: DateTime.UtcNow.AddMinutes(3), 
             claims: authClaims,
-            signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
+            signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+        );
+
         return token;
     }
+
+    
+    [HttpPost]
+    [Route("RefreshToken")]
+    public async Task<IActionResult> RefreshToken([FromBody] TokenRequest tokenRequest)
+    {
+        var refreshToken = _context.RefreshTokens.SingleOrDefault(rt => rt.Token == tokenRequest.RefreshToken && rt.IsActive);
+
+        if (refreshToken == null)
+        {
+            return Unauthorized("Invalid refresh token");
+        }
+
+        var user = await _userManager.FindByIdAsync(refreshToken.UserId);
+        if (user == null)
+        {
+            return Unauthorized("Invalid refresh token");
+        }
+
+        var newAccessToken = GetToken(new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, user.UserName),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        });
+
+        var newRefreshToken = await _tokenService.GenerateRefreshToken(HttpContext.Connection.RemoteIpAddress.ToString(), user);
+        refreshToken.Revoked = DateTime.UtcNow;
+        refreshToken.RevokedByIp = HttpContext.Connection.RemoteIpAddress.ToString();
+        refreshToken.ReplacedByToken = newRefreshToken.Token;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            Token = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
+            Expiration = newAccessToken.ValidTo,
+            RefreshToken = newRefreshToken.Token,
+            RefreshTokenExpiration = newRefreshToken.Expires
+        });
+    }
+
+    
+    private async Task<RefreshToken> GenerateRefreshToken(string ipAddress, IdentityUser user)
+    {
+        var refreshToken = new RefreshToken
+        {
+            UserId = user.Id,
+            Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+            Expires = DateTime.UtcNow.AddDays(7),
+            Created = DateTime.UtcNow,
+            CreatedByIp = ipAddress
+        };
+
+        _context.RefreshTokens.Add(refreshToken);
+        await _context.SaveChangesAsync();
+
+        return refreshToken;
+    }
+
 }

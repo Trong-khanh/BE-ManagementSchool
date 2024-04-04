@@ -1,4 +1,5 @@
 using ManagementSchool.Entities;
+using ManagementSchool.Models.Authentication.RefreshToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,8 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<ClassSubject> ClassSubjects { get; set; }
     public DbSet<ClassSemester> ClassSemesters { get; set; }
     public DbSet<Score> Scores { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+
     public DbSet<Semester> Semesters { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
