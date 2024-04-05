@@ -74,3 +74,4 @@
 /Users/thanletrongkhanh/RiderProjects/ManagementSchool/ManagementSchool/bin/Debug/net6.0/BouncyCastle.Crypto.dll
 /Users/thanletrongkhanh/RiderProjects/ManagementSchool/ManagementSchool/bin/Debug/net6.0/User.ManagementSchool.Service.dll
 /Users/thanletrongkhanh/RiderProjects/ManagementSchool/ManagementSchool/bin/Debug/net6.0/User.ManagementSchool.Service.pdb
+/Users/thanletrongkhanh/RiderProjects/ManagementSchool/ManagementSchool/bin/Debug/net6.0/Newtonsoft.Json.dll

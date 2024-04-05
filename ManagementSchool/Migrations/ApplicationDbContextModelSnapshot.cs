@@ -374,6 +374,36 @@ namespace ManagementSchool.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ManagementSchool.Entities.Score", b =>
+                {
+                    b.Property<int>("ScoreId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScoreId"), 1L, 1);
+
+                    b.Property<string>("SemesterName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Value")
+                        .HasColumnType("float");
+
+                    b.HasKey("ScoreId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("SubjectId");
+
+                    b.ToTable("Scores");
+                });
+
             modelBuilder.Entity("ManagementSchool.Entities.Semester", b =>
                 {
                     b.Property<int>("SemesterId")
@@ -574,6 +604,40 @@ namespace ManagementSchool.Migrations
                     b.ToTable("TeacherClasses");
                 });
 
+            modelBuilder.Entity("ManagementSchool.Service.RefreshToken.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ExpiresUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("IssuedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("JwtId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReplacedByToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Token")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -603,28 +667,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "76ecaec2-d2fa-454b-9795-0ed8b436cf3b",
+                            Id = "293d0d01-a719-462d-b39a-0041338a1f44",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "dee47561-9c6f-409e-b2d7-1dcc0fbdd21e",
+                            Id = "6a1da752-b64f-4f85-b33e-b45e9b1712f9",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "fc17f065-ce8a-4077-91d0-095f2f777a45",
+                            Id = "761f7bc9-fc5a-4dde-9f61-03641f12d255",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "a9ead909-0a56-4dc8-b42d-b3e351c5e7c3",
+                            Id = "7fe7cd9c-c336-487b-874c-92e3c090db37",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
@@ -855,6 +919,25 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Subject");
                 });
 
+            modelBuilder.Entity("ManagementSchool.Entities.Score", b =>
+                {
+                    b.HasOne("ManagementSchool.Entities.Student", "Student")
+                        .WithMany("Scores")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ManagementSchool.Entities.Subject", "Subject")
+                        .WithMany("Scores")
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Subject");
+                });
+
             modelBuilder.Entity("ManagementSchool.Entities.Student", b =>
                 {
                     b.HasOne("ManagementSchool.Entities.Class", "Class")
@@ -928,6 +1011,15 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Class");
 
                     b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("ManagementSchool.Service.RefreshToken.RefreshToken", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1011,6 +1103,8 @@ namespace ManagementSchool.Migrations
                 {
                     b.Navigation("ClassSemesters");
 
+                    b.Navigation("Scores");
+
                     b.Navigation("StudentSubjects");
 
                     b.Navigation("Subjects");
@@ -1019,6 +1113,8 @@ namespace ManagementSchool.Migrations
             modelBuilder.Entity("ManagementSchool.Entities.Subject", b =>
                 {
                     b.Navigation("ClassSubjects");
+
+                    b.Navigation("Scores");
 
                     b.Navigation("StudentSubjects");
 

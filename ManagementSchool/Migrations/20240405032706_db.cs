@@ -196,6 +196,29 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    IssuedUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpiresUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsRevoked = table.Column<bool>(type: "bit", nullable: false),
+                    ReplacedByToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    JwtId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Classes",
                 columns: table => new
                 {
@@ -319,6 +342,34 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Scores",
+                columns: table => new
+                {
+                    ScoreId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StudentId = table.Column<int>(type: "int", nullable: false),
+                    SubjectId = table.Column<int>(type: "int", nullable: false),
+                    Value = table.Column<double>(type: "float", nullable: false),
+                    SemesterName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Scores", x => x.ScoreId);
+                    table.ForeignKey(
+                        name: "FK_Scores_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "StudentId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Scores_Subjects_SubjectId",
+                        column: x => x.SubjectId,
+                        principalTable: "Subjects",
+                        principalColumn: "SubjectId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "StudentSubjects",
                 columns: table => new
                 {
@@ -396,10 +447,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "76ecaec2-d2fa-454b-9795-0ed8b436cf3b", "1", "Admin", "ADMIN" },
-                    { "a9ead909-0a56-4dc8-b42d-b3e351c5e7c3", "4", "Parent", "PARENT" },
-                    { "dee47561-9c6f-409e-b2d7-1dcc0fbdd21e", "2", "Student", "STUDENT" },
-                    { "fc17f065-ce8a-4077-91d0-095f2f777a45", "3", "Teacher", "TEACHER" }
+                    { "293d0d01-a719-462d-b39a-0041338a1f44", "1", "Admin", "ADMIN" },
+                    { "6a1da752-b64f-4f85-b33e-b45e9b1712f9", "2", "Student", "STUDENT" },
+                    { "761f7bc9-fc5a-4dde-9f61-03641f12d255", "3", "Teacher", "TEACHER" },
+                    { "7fe7cd9c-c336-487b-874c-92e3c090db37", "4", "Parent", "PARENT" }
                 });
 
             migrationBuilder.InsertData(
@@ -540,6 +591,21 @@ namespace ManagementSchool.Migrations
                 column: "SubjectId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_UserId",
+                table: "RefreshTokens",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Scores_StudentId",
+                table: "Scores",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Scores_SubjectId",
+                table: "Scores",
+                column: "SubjectId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Students_ClassId",
                 table: "Students",
                 column: "ClassId");
@@ -604,6 +670,12 @@ namespace ManagementSchool.Migrations
                 name: "ClassSubjects");
 
             migrationBuilder.DropTable(
+                name: "RefreshTokens");
+
+            migrationBuilder.DropTable(
+                name: "Scores");
+
+            migrationBuilder.DropTable(
                 name: "StudentSubjects");
 
             migrationBuilder.DropTable(
@@ -613,10 +685,10 @@ namespace ManagementSchool.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Semesters");
 
             migrationBuilder.DropTable(
-                name: "Semesters");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Teachers");

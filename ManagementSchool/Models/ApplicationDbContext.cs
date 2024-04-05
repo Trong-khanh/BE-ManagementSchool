@@ -1,5 +1,5 @@
 using ManagementSchool.Entities;
-using ManagementSchool.Models.Authentication.RefreshToken;
+using ManagementSchool.Service.RefreshToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +26,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public DbSet<Semester> Semesters { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -87,7 +88,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .HasOne(t => t.Teacher)
             .WithMany(tc => tc.TeacherClasses)
             .HasForeignKey(t => t.TeacherId);
-        
+
         // Cấu hình mối quan hệ nhiều-nhiều giữa Class và Semester thông qua ClassSemester
         modelBuilder.Entity<ClassSemester>()
             .HasKey(cs => new { cs.ClassId, cs.SemesterId });
@@ -104,15 +105,15 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
         // Cấu hình quan hệ Score với Student
         modelBuilder.Entity<Score>()
             .HasOne(s => s.Student)
-            .WithMany(st => st.Scores) 
+            .WithMany(st => st.Scores)
             .HasForeignKey(s => s.StudentId);
 
         // Cấu hình quan hệ Score với Subject
         modelBuilder.Entity<Score>()
             .HasOne(s => s.Subject)
-            .WithMany(sub => sub.Scores) 
+            .WithMany(sub => sub.Scores)
             .HasForeignKey(s => s.SubjectId);
-        
+
 
         // Seed date for grade
         modelBuilder.Entity<SchoolYear>().HasData(

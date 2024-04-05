@@ -1,17 +1,19 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
+using ManagementSchool.Dto;
 using ManagementSchool.Models;
-using ManagementSchool.Models.Authentication.RefreshToken;
-using ManagementSchool.Models.Authentication.RefreshToken.Service;
 using ManagementSchool.Models.Login;
 using ManagementSchool.Models.SignUp;
+using ManagementSchool.Service.RefreshToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using User.ManagementSchool.Service.Models;
 using User.ManagementSchool.Service.Service;
+
 
 namespace ManagementSchool.Controllers;
 
@@ -20,23 +22,25 @@ namespace ManagementSchool.Controllers;
 public class AuthenticateController : ControllerBase
 {
     private readonly UserManager<IdentityUser> _userManager;
-    private readonly ITokenService _tokenService;
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
+    private readonly TokenService _tokenService;
+    private readonly ILogger<AuthenticateController> _logger;
     private readonly ApplicationDbContext _context;
-
     public AuthenticateController(UserManager<IdentityUser> userManager,
         RoleManager<IdentityRole> roleManager, IEmailService emailService, IConfiguration configuration,
-        SignInManager<IdentityUser> signInManager, ApplicationDbContext context, ITokenService tokenService)
+        SignInManager<IdentityUser> signInManager, 
+        TokenService tokenService, ILogger<AuthenticateController> logger, ApplicationDbContext  context)
     {
-        _roleManager = roleManager;
         _userManager = userManager;
+        _roleManager = roleManager;
         _emailService = emailService;
         _configuration = configuration;
-        _tokenService = tokenService;
         _signInManager = signInManager;
+        _tokenService = tokenService;
+        _logger = logger;
         _context = context;
     }
 
@@ -54,7 +58,6 @@ public class AuthenticateController : ControllerBase
             Email = registerUser.Email,
             SecurityStamp = Guid.NewGuid().ToString(),
             UserName = registerUser.UserName,
-            TwoFactorEnabled = true
         };
 
         if (await _roleManager.RoleExistsAsync(role))
@@ -100,149 +103,132 @@ public class AuthenticateController : ControllerBase
             new Response { Status = "Error", Message = "This User Doesnot Exist" });
     }
 
-    [HttpPost]
-    [Route("Login")]
+    [HttpPost("Login")]
     public async Task<IActionResult> Login([FromBody] LoginUser loginUser)
     {
-        var user = await _userManager.FindByNameAsync(loginUser.UserName);
-        if (user.TwoFactorEnabled)
+        if (!ModelState.IsValid)
         {
-            await _signInManager.SignOutAsync();
-            await _signInManager.PasswordSignInAsync(user, loginUser.Password, false, false);
-            var token = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
-
-            var message = new Message(new string[] { user.Email }, "OTP Confirmation", token);
-            _emailService.SendEmail(message);
-
-            return StatusCode(StatusCodes.Status200OK,
-                new Response { Status = "Success", Message = $"We have sent an OTP email to {user.Email}" });
+            return BadRequest(ModelState);
         }
 
-        if (user != null && await _userManager.CheckPasswordAsync(user, loginUser.Password))
+        _logger.LogInformation("Attempting login for {User}",  loginUser.UserName);
+    
+        var user = await _userManager.FindByNameAsync(loginUser.UserName);
+        if (user == null)
         {
-            var authClaims = new List<Claim>
-            {
-                new(ClaimTypes.Name, user.UserName),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-            var userRoles = await _userManager.GetRolesAsync(user);
-            foreach (var role in userRoles) authClaims.Add(new Claim(ClaimTypes.Role, role));
+            _logger.LogWarning("Login failed for {User}: User not found", loginUser.UserName);
+            return Unauthorized(new { message = "Invalid login attempt." });
+        }
 
-            var jwtToken = GetToken(authClaims);
-            var refreshToken = await _tokenService.GenerateRefreshToken(HttpContext.Connection.RemoteIpAddress.ToString(), user);
-            return Ok(new
-            {
-                token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
-                expiration = jwtToken.ValidTo,
-                refreshToken = refreshToken.Token,
-                refreshTokenExpiration = refreshToken.Expires
+        var result = await _signInManager.PasswordSignInAsync(user, loginUser.Password, loginUser.RememberMe, lockoutOnFailure: false);
+        if (result.Succeeded)
+        {
+            _logger.LogInformation("Signin succeeded for {User}", loginUser.UserName);
+            var roles = await _userManager.GetRolesAsync(user); 
+            var accessToken = await _tokenService.GenerateAccessToken(user); 
+            var refreshToken = _tokenService.GenerateRefreshToken(user.Id, Guid.NewGuid().ToString()); 
+            await SaveRefreshTokenAsync(refreshToken);
+            
+            var userRole = roles.FirstOrDefault() ?? "User"; // Adjust based on your role logic
+
+            return Ok(new {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken.Token,
+                User = JsonConvert.SerializeObject(user),
+                Role = userRole
             });
         }
-
-        return Unauthorized();
+        else
+        {
+            _logger.LogWarning("Signin failed for {User}.", loginUser.UserName);
+            return Unauthorized(new { message = "Username or password is incorrect" });
+        }
     }
 
-    [HttpPost]
-    [Route("Login- 2FA")]
-    public async Task<IActionResult> LoginWithOTP(string code, string username)
+    
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken( RefreshTokenRequestDto request)
     {
-        var user = await _userManager.FindByNameAsync(username);
-        var SignIn = await _signInManager.TwoFactorSignInAsync("Email", code, false, false);
-        if (SignIn.Succeeded)
-            if (user != null)
-            {
-                var authClaims = new List<Claim>
-                {
-                    new(ClaimTypes.Name, user.UserName),
-                    new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                };
-                var userRoles = await _userManager.GetRolesAsync(user);
-                foreach (var role in userRoles) authClaims.Add(new Claim(ClaimTypes.Role, role));
+        var refreshToken = await _context.RefreshTokens
+            .SingleOrDefaultAsync(rt => rt.Token == request.Token && !rt.IsRevoked);
+        if (refreshToken == null) {
+            return BadRequest(new { message = "Invalid refresh token." });
+        }
+        if (refreshToken.ExpiresUtc < DateTime.UtcNow) {
+            return Unauthorized(new { message = "Refresh token has expired. Please log in again." });
+        }
+        var user = await _userManager.FindByIdAsync(refreshToken.UserId);
+        if (user == null) {
+            return BadRequest(new { message = "User not found." });
+        }
+        var newAccessToken = await _tokenService.GenerateAccessToken(user);
+        _logger.LogInformation("Return new access token");
 
-                var jwtToken = GetToken(authClaims);
-                return Ok(new
-                {
-                    token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
-                    expiration = jwtToken.ValidTo
-                });
-            }
-
-        return StatusCode(StatusCodes.Status403Forbidden,
-            new Response() { Status = "Error", Message = "Invalid OTP" });
+        return Ok(new {
+            AccessToken = newAccessToken
+        });
     }
     
+    private async Task SaveRefreshTokenAsync(RefreshToken refreshToken)
+    {
+        var existingToken = await _context.RefreshTokens
+            .FirstOrDefaultAsync(rt => rt.UserId == refreshToken.UserId && !rt.IsRevoked);
+
+        if (existingToken != null) {
+            existingToken.Token = refreshToken.Token;
+            existingToken.IssuedUtc = refreshToken.IssuedUtc;
+            existingToken.ExpiresUtc = refreshToken.ExpiresUtc;
+            existingToken.JwtId = refreshToken.JwtId;
+            existingToken.IsRevoked = refreshToken.IsRevoked;
+            existingToken.ReplacedByToken = null; 
+        }
+        else {
+            await _context.RefreshTokens.AddAsync(refreshToken);
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    // [HttpPost]
+    // [Route("Login- 2FA")]
+    // public async Task<IActionResult> LoginWithOTP(string code, string username)
+    // {
+    //     var user = await _userManager.FindByNameAsync(username);
+    //     var SignIn = await _signInManager.TwoFactorSignInAsync("Email", code, false, false);
+    //     if (SignIn.Succeeded)
+    //         if (user != null)
+    //         {
+    //             var authClaims = new List<Claim>
+    //             {
+    //                 new(ClaimTypes.Name, user.UserName),
+    //                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+    //             };
+    //             var userRoles = await _userManager.GetRolesAsync(user);
+    //             foreach (var role in userRoles) authClaims.Add(new Claim(ClaimTypes.Role, role));
+    //
+    //             var jwtToken = GetToken(authClaims);
+    //             return Ok(new
+    //             {
+    //                 token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
+    //                 expiration = jwtToken.ValidTo
+    //             });
+    //         }
+    //
+    //     return StatusCode(StatusCodes.Status403Forbidden,
+    //         new Response() { Status = "Error", Message = "Invalid OTP" });
+    // }
+    //
 
     private JwtSecurityToken GetToken(List<Claim> authClaims)
     {
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["JWT:ValidIssuer"],
-            audience: _configuration["JWT:ValidAudience"],
-            expires: DateTime.UtcNow.AddMinutes(3), 
+            _configuration["JWT:ValidIssuer"],
+            _configuration["JWT:ValidAudience"],
+            expires: DateTime.Now.AddMinutes(1),
             claims: authClaims,
-            signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-        );
-
+            signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
         return token;
     }
-
-    
-    [HttpPost]
-    [Route("RefreshToken")]
-    public async Task<IActionResult> RefreshToken([FromBody] TokenRequest tokenRequest)
-    {
-        var refreshToken = _context.RefreshTokens.SingleOrDefault(rt => rt.Token == tokenRequest.RefreshToken && rt.IsActive);
-
-        if (refreshToken == null)
-        {
-            return Unauthorized("Invalid refresh token");
-        }
-
-        var user = await _userManager.FindByIdAsync(refreshToken.UserId);
-        if (user == null)
-        {
-            return Unauthorized("Invalid refresh token");
-        }
-
-        var newAccessToken = GetToken(new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        });
-
-        var newRefreshToken = await _tokenService.GenerateRefreshToken(HttpContext.Connection.RemoteIpAddress.ToString(), user);
-        refreshToken.Revoked = DateTime.UtcNow;
-        refreshToken.RevokedByIp = HttpContext.Connection.RemoteIpAddress.ToString();
-        refreshToken.ReplacedByToken = newRefreshToken.Token;
-
-        await _context.SaveChangesAsync();
-
-        return Ok(new
-        {
-            Token = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
-            Expiration = newAccessToken.ValidTo,
-            RefreshToken = newRefreshToken.Token,
-            RefreshTokenExpiration = newRefreshToken.Expires
-        });
-    }
-
-    
-    private async Task<RefreshToken> GenerateRefreshToken(string ipAddress, IdentityUser user)
-    {
-        var refreshToken = new RefreshToken
-        {
-            UserId = user.Id,
-            Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
-            Expires = DateTime.UtcNow.AddDays(7),
-            Created = DateTime.UtcNow,
-            CreatedByIp = ipAddress
-        };
-
-        _context.RefreshTokens.Add(refreshToken);
-        await _context.SaveChangesAsync();
-
-        return refreshToken;
-    }
-
 }
