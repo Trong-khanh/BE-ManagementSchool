@@ -1,17 +1,19 @@
 using ManagementSchool.Dto;
 using ManagementSchool.Entities;
 using ManagementSchool.Service;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
 namespace ManagementSchool.Controllers;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [Route("api/[controller]")]
 [ApiController]
 public class AdminController : ControllerBase
 {
+    
     private readonly IAdminService _adminService;
 
     public AdminController(IAdminService adminService)
@@ -19,6 +21,11 @@ public class AdminController : ControllerBase
         _adminService = adminService;
     }
 
+    [HttpGet("only-admin")]
+    public IActionResult OnlyAdmin()
+    {
+        return Ok(new {message = "Only admin can see this"});
+    }
     // START CRUD STUDENT 
 
     [HttpPost("AddStudent")]

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "bFBA+Oie6IPI0LTc1HbMyhD42Xzbi7b8bQaMfhVEl9cwwJcFl2ttS9wVHJct1d2clgovxoCyTn4+FwFLQQ5ipQ==",
+  "dgSpecHash": "DuX8wkYUEWG4am/ehzmZ3ey5R3jHDmvqN80zakfqVKADYuuh3tlm3FWlr5o/CTWioNc+ntCNE0q3ms3lTds2SQ==",
   "success": true,
   "projectFilePath": "/Users/thanletrongkhanh/RiderProjects/ManagementSchool/ManagementSchool/ManagementSchool.csproj",
   "expectedPackageFiles": [
@@ -46,6 +46,7 @@
     "/Users/thanletrongkhanh/.nuget/packages/microsoft.win32.systemevents/4.7.0/microsoft.win32.systemevents.4.7.0.nupkg.sha512",
     "/Users/thanletrongkhanh/.nuget/packages/mimekit/3.2.0/mimekit.3.2.0.nupkg.sha512",
     "/Users/thanletrongkhanh/.nuget/packages/netcore.mailkit/2.1.0/netcore.mailkit.2.1.0.nupkg.sha512",
+    "/Users/thanletrongkhanh/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512",
     "/Users/thanletrongkhanh/.nuget/packages/portable.bouncycastle/1.9.0/portable.bouncycastle.1.9.0.nupkg.sha512",
     "/Users/thanletrongkhanh/.nuget/packages/swashbuckle.aspnetcore/6.5.0/swashbuckle.aspnetcore.6.5.0.nupkg.sha512",
     "/Users/thanletrongkhanh/.nuget/packages/swashbuckle.aspnetcore.swagger/6.5.0/swashbuckle.aspnetcore.swagger.6.5.0.nupkg.sha512",
