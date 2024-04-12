@@ -467,4 +467,11 @@ public class AdminService : IAdminService
 
         return semester;
     }
+
+    public async Task<IEnumerable<Student>> GetAllStudentsAsync()
+    {
+        return await _context.Students
+            .Include(s => s.Class) // Include the related class
+            .Include(s => s.Parent) // Include the related parent
+            .ToListAsync();    }
 }

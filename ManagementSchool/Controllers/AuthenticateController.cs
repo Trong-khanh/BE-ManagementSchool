@@ -189,36 +189,6 @@ public class AuthenticateController : ControllerBase
         await _context.SaveChangesAsync();
     }
 
-    // [HttpPost]
-    // [Route("Login- 2FA")]
-    // public async Task<IActionResult> LoginWithOTP(string code, string username)
-    // {
-    //     var user = await _userManager.FindByNameAsync(username);
-    //     var SignIn = await _signInManager.TwoFactorSignInAsync("Email", code, false, false);
-    //     if (SignIn.Succeeded)
-    //         if (user != null)
-    //         {
-    //             var authClaims = new List<Claim>
-    //             {
-    //                 new(ClaimTypes.Name, user.UserName),
-    //                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-    //             };
-    //             var userRoles = await _userManager.GetRolesAsync(user);
-    //             foreach (var role in userRoles) authClaims.Add(new Claim(ClaimTypes.Role, role));
-    //
-    //             var jwtToken = GetToken(authClaims);
-    //             return Ok(new
-    //             {
-    //                 token = new JwtSecurityTokenHandler().WriteToken(jwtToken),
-    //                 expiration = jwtToken.ValidTo
-    //             });
-    //         }
-    //
-    //     return StatusCode(StatusCodes.Status403Forbidden,
-    //         new Response() { Status = "Error", Message = "Invalid OTP" });
-    // }
-    //
-
     private JwtSecurityToken GetToken(List<Claim> authClaims)
     {
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));

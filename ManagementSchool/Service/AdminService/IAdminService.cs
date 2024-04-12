@@ -24,4 +24,5 @@ public interface IAdminService
     Task<bool> DeleteSemesterAsync(int semesterId);
     Task<IEnumerable<Semester>> GetAllSemestersAsync();
     Task<Semester> GetSemesterByIdAsync(int semesterId);
+    Task<IEnumerable<Student>> GetAllStudentsAsync();
 }

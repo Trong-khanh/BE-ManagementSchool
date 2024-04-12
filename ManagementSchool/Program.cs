@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using ManagementSchool.Models;
 using ManagementSchool.Service;
 using ManagementSchool.Service.RefreshToken;
@@ -96,8 +97,12 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
-
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
+// builder.Services.AddControllers();
 
 builder.Services.AddCors(options =>
 {
