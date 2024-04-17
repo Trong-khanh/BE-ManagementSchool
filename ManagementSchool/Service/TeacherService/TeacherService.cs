@@ -28,9 +28,38 @@ namespace ManagementSchool.Service.TeacherService
             return semesters;
         }
 
-        public async Task<bool> AddStudentScoreAsync(ScoreDto scoreDto)
+        public async Task AddScoreAsync(ScoreDto scoreDto, string teacherEmail)
         {
-            throw new NotImplementedException();
+            // Kiểm tra xem giáo viên có được gán vào lớp không
+            var assignedClasses = await _context.TeacherClasses
+                .Where(tc => tc.Teacher.Email == teacherEmail)
+                .Select(tc => tc.ClassId)
+                .ToListAsync();
+
+            if (!assignedClasses.Contains(scoreDto.ClassId))
+            {
+                throw new AdminService.ValidateException("Teacher is not assigned to the selected class.");
+            }
+
+            // Kiểm tra xem kỳ học có tồn tại không
+            var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.Name == scoreDto.SemesterName);
+            if (semester == null)
+            {
+                throw new AdminService.ValidateException("Semester not found.");
+            }
+
+            // Tạo bản ghi điểm mới và lưu vào cơ sở dữ liệu
+            var score = new Score
+            {
+                StudentId = scoreDto.StudentId,
+                SubjectId = scoreDto.SubjectId,
+                Value = scoreDto.Value,
+                SemesterName = scoreDto.SemesterName,
+                ExamType = scoreDto.ExamType
+            };
+
+            _context.Scores.Add(score);
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -350,7 +350,8 @@ namespace ManagementSchool.Migrations
                     StudentId = table.Column<int>(type: "int", nullable: false),
                     SubjectId = table.Column<int>(type: "int", nullable: false),
                     Value = table.Column<double>(type: "float", nullable: false),
-                    SemesterName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    SemesterName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ExamType = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -447,10 +448,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "293d0d01-a719-462d-b39a-0041338a1f44", "1", "Admin", "ADMIN" },
-                    { "6a1da752-b64f-4f85-b33e-b45e9b1712f9", "2", "Student", "STUDENT" },
-                    { "761f7bc9-fc5a-4dde-9f61-03641f12d255", "3", "Teacher", "TEACHER" },
-                    { "7fe7cd9c-c336-487b-874c-92e3c090db37", "4", "Parent", "PARENT" }
+                    { "14868537-d7f1-4aa2-a4e5-538329198c54", "3", "Teacher", "TEACHER" },
+                    { "50d2057a-d7c5-4f84-a252-d69c6f480b8b", "4", "Parent", "PARENT" },
+                    { "736e9aa9-806a-424f-a140-8268fee52220", "2", "Student", "STUDENT" },
+                    { "758a3e27-3b71-4042-9af6-e70e3a351bf5", "1", "Admin", "ADMIN" }
                 });
 
             migrationBuilder.InsertData(
