@@ -48,4 +48,19 @@ public class TeacherController: ControllerBase
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
+    
+    [HttpGet("GetStudentsInAssignedClasses")]
+    public async Task<IActionResult> GetStudentsInAssignedClasses(string teacherEmail)
+    {
+        try
+        {
+            var students = await _teacherService.GetAssignedClassesStudentsAsync(teacherEmail);
+            return Ok(students);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Server error: {ex.Message}");
+        }
+    }
+
 }
