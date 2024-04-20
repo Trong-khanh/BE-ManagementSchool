@@ -21,11 +21,7 @@ public class AdminController : ControllerBase
         _adminService = adminService;
     }
 
-    [HttpGet("only-admin")]
-    public IActionResult OnlyAdmin()
-    {
-        return Ok(new {message = "Only admin can see this"});
-    }
+    
     // START CRUD STUDENT 
 
     [HttpPost("AddStudent")]
@@ -89,6 +85,12 @@ public class AdminController : ControllerBase
         {
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
+    }
+
+    [HttpGet("getaAllStudents")]
+    public async Task<IActionResult> GetAllStudents()
+    {
+        return  Ok(await _adminService.GetAllStudentsAsync());
     }
 
     // END CRUD STUDENT 
@@ -286,5 +288,4 @@ public class AdminController : ControllerBase
             return NotFound(ex.Message);
         }
     }
-
 }

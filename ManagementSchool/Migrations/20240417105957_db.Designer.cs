@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ManagementSchool.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240405032706_db")]
+    [Migration("20240417105957_db")]
     partial class db
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -384,6 +384,10 @@ namespace ManagementSchool.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScoreId"), 1L, 1);
 
+                    b.Property<string>("ExamType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SemesterName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -669,28 +673,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "293d0d01-a719-462d-b39a-0041338a1f44",
+                            Id = "758a3e27-3b71-4042-9af6-e70e3a351bf5",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "6a1da752-b64f-4f85-b33e-b45e9b1712f9",
+                            Id = "736e9aa9-806a-424f-a140-8268fee52220",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "761f7bc9-fc5a-4dde-9f61-03641f12d255",
+                            Id = "14868537-d7f1-4aa2-a4e5-538329198c54",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "7fe7cd9c-c336-487b-874c-92e3c090db37",
+                            Id = "50d2057a-d7c5-4f84-a252-d69c6f480b8b",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
