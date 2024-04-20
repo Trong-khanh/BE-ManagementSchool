@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ManagementSchool.Models;
@@ -154,11 +155,12 @@ public class AdminService : IAdminService
 
     public async Task<IEnumerable<Student>> GetStudentsByClassAsync(string className)
     {
+        // Decode the className in case it was URL-encoded.
+        className = WebUtility.UrlDecode(className);
+
         if (string.IsNullOrWhiteSpace(className))
             throw new ArgumentException("Class name cannot be empty.");
 
-        // encryption  className before send to  method service
-        className = Uri.EscapeDataString(className);
         var classInDb = await _context.Classes
             .FirstOrDefaultAsync(c => c.ClassName == className);
 
@@ -169,6 +171,7 @@ public class AdminService : IAdminService
             .Where(s => s.ClassId == classInDb.ClassId)
             .ToListAsync();
     }
+
 
 
     public async Task<IEnumerable<Student>> GetStudentsBySchoolYearAsync(string YearName)
@@ -473,5 +476,6 @@ public class AdminService : IAdminService
         return await _context.Students
             .Include(s => s.Class) // Include the related class
             .Include(s => s.Parent) // Include the related parent
-            .ToListAsync();    }
+            .ToListAsync();    
+    }
 }
