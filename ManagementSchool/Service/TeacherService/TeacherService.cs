@@ -109,6 +109,21 @@ public class TeacherService : ITeacherService
         };
         return semesterScores; 
     }
+    
+    public async Task<double?> CalculateAnnualAverageScoreAsync(string teacherEmail, int studentId, int subjectId)
+    {
+        var semesterScores = await CalculateScoreForSemestersAsync(teacherEmail, studentId, subjectId);
+        
+        if (semesterScores.Semester1Score.HasValue && semesterScores.Semester2Score.HasValue)
+        {
+            double annualAverage = (semesterScores.Semester1Score.Value + 2 * semesterScores.Semester2Score.Value) / 3;
+            return Math.Round(annualAverage, 1);
+        }
+        else
+        {
+            return null;
+        }
+    }
 
     private double? CalculateSemesterScore(List<Score> scores, string semesterName)
     {

@@ -5,10 +5,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ManagementSchool.Controllers;
+
 [Authorize(Roles = "Teacher")]
 [Route("api/[controller]")]
 [ApiController]
-public class TeacherController: ControllerBase
+public class TeacherController : ControllerBase
 {
     private readonly ITeacherService _teacherService;
 
@@ -30,7 +31,7 @@ public class TeacherController: ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
-    
+
     [HttpPost("AddScore")]
     public async Task<IActionResult> AddScore([FromBody] ScoreDto scoreDto, string teacherEmail)
     {
@@ -48,7 +49,7 @@ public class TeacherController: ControllerBase
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
-    
+
     [HttpGet("GetStudentsInAssignedClasses")]
     public async Task<IActionResult> GetStudentsInAssignedClasses(string teacherEmail)
     {
@@ -62,7 +63,7 @@ public class TeacherController: ControllerBase
             return StatusCode(500, $"Server error: {ex.Message}");
         }
     }
-    
+
     [HttpGet("CalculateScoreForSemesters")]
     public async Task<IActionResult> CalculateScoreForSemesters(string teacherEmail, int studentId, int subjectId)
     {
@@ -74,6 +75,25 @@ public class TeacherController: ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
+    }
+
+    [HttpGet("CalculateAnnualAverageScore")]
+    public async Task<IActionResult> CalculateAnnualAverageScore(string teacherEmail, int studentId, int subjectId)
+    {
+        try
+        {
+            var annualAverageScore =
+                await _teacherService.CalculateAnnualAverageScoreAsync(teacherEmail, studentId, subjectId);
+
+            if (annualAverageScore.HasValue)
+                return Ok(new { AnnualAverageScore = annualAverageScore.Value });
+            else
+                return NotFound("It is not possible to calculate a yearly average because of missing grades from one or both semesters");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $" 1 error has occurred: {ex.Message}");
         }
     }
 }
