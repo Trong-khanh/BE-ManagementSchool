@@ -62,5 +62,18 @@ public class TeacherController: ControllerBase
             return StatusCode(500, $"Server error: {ex.Message}");
         }
     }
-
+    
+    [HttpGet("CalculateScoreForSemesters")]
+    public async Task<IActionResult> CalculateScoreForSemesters(string teacherEmail, int studentId, int subjectId)
+    {
+        try
+        {
+            var score = await _teacherService.CalculateScoreForSemestersAsync(teacherEmail, studentId, subjectId);
+            return Ok(new { Score = score });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
+    }
 }

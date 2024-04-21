@@ -7,4 +7,5 @@ public interface ITeacherService
     Task<IEnumerable<SemesterDto>> GetAllSemestersAsync();
     Task AddScoreAsync(ScoreDto scoreDto, string teacherEmail);
     Task<List<StudentInfoDto>> GetAssignedClassesStudentsAsync(string teacherEmail);
+    Task<SemesterScoresDto> CalculateScoreForSemestersAsync(string teacherEmail, int studentId, int subjectId);
 }

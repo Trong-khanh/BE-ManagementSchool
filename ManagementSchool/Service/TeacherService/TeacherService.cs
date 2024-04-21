@@ -43,6 +43,9 @@ public class TeacherService : ITeacherService
         var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.Name == scoreDto.SemesterName);
         if (semester == null) throw new AdminService.ValidateException("Semester not found.");
 
+        // Kiểm tra điểm số nhập vào có hợp lệ không
+        if (scoreDto.Value < 0 || scoreDto.Value > 10) throw new ArgumentException("Score must be between 0 and 10.");
+
         // Tạo bản ghi điểm mới và lưu vào cơ sở dữ liệu
         var score = new Score
         {
@@ -67,7 +70,9 @@ public class TeacherService : ITeacherService
             {
                 StudentFullName = s.FullName,
                 ClassName = tc.Class.ClassName,
-                SubjectName = s.StudentSubjects.Any() ? s.StudentSubjects.FirstOrDefault().Subject.SubjectName : "No Subject",
+                SubjectName = s.StudentSubjects.Any()
+                    ? s.StudentSubjects.FirstOrDefault().Subject.SubjectName
+                    : "No Subject",
                 ScoreValue = s.Scores.Any() ? s.Scores.FirstOrDefault().Value : 0,
                 ExamType = s.Scores.Any() ? s.Scores.FirstOrDefault().ExamType : "No Exam",
                 Semester = s.Scores.Any() ? s.Scores.FirstOrDefault().SemesterName : "No Semester"
@@ -76,4 +81,50 @@ public class TeacherService : ITeacherService
 
         return assignedClassStudents;
     }
+
+    public async Task<SemesterScoresDto> CalculateScoreForSemestersAsync(string teacherEmail, int studentId, int subjectId)
+    {
+        var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Email == teacherEmail);
+        if (teacher == null)
+            throw new ArgumentException("Teacher not found.");
+
+        var isAssigned = await _context.TeacherClasses
+            .AnyAsync(tc => tc.TeacherId == teacher.TeacherId &&
+                            tc.Class.Students.Any(s => s.StudentId == studentId) &&
+                            tc.Teacher.SubjectId == subjectId);
+
+        if (!isAssigned)
+            throw new ArgumentException("Teacher is not assigned to teach the subject for this class.");
+
+        var scores = await _context.Scores
+            .Where(s => s.StudentId == studentId &&
+                        s.SubjectId == subjectId &&
+                        s.Student.Class.TeacherClasses.Any(tc => tc.Teacher.Email == teacherEmail))
+            .ToListAsync();
+
+        var semesterScores = new SemesterScoresDto
+        {
+            Semester1Score = CalculateSemesterScore(scores, "Semester 1"),
+            Semester2Score = CalculateSemesterScore(scores, "Semester 2")
+        };
+        return semesterScores; 
+    }
+
+    private double? CalculateSemesterScore(List<Score> scores, string semesterName)
+    {
+        var semesterScores = scores.Where(s => s.SemesterName == semesterName).ToList();
+        if (semesterScores.Count == 0)
+        {
+            return null; // No scores for this semester
+        }
+
+        double totalScore = semesterScores.Sum(s => s.Value);
+        double averageScore = totalScore / semesterScores.Count;
+
+        // Round the average score to one decimal place
+        return Math.Round(averageScore, 1);
+    }
+
+
+
 }
