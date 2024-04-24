@@ -3333,11 +3333,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/thanletrongkhanh/RiderProjects/ManagementSchool/ManagementSchool/ManagementSchool.csproj",
+      "projectUniqueName": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/ManagementSchool.csproj",
       "projectName": "ManagementSchool",
-      "projectPath": "/Users/thanletrongkhanh/RiderProjects/ManagementSchool/ManagementSchool/ManagementSchool.csproj",
+      "projectPath": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/ManagementSchool.csproj",
       "packagesPath": "/Users/thanletrongkhanh/.nuget/packages/",
-      "outputPath": "/Users/thanletrongkhanh/RiderProjects/ManagementSchool/ManagementSchool/obj/",
+      "outputPath": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/thanletrongkhanh/.nuget/NuGet/NuGet.Config"
@@ -3352,8 +3352,8 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "/Users/thanletrongkhanh/RiderProjects/ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj": {
-              "projectPath": "/Users/thanletrongkhanh/RiderProjects/ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj"
+            "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj": {
+              "projectPath": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj"
             }
           }
         }

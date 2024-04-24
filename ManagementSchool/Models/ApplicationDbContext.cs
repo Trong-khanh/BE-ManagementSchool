@@ -24,7 +24,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<ClassSemester> ClassSemesters { get; set; }
     public DbSet<Score> Scores { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
-
+    public DbSet<StudentSubjectScore> StudentSubjectScores { get; set; }
     public DbSet<Semester> Semesters { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -114,6 +114,18 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .WithMany(sub => sub.Scores)
             .HasForeignKey(s => s.SubjectId);
 
+        // Thiết lập mối quan hệ giữa StudentSubjectScore và Student
+        modelBuilder.Entity<StudentSubjectScore>()
+            .HasOne(sss => sss.Student)
+            .WithMany(s => s.StudentSubjectScores)
+            .HasForeignKey(sss => sss.StudentId);
+
+// Thiết lập mối quan hệ giữa StudentSubjectScore và Subject
+        modelBuilder.Entity<StudentSubjectScore>()
+            .HasOne(sss => sss.Subject)
+            .WithMany(sub => sub.StudentSubjectScores)
+            .HasForeignKey(sss => sss.SubjectId);
+
 
         // Seed date for grade
         modelBuilder.Entity<SchoolYear>().HasData(
@@ -145,10 +157,11 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             new Subject { SubjectId = 7, SubjectName = "History" },
             new Subject { SubjectId = 8, SubjectName = "Geography" },
             new Subject { SubjectId = 9, SubjectName = "Civics" },
-            new Subject { SubjectId = 10, SubjectName = "Computer Science" }
+            new Subject { SubjectId = 10, SubjectName = "Computer Science" },
+            new Subject { SubjectId = 11, SubjectName = "Sport" },
+            new Subject { SubjectId = 12, SubjectName = "Defense Education" }
         );
     }
-
 
     private void SeedRoles(ModelBuilder builder)
     {

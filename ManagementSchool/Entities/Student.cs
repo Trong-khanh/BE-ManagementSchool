@@ -15,5 +15,5 @@ public class Student
     public ICollection<StudentSubject> StudentSubjects { get; set; }
     public ICollection<ClassSemester> ClassSemesters { get; set; }
     public ICollection<Score> Scores { get; set; }
-
+    public IEnumerable<StudentSubjectScore>? StudentSubjectScores { get; set; }
 }

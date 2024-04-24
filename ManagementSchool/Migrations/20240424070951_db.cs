@@ -397,6 +397,35 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "StudentSubjectScores",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StudentId = table.Column<int>(type: "int", nullable: false),
+                    SubjectId = table.Column<int>(type: "int", nullable: false),
+                    Semester1Score = table.Column<double>(type: "float", nullable: false),
+                    Semester2Score = table.Column<double>(type: "float", nullable: false),
+                    AnnualScore = table.Column<double>(type: "float", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentSubjectScores", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StudentSubjectScores_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "StudentId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StudentSubjectScores_Subjects_SubjectId",
+                        column: x => x.SubjectId,
+                        principalTable: "Subjects",
+                        principalColumn: "SubjectId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Teachers",
                 columns: table => new
                 {
@@ -448,10 +477,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "14868537-d7f1-4aa2-a4e5-538329198c54", "3", "Teacher", "TEACHER" },
-                    { "50d2057a-d7c5-4f84-a252-d69c6f480b8b", "4", "Parent", "PARENT" },
-                    { "736e9aa9-806a-424f-a140-8268fee52220", "2", "Student", "STUDENT" },
-                    { "758a3e27-3b71-4042-9af6-e70e3a351bf5", "1", "Admin", "ADMIN" }
+                    { "465fde1f-cc79-444d-9faa-47b8882050db", "4", "Parent", "PARENT" },
+                    { "d0cff29e-b449-4b09-bc65-fccd3f1d23da", "3", "Teacher", "TEACHER" },
+                    { "e63a5d6d-d197-4fc4-91ab-a2afeac21822", "2", "Student", "STUDENT" },
+                    { "f9586ce8-1b38-49e4-9297-eb4e0a47f81b", "1", "Admin", "ADMIN" }
                 });
 
             migrationBuilder.InsertData(
@@ -478,7 +507,9 @@ namespace ManagementSchool.Migrations
                     { 7, null, "History" },
                     { 8, null, "Geography" },
                     { 9, null, "Civics" },
-                    { 10, null, "Computer Science" }
+                    { 10, null, "Computer Science" },
+                    { 11, null, "Sport" },
+                    { 12, null, "Defense Education" }
                 });
 
             migrationBuilder.InsertData(
@@ -627,6 +658,16 @@ namespace ManagementSchool.Migrations
                 column: "SubjectId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_StudentSubjectScores_StudentId",
+                table: "StudentSubjectScores",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentSubjectScores_SubjectId",
+                table: "StudentSubjectScores",
+                column: "SubjectId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Subjects_StudentId",
                 table: "Subjects",
                 column: "StudentId");
@@ -678,6 +719,9 @@ namespace ManagementSchool.Migrations
 
             migrationBuilder.DropTable(
                 name: "StudentSubjects");
+
+            migrationBuilder.DropTable(
+                name: "StudentSubjectScores");
 
             migrationBuilder.DropTable(
                 name: "TeacherClasses");

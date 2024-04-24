@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "DuX8wkYUEWG4am/ehzmZ3ey5R3jHDmvqN80zakfqVKADYuuh3tlm3FWlr5o/CTWioNc+ntCNE0q3ms3lTds2SQ==",
+  "dgSpecHash": "A7VjeLLA/uIZEJfe7T8+OXjc488c4fT4G4dX6iTPEKlUSVuJoK1buSXRAuVRjx6qqW5NKtwGoyuhOho2WTY4yg==",
   "success": true,
-  "projectFilePath": "/Users/thanletrongkhanh/RiderProjects/ManagementSchool/ManagementSchool/ManagementSchool.csproj",
+  "projectFilePath": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/ManagementSchool.csproj",
   "expectedPackageFiles": [
     "/Users/thanletrongkhanh/.nuget/packages/humanizer.core/2.8.26/humanizer.core.2.8.26.nupkg.sha512",
     "/Users/thanletrongkhanh/.nuget/packages/mailkit/3.2.0/mailkit.3.2.0.nupkg.sha512",

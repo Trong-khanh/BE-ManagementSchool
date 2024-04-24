@@ -1,3 +1,4 @@
+using System.Net;
 using ManagementSchool.Dto;
 using ManagementSchool.Service;
 using ManagementSchool.Service.TeacherService;
@@ -63,37 +64,32 @@ public class TeacherController : ControllerBase
             return StatusCode(500, $"Server error: {ex.Message}");
         }
     }
-
-    [HttpGet("CalculateScoreForSemesters")]
-    public async Task<IActionResult> CalculateScoreForSemesters(string teacherEmail, int studentId, int subjectId)
+    [HttpGet("semester-average")]
+    public ActionResult<double> GetSemesterAverage(int studentId, int subjectId, string semesterName)
     {
         try
         {
-            var score = await _teacherService.CalculateScoreForSemestersAsync(teacherEmail, studentId, subjectId);
-            return Ok(new { Score = score });
+            var average = _teacherService.CalculateSemesterAverage(studentId, subjectId, semesterName);
+            return Ok(average);
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"An error occurred: {ex.Message}");
+            return BadRequest(ex.Message);
         }
     }
 
-    [HttpGet("CalculateAnnualAverageScore")]
-    public async Task<IActionResult> CalculateAnnualAverageScore(string teacherEmail, int studentId, int subjectId)
+    [HttpGet("annual-average")]
+    public ActionResult<double> GetAnnualAverage(int studentId, int subjectId)
     {
         try
         {
-            var annualAverageScore =
-                await _teacherService.CalculateAnnualAverageScoreAsync(teacherEmail, studentId, subjectId);
-
-            if (annualAverageScore.HasValue)
-                return Ok(new { AnnualAverageScore = annualAverageScore.Value });
-            else
-                return NotFound("It is not possible to calculate a yearly average because of missing grades from one or both semesters");
+            var average = _teacherService.CalculateAnnualAverage(studentId, subjectId);
+            return Ok(average);
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $" 1 error has occurred: {ex.Message}");
+            return BadRequest(ex.Message);
         }
     }
+    
 }

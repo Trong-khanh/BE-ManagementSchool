@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using ManagementSchool.Models; // Thay thế bằng namespace chứa ApplicationDbContext của bạn
-using ManagementSchool.Entities; // Thay thế bằng namespace chứa các entity của bạn
-using ManagementSchool.Dto; // Thay thế bằng namespace chứa các DTO của bạn
-using ManagementSchool.Service.TeacherService; // Thay thế bằng namespace chứa ITeacherService
+using ManagementSchool.Models;
+using ManagementSchool.Entities;
+using ManagementSchool.Dto;
 
 namespace ManagementSchool.Service.TeacherService;
 
@@ -41,7 +40,8 @@ public class TeacherService : ITeacherService
 
         // Kiểm tra xem kỳ học có tồn tại không
         var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.Name == scoreDto.SemesterName);
-        if (semester == null) throw new AdminService.ValidateException("Semester not found.");
+        if (semester == null)
+            throw new AdminService.ValidateException("Semester not found. Please enter a valid semester.");
 
         // Kiểm tra điểm số nhập vào có hợp lệ không
         if (scoreDto.Value < 0 || scoreDto.Value > 10) throw new ArgumentException("Score must be between 0 and 10.");
@@ -82,64 +82,94 @@ public class TeacherService : ITeacherService
         return assignedClassStudents;
     }
 
-    public async Task<SemesterScoresDto> CalculateScoreForSemestersAsync(string teacherEmail, int studentId, int subjectId)
+    public double CalculateSemesterAverage(int studentId, int subjectId, string semesterName)
     {
-        var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Email == teacherEmail);
-        if (teacher == null)
-            throw new ArgumentException("Teacher not found.");
+        var scores = _context.Scores
+            .Where(s => s.StudentId == studentId && s.SubjectId == subjectId && s.SemesterName.Equals(semesterName))
+            .ToList();
 
-        var isAssigned = await _context.TeacherClasses
-            .AnyAsync(tc => tc.TeacherId == teacher.TeacherId &&
-                            tc.Class.Students.Any(s => s.StudentId == studentId) &&
-                            tc.Teacher.SubjectId == subjectId);
+        if (!scores.Any())
+            throw new ArgumentException("No scores found for the specified criteria.");
 
-        if (!isAssigned)
-            throw new ArgumentException("Teacher is not assigned to teach the subject for this class.");
+        double totalScore = 0;
+        double countTestWhenClassBegins = 0;
+        double countFifteenMinutesTest = 0;
 
-        var scores = await _context.Scores
-            .Where(s => s.StudentId == studentId &&
-                        s.SubjectId == subjectId &&
-                        s.Student.Class.TeacherClasses.Any(tc => tc.Teacher.Email == teacherEmail))
-            .ToListAsync();
+        // Accumulate scores based on the type of the test
+        foreach (var score in scores)
+            switch (score.ExamType)
+            {
+                case "Test when class begins":
+                    totalScore += score.Value;
+                    countTestWhenClassBegins += 1;
+                    break;
+                case "15 minutes test":
+                    totalScore += score.Value;
+                    countFifteenMinutesTest += 1;
+                    break;
+                case "45 minutes test":
+                    totalScore += 2 * score.Value;
+                    break;
+                case "semester test":
+                    totalScore += 3 * score.Value;
+                    break;
+                default:
+                    throw new ArgumentException("Invalid exam type encountered in score data.");
+            }
 
-        var semesterScores = new SemesterScoresDto
-        {
-            Semester1Score = CalculateSemesterScore(scores, "Semester 1"),
-            Semester2Score = CalculateSemesterScore(scores, "Semester 2")
-        };
-        return semesterScores; 
-    }
-    
-    public async Task<double?> CalculateAnnualAverageScoreAsync(string teacherEmail, int studentId, int subjectId)
-    {
-        var semesterScores = await CalculateScoreForSemestersAsync(teacherEmail, studentId, subjectId);
-        
-        if (semesterScores.Semester1Score.HasValue && semesterScores.Semester2Score.HasValue)
-        {
-            double annualAverage = (semesterScores.Semester1Score.Value + 2 * semesterScores.Semester2Score.Value) / 3;
-            return Math.Round(annualAverage, 1);
-        }
-        else
-        {
-            return null;
-        }
-    }
+        var denominator = countTestWhenClassBegins + countFifteenMinutesTest + 5;
+        if (denominator == 0)
+            throw new InvalidOperationException("Invalid score data. Not enough tests to calculate the average.");
 
-    private double? CalculateSemesterScore(List<Score> scores, string semesterName)
-    {
-        var semesterScores = scores.Where(s => s.SemesterName == semesterName).ToList();
-        if (semesterScores.Count == 0)
-        {
-            return null; // No scores for this semester
-        }
+        var average = totalScore / denominator;
+        var roundedAverage = Math.Round(average, 1);
 
-        double totalScore = semesterScores.Sum(s => s.Value);
-        double averageScore = totalScore / semesterScores.Count;
+        SaveSemesterScore(studentId, subjectId, semesterName, roundedAverage);
 
-        // Round the average score to one decimal place
-        return Math.Round(averageScore, 1);
+        return roundedAverage;
     }
 
+    public double CalculateAnnualAverage(int studentId, int subjectId)
+    {
+        var semester1Average = CalculateSemesterAverage(studentId, subjectId, "Semester 1");
+        var semester2Average = CalculateSemesterAverage(studentId, subjectId, "Semester 2");
 
+        var annualAverage = (semester1Average + 2 * semester2Average) / 3;
+        var roundedAnnualAverage = Math.Round(annualAverage, 1);
 
+        SaveSemesterScore(studentId, subjectId, "Annual", roundedAnnualAverage);
+
+        return roundedAnnualAverage;
+    }
+
+    private void SaveSemesterScore(int studentId, int subjectId, string semesterName, double score)
+    {
+        var studentSubjectScore = _context.StudentSubjectScores
+            .FirstOrDefault(sss => sss.StudentId == studentId && sss.SubjectId == subjectId);
+
+        if (studentSubjectScore == null)
+        {
+            studentSubjectScore = new StudentSubjectScore
+            {
+                StudentId = studentId,
+                SubjectId = subjectId
+            };
+            _context.StudentSubjectScores.Add(studentSubjectScore);
+        }
+
+        switch (semesterName.ToLower())
+        {
+            case "semester 1":
+                studentSubjectScore.Semester1Score = score;
+                break;
+            case "semester 2":
+                studentSubjectScore.Semester2Score = score;
+                break;
+            case "annual":
+                studentSubjectScore.AnnualScore = score;
+                break;
+        }
+
+        _context.SaveChanges();
+    }
 }

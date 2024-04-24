@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ManagementSchool.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240417105957_db")]
+    [Migration("20240424070951_db")]
     partial class db
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -558,6 +558,16 @@ namespace ManagementSchool.Migrations
                         {
                             SubjectId = 10,
                             SubjectName = "Computer Science"
+                        },
+                        new
+                        {
+                            SubjectId = 11,
+                            SubjectName = "Sport"
+                        },
+                        new
+                        {
+                            SubjectId = 12,
+                            SubjectName = "Defense Education"
                         });
                 });
 
@@ -673,28 +683,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "758a3e27-3b71-4042-9af6-e70e3a351bf5",
+                            Id = "f9586ce8-1b38-49e4-9297-eb4e0a47f81b",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "736e9aa9-806a-424f-a140-8268fee52220",
+                            Id = "e63a5d6d-d197-4fc4-91ab-a2afeac21822",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "14868537-d7f1-4aa2-a4e5-538329198c54",
+                            Id = "d0cff29e-b449-4b09-bc65-fccd3f1d23da",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "50d2057a-d7c5-4f84-a252-d69c6f480b8b",
+                            Id = "465fde1f-cc79-444d-9faa-47b8882050db",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
@@ -870,6 +880,38 @@ namespace ManagementSchool.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("StudentSubjectScore", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<double>("AnnualScore")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Semester1Score")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Semester2Score")
+                        .HasColumnType("float");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("SubjectId");
+
+                    b.ToTable("StudentSubjectScores");
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.Class", b =>
@@ -1079,6 +1121,25 @@ namespace ManagementSchool.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("StudentSubjectScore", b =>
+                {
+                    b.HasOne("ManagementSchool.Entities.Student", "Student")
+                        .WithMany("StudentSubjectScores")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ManagementSchool.Entities.Subject", "Subject")
+                        .WithMany("StudentSubjectScores")
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Subject");
+                });
+
             modelBuilder.Entity("ManagementSchool.Entities.Class", b =>
                 {
                     b.Navigation("ClassSemesters");
@@ -1111,6 +1172,8 @@ namespace ManagementSchool.Migrations
 
                     b.Navigation("Scores");
 
+                    b.Navigation("StudentSubjectScores");
+
                     b.Navigation("StudentSubjects");
 
                     b.Navigation("Subjects");
@@ -1121,6 +1184,8 @@ namespace ManagementSchool.Migrations
                     b.Navigation("ClassSubjects");
 
                     b.Navigation("Scores");
+
+                    b.Navigation("StudentSubjectScores");
 
                     b.Navigation("StudentSubjects");
 
