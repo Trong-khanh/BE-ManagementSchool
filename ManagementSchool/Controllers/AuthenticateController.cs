@@ -144,7 +144,6 @@ public class AuthenticateController : ControllerBase
             return Unauthorized(new { message = "Username or password is incorrect" });
         }
     }
-
     
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken( RefreshTokenRequestDto request)

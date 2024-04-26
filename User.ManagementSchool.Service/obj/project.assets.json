@@ -403,11 +403,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/thanletrongkhanh/RiderProjects/ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj",
+      "projectUniqueName": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj",
       "projectName": "User.ManagementSchool.Service",
-      "projectPath": "/Users/thanletrongkhanh/RiderProjects/ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj",
+      "projectPath": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj",
       "packagesPath": "/Users/thanletrongkhanh/.nuget/packages/",
-      "outputPath": "/Users/thanletrongkhanh/RiderProjects/ManagementSchool/User.ManagementSchool.Service/obj/",
+      "outputPath": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/thanletrongkhanh/.nuget/NuGet/NuGet.Config"

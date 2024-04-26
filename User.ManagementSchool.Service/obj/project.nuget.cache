@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "QGWRtY5nBWvvDL9oCw/x59MJvo8fN/9RSASw+ueiszLJ5PNi4IMtWmW4fzxzl2AwVJw1JTMH0KEa/kS+cgXlug==",
+  "dgSpecHash": "dcGUeJfFbBn1SYc9xi3HRLjeI/afSS0tAkFcA1oS2umjtL+1VvwDql1e9LE5VxW4cD4KpZ0SmdwMyWs6pPG2hA==",
   "success": true,
-  "projectFilePath": "/Users/thanletrongkhanh/RiderProjects/ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj",
+  "projectFilePath": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj",
   "expectedPackageFiles": [
     "/Users/thanletrongkhanh/.nuget/packages/mailkit/3.2.0/mailkit.3.2.0.nupkg.sha512",
     "/Users/thanletrongkhanh/.nuget/packages/microsoft.extensions.dependencyinjection/6.0.0/microsoft.extensions.dependencyinjection.6.0.0.nupkg.sha512",

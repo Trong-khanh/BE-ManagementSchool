@@ -4,6 +4,7 @@ using ManagementSchool.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ManagementSchool.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240424153534_Total")]
+    partial class Total
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -620,13 +622,10 @@ namespace ManagementSchool.Migrations
 
             modelBuilder.Entity("ManagementSchool.Entities.TotalPoints", b =>
                 {
-                    b.Property<int>("TotalPointsId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("StudentId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TotalPointsId"), 1L, 1);
-
-                    b.Property<int>("StudentId")
+                    b.Property<int>("StudentId1")
                         .HasColumnType("int");
 
                     b.Property<double>("TotalSemester1")
@@ -638,10 +637,9 @@ namespace ManagementSchool.Migrations
                     b.Property<double>("TotalYear")
                         .HasColumnType("float");
 
-                    b.HasKey("TotalPointsId");
+                    b.HasKey("StudentId");
 
-                    b.HasIndex("StudentId")
-                        .IsUnique();
+                    b.HasIndex("StudentId1");
 
                     b.ToTable("TotalPoints");
                 });
@@ -709,28 +707,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "0b8aff1e-bcf5-446b-af4c-5eb47db61631",
+                            Id = "31725a3b-3d56-4c8d-98e3-83975dce4770",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "349ccb2b-f065-4ce0-829e-548eaf9ace8e",
+                            Id = "fa0b083d-7339-4081-8846-7b321b2a6670",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "bcc681d3-0188-43c6-a0fe-7fe8ad6984fe",
+                            Id = "8e0617ee-1fea-495a-9627-c5d11edc32fd",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "53309d46-b299-458b-ba60-fc479171f8bd",
+                            Id = "920a44bd-6efb-438e-aa53-47a578c5184b",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
@@ -1089,10 +1087,16 @@ namespace ManagementSchool.Migrations
 
             modelBuilder.Entity("ManagementSchool.Entities.TotalPoints", b =>
                 {
-                    b.HasOne("ManagementSchool.Entities.Student", "Student")
-                        .WithOne("TotalPoints")
+                    b.HasOne("ManagementSchool.Entities.Student", null)
+                        .WithOne()
                         .HasForeignKey("ManagementSchool.Entities.TotalPoints", "StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ManagementSchool.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId1")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Student");
@@ -1214,9 +1218,6 @@ namespace ManagementSchool.Migrations
                     b.Navigation("StudentSubjects");
 
                     b.Navigation("Subjects");
-
-                    b.Navigation("TotalPoints")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.Subject", b =>

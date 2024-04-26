@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using ManagementSchool.Models;
 using ManagementSchool.Entities;
 using ManagementSchool.Dto;
+using Microsoft.AspNetCore.Identity;
 
 namespace ManagementSchool.Service.TeacherService;
 
@@ -29,6 +31,13 @@ public class TeacherService : ITeacherService
 
     public async Task AddScoreAsync(ScoreDto scoreDto, string teacherEmail)
     {
+        var teacher = await _context.Teachers
+            .FirstOrDefaultAsync(t => t.Email == teacherEmail);
+
+        // Kiểm tra giáo viên có tồn tại và được phân công môn học phù hợp không
+        if (teacher == null || teacher.SubjectId != scoreDto.SubjectId)
+            throw new AdminService.ValidateException("Teacher is not assigned to this subject or does not exist.");
+
         // Kiểm tra xem giáo viên có được gán vào lớp không
         var assignedClasses = await _context.TeacherClasses
             .Where(tc => tc.Teacher.Email == teacherEmail)
@@ -38,13 +47,14 @@ public class TeacherService : ITeacherService
         if (!assignedClasses.Contains(scoreDto.ClassId))
             throw new AdminService.ValidateException("Teacher is not assigned to the selected class.");
 
-        // Kiểm tra xem kỳ học có tồn tại không
+        // Kiểm tra kỳ học có tồn tại không
         var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.Name == scoreDto.SemesterName);
         if (semester == null)
             throw new AdminService.ValidateException("Semester not found. Please enter a valid semester.");
 
         // Kiểm tra điểm số nhập vào có hợp lệ không
-        if (scoreDto.Value < 0 || scoreDto.Value > 10) throw new ArgumentException("Score must be between 0 and 10.");
+        if (scoreDto.Value < 0 || scoreDto.Value > 10)
+            throw new ArgumentException("Score must be between 0 and 10.");
 
         // Tạo bản ghi điểm mới và lưu vào cơ sở dữ liệu
         var score = new Score
@@ -59,6 +69,7 @@ public class TeacherService : ITeacherService
         _context.Scores.Add(score);
         await _context.SaveChangesAsync();
     }
+
 
     public async Task<List<StudentInfoDto>> GetAssignedClassesStudentsAsync(string teacherEmail)
     {
@@ -82,8 +93,19 @@ public class TeacherService : ITeacherService
         return assignedClassStudents;
     }
 
-    public double CalculateSemesterAverage(int studentId, int subjectId, string semesterName)
+    public double CalculateSemesterAverage(int studentId, int subjectId, string semesterName, ClaimsPrincipal user)
     {
+        // Lấy email từ claims trong JWT token
+        var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        if (emailClaim == null)
+            throw new UnauthorizedAccessException("Email claim not found in token.");
+
+        var teacherEmail = emailClaim;
+
+        var teacher = _context.Teachers.FirstOrDefault(t => t.Email == teacherEmail && t.SubjectId == subjectId);
+        if (teacher == null)
+            throw new UnauthorizedAccessException("Teacher is not assigned to this subject or does not exist.");
+
         var scores = _context.Scores
             .Where(s => s.StudentId == studentId && s.SubjectId == subjectId && s.SemesterName.Equals(semesterName))
             .ToList();
@@ -95,7 +117,7 @@ public class TeacherService : ITeacherService
         double countTestWhenClassBegins = 0;
         double countFifteenMinutesTest = 0;
 
-        // Accumulate scores based on the type of the test
+        // Tích lũy điểm dựa trên loại bài kiểm tra
         foreach (var score in scores)
             switch (score.ExamType)
             {
@@ -117,7 +139,7 @@ public class TeacherService : ITeacherService
                     throw new ArgumentException("Invalid exam type encountered in score data.");
             }
 
-        var denominator = countTestWhenClassBegins + countFifteenMinutesTest + 5;
+        var denominator = countTestWhenClassBegins + countFifteenMinutesTest + 5; // Đảm bảo rằng mẫu số không bằng 0
         if (denominator == 0)
             throw new InvalidOperationException("Invalid score data. Not enough tests to calculate the average.");
 
@@ -128,19 +150,34 @@ public class TeacherService : ITeacherService
 
         return roundedAverage;
     }
-
-    public double CalculateAnnualAverage(int studentId, int subjectId)
+    public double CalculateAnnualAverage(int studentId, int subjectId, ClaimsPrincipal user)
     {
-        var semester1Average = CalculateSemesterAverage(studentId, subjectId, "Semester 1");
-        var semester2Average = CalculateSemesterAverage(studentId, subjectId, "Semester 2");
+        // Get email from claims in the JWT token
+        var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        if (emailClaim == null)
+            throw new UnauthorizedAccessException("Email claim not found in token.");
 
+        var teacherEmail = emailClaim;
+
+        // Check if the teacher is assigned to the subject
+        var teacherSubject = _context.Teachers.FirstOrDefault(t => t.Email == teacherEmail && t.SubjectId == subjectId);
+        if (teacherSubject == null)
+            throw new UnauthorizedAccessException("Teacher is not assigned to this subject.");
+
+        // Calculate the average for each semester
+        var semester1Average = CalculateSemesterAverage(studentId, subjectId, "Semester 1", user);
+        var semester2Average = CalculateSemesterAverage(studentId, subjectId, "Semester 2", user);
+
+        // Calculate the annual average
         var annualAverage = (semester1Average + 2 * semester2Average) / 3;
         var roundedAnnualAverage = Math.Round(annualAverage, 1);
 
+        // Save the score for the whole year
         SaveSemesterScore(studentId, subjectId, "Annual", roundedAnnualAverage);
 
         return roundedAnnualAverage;
     }
+
 
     private void SaveSemesterScore(int studentId, int subjectId, string semesterName, double score)
     {

@@ -64,12 +64,14 @@ public class TeacherController : ControllerBase
             return StatusCode(500, $"Server error: {ex.Message}");
         }
     }
+    
     [HttpGet("semester-average")]
     public ActionResult<double> GetSemesterAverage(int studentId, int subjectId, string semesterName)
     {
         try
         {
-            var average = _teacherService.CalculateSemesterAverage(studentId, subjectId, semesterName);
+            // Call the service method with the logged-in user's claims
+            var average = _teacherService.CalculateSemesterAverage(studentId, subjectId, semesterName, this.User);
             return Ok(average);
         }
         catch (Exception ex)
@@ -83,7 +85,8 @@ public class TeacherController : ControllerBase
     {
         try
         {
-            var average = _teacherService.CalculateAnnualAverage(studentId, subjectId);
+            // Call the service method with the logged-in user's claims
+            var average = _teacherService.CalculateAnnualAverage(studentId, subjectId, this.User);
             return Ok(average);
         }
         catch (Exception ex)
@@ -91,5 +94,5 @@ public class TeacherController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
-    
+
 }

@@ -10,3 +10,15 @@
 /Users/thanletrongkhanh/RiderProjects/ManagementSchool/User.ManagementSchool.Service/obj/Debug/net6.0/refint/User.ManagementSchool.Service.dll
 /Users/thanletrongkhanh/RiderProjects/ManagementSchool/User.ManagementSchool.Service/obj/Debug/net6.0/User.ManagementSchool.Service.pdb
 /Users/thanletrongkhanh/RiderProjects/ManagementSchool/User.ManagementSchool.Service/obj/Debug/net6.0/ref/User.ManagementSchool.Service.dll
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/bin/Debug/net6.0/User.ManagementSchool.Service.deps.json
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/bin/Debug/net6.0/User.ManagementSchool.Service.dll
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/bin/Debug/net6.0/User.ManagementSchool.Service.pdb
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/obj/Debug/net6.0/User.ManagementSchool.Service.csproj.AssemblyReference.cache
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/obj/Debug/net6.0/User.ManagementSchool.Service.GeneratedMSBuildEditorConfig.editorconfig
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/obj/Debug/net6.0/User.ManagementSchool.Service.AssemblyInfoInputs.cache
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/obj/Debug/net6.0/User.ManagementSchool.Service.AssemblyInfo.cs
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/obj/Debug/net6.0/User.ManagementSchool.Service.csproj.CoreCompileInputs.cache
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/obj/Debug/net6.0/User.ManagementSchool.Service.dll
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/obj/Debug/net6.0/refint/User.ManagementSchool.Service.dll
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/obj/Debug/net6.0/User.ManagementSchool.Service.pdb
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/obj/Debug/net6.0/ref/User.ManagementSchool.Service.dll
