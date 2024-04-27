@@ -181,8 +181,8 @@ public class AdminService : IAdminService
 
         return await _context.Students
             .Include(s => s.Class)
-            .ThenInclude(c => c.SchoolYear)
-            .Where(s => s.Class.SchoolYear.YearName == YearName)
+            .ThenInclude(c => c.Grade)
+            .Where(s => s.Class.Grade.YearName == YearName)
             .ToListAsync();
     }
 
@@ -394,7 +394,8 @@ public class AdminService : IAdminService
         {
             Name = semesterDto.Name,
             StartDate = semesterDto.StartDate,
-            EndDate = semesterDto.EndDate
+            EndDate = semesterDto.EndDate,
+            AcademicYear = semesterDto.AcademicYear 
         };
 
         _context.Semesters.Add(semester);
@@ -408,7 +409,7 @@ public class AdminService : IAdminService
         {
             throw new ValidateException("The semesterDto object must be provided.");
         }
-    
+
         var semester = await _context.Semesters.FindAsync(semesterId);
         if (semester == null)
         {
@@ -435,6 +436,7 @@ public class AdminService : IAdminService
         semester.Name = semesterDto.Name;
         semester.StartDate = semesterDto.StartDate;
         semester.EndDate = semesterDto.EndDate;
+        semester.AcademicYear = semesterDto.AcademicYear; 
 
         await _context.SaveChangesAsync();
 

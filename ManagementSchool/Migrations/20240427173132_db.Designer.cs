@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ManagementSchool.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240424153534_Total")]
-    partial class Total
+    [Migration("20240427173132_db")]
+    partial class db
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -325,6 +325,40 @@ namespace ManagementSchool.Migrations
                     b.ToTable("ClassSubjects");
                 });
 
+            modelBuilder.Entity("ManagementSchool.Entities.Grade", b =>
+                {
+                    b.Property<int>("GradeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GradeId"), 1L, 1);
+
+                    b.Property<string>("YearName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("GradeId");
+
+                    b.ToTable("SchoolYears");
+
+                    b.HasData(
+                        new
+                        {
+                            GradeId = 1,
+                            YearName = "10"
+                        },
+                        new
+                        {
+                            GradeId = 2,
+                            YearName = "11"
+                        },
+                        new
+                        {
+                            GradeId = 3,
+                            YearName = "12"
+                        });
+                });
+
             modelBuilder.Entity("ManagementSchool.Entities.Parent", b =>
                 {
                     b.Property<int>("ParentId")
@@ -340,40 +374,6 @@ namespace ManagementSchool.Migrations
                     b.HasKey("ParentId");
 
                     b.ToTable("Parents");
-                });
-
-            modelBuilder.Entity("ManagementSchool.Entities.SchoolYear", b =>
-                {
-                    b.Property<int>("SchoolYearId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SchoolYearId"), 1L, 1);
-
-                    b.Property<string>("YearName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("SchoolYearId");
-
-                    b.ToTable("SchoolYears");
-
-                    b.HasData(
-                        new
-                        {
-                            SchoolYearId = 1,
-                            YearName = "10"
-                        },
-                        new
-                        {
-                            SchoolYearId = 2,
-                            YearName = "11"
-                        },
-                        new
-                        {
-                            SchoolYearId = 3,
-                            YearName = "12"
-                        });
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.Score", b =>
@@ -417,6 +417,10 @@ namespace ManagementSchool.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SemesterId"), 1L, 1);
+
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
@@ -620,30 +624,6 @@ namespace ManagementSchool.Migrations
                     b.ToTable("TeacherClasses");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.TotalPoints", b =>
-                {
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StudentId1")
-                        .HasColumnType("int");
-
-                    b.Property<double>("TotalSemester1")
-                        .HasColumnType("float");
-
-                    b.Property<double>("TotalSemester2")
-                        .HasColumnType("float");
-
-                    b.Property<double>("TotalYear")
-                        .HasColumnType("float");
-
-                    b.HasKey("StudentId");
-
-                    b.HasIndex("StudentId1");
-
-                    b.ToTable("TotalPoints");
-                });
-
             modelBuilder.Entity("ManagementSchool.Service.RefreshToken.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -707,28 +687,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "31725a3b-3d56-4c8d-98e3-83975dce4770",
+                            Id = "9dfce228-cd65-44e9-9ad0-9d7e351cc823",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "fa0b083d-7339-4081-8846-7b321b2a6670",
+                            Id = "d274e239-6b78-49bf-99e6-d07997faf959",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "8e0617ee-1fea-495a-9627-c5d11edc32fd",
+                            Id = "c95b6f0e-a78e-4951-a616-88e12145093c",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "920a44bd-6efb-438e-aa53-47a578c5184b",
+                            Id = "03c9be8e-ebae-494a-a89d-ec5d5e3b101f",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
@@ -940,13 +920,13 @@ namespace ManagementSchool.Migrations
 
             modelBuilder.Entity("ManagementSchool.Entities.Class", b =>
                 {
-                    b.HasOne("ManagementSchool.Entities.SchoolYear", "SchoolYear")
+                    b.HasOne("ManagementSchool.Entities.Grade", "Grade")
                         .WithMany("Classes")
                         .HasForeignKey("SchoolYearId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("SchoolYear");
+                    b.Navigation("Grade");
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.ClassSemester", b =>
@@ -1085,23 +1065,6 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Teacher");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.TotalPoints", b =>
-                {
-                    b.HasOne("ManagementSchool.Entities.Student", null)
-                        .WithOne()
-                        .HasForeignKey("ManagementSchool.Entities.TotalPoints", "StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ManagementSchool.Entities.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("ManagementSchool.Service.RefreshToken.RefreshToken", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
@@ -1192,14 +1155,14 @@ namespace ManagementSchool.Migrations
                     b.Navigation("TeacherClasses");
                 });
 
+            modelBuilder.Entity("ManagementSchool.Entities.Grade", b =>
+                {
+                    b.Navigation("Classes");
+                });
+
             modelBuilder.Entity("ManagementSchool.Entities.Parent", b =>
                 {
                     b.Navigation("Students");
-                });
-
-            modelBuilder.Entity("ManagementSchool.Entities.SchoolYear", b =>
-                {
-                    b.Navigation("Classes");
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.Semester", b =>

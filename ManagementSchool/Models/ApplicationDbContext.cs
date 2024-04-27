@@ -13,7 +13,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     }
 
     public DbSet<Class> Classes { get; set; }
-    public DbSet<SchoolYear> SchoolYears { get; set; }
+    public DbSet<Grade> SchoolYears { get; set; }
     public DbSet<Student> Students { get; set; }
     public DbSet<Teacher?> Teachers { get; set; }
     public DbSet<Parent> Parents { get; set; }
@@ -33,7 +33,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
         SeedRoles(modelBuilder);
 
         modelBuilder.Entity<Class>()
-            .HasOne(sy => sy.SchoolYear)
+            .HasOne(sy => sy.Grade)
             .WithMany(c => c.Classes)
             .HasForeignKey(sy => sy.SchoolYearId);
 
@@ -128,10 +128,10 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
 
 
         // Seed date for grade
-        modelBuilder.Entity<SchoolYear>().HasData(
-            new SchoolYear { SchoolYearId = 1, YearName = "10" },
-            new SchoolYear { SchoolYearId = 2, YearName = "11" },
-            new SchoolYear { SchoolYearId = 3, YearName = "12" }
+        modelBuilder.Entity<Grade>().HasData(
+            new Grade { GradeId = 1, YearName = "10" },
+            new Grade { GradeId = 2, YearName = "11" },
+            new Grade { GradeId = 3, YearName = "12" }
         );
 
         // Seed data for class, one grade have 13 class

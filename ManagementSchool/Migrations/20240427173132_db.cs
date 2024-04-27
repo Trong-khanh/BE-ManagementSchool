@@ -65,13 +65,13 @@ namespace ManagementSchool.Migrations
                 name: "SchoolYears",
                 columns: table => new
                 {
-                    SchoolYearId = table.Column<int>(type: "int", nullable: false)
+                    GradeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     YearName = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SchoolYears", x => x.SchoolYearId);
+                    table.PrimaryKey("PK_SchoolYears", x => x.GradeId);
                 });
 
             migrationBuilder.CreateTable(
@@ -82,7 +82,8 @@ namespace ManagementSchool.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -234,7 +235,7 @@ namespace ManagementSchool.Migrations
                         name: "FK_Classes_SchoolYears_SchoolYearId",
                         column: x => x.SchoolYearId,
                         principalTable: "SchoolYears",
-                        principalColumn: "SchoolYearId",
+                        principalColumn: "GradeId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -477,15 +478,15 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "465fde1f-cc79-444d-9faa-47b8882050db", "4", "Parent", "PARENT" },
-                    { "d0cff29e-b449-4b09-bc65-fccd3f1d23da", "3", "Teacher", "TEACHER" },
-                    { "e63a5d6d-d197-4fc4-91ab-a2afeac21822", "2", "Student", "STUDENT" },
-                    { "f9586ce8-1b38-49e4-9297-eb4e0a47f81b", "1", "Admin", "ADMIN" }
+                    { "03c9be8e-ebae-494a-a89d-ec5d5e3b101f", "4", "Parent", "PARENT" },
+                    { "9dfce228-cd65-44e9-9ad0-9d7e351cc823", "1", "Admin", "ADMIN" },
+                    { "c95b6f0e-a78e-4951-a616-88e12145093c", "3", "Teacher", "TEACHER" },
+                    { "d274e239-6b78-49bf-99e6-d07997faf959", "2", "Student", "STUDENT" }
                 });
 
             migrationBuilder.InsertData(
                 table: "SchoolYears",
-                columns: new[] { "SchoolYearId", "YearName" },
+                columns: new[] { "GradeId", "YearName" },
                 values: new object[,]
                 {
                     { 1, "10" },

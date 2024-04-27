@@ -1,8 +1,8 @@
 namespace ManagementSchool.Entities;
 
-public class SchoolYear
+public class Grade
 {
-    public int SchoolYearId { get; set; }
+    public int GradeId { get; set; }
     public string YearName { get; set; }
     public ICollection<Class> Classes { get; set; }
 }
