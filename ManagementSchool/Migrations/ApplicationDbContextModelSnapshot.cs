@@ -377,6 +377,10 @@ namespace ManagementSchool.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScoreId"), 1L, 1);
 
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ExamType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -684,28 +688,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "20e36968-259c-4334-851b-25fd6739c930",
+                            Id = "b9b48ce3-78d2-4a3f-b36a-1e0c0198f954",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "9f104c4e-a9fc-4c8d-beb8-ff23b556477e",
+                            Id = "cfd8c2ca-fd30-44fe-b5d5-4233f8a25fc5",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "79179ec1-128f-4484-91e1-e67fcf266c89",
+                            Id = "41b0a0ca-8ab4-4056-8e89-3f655c436d96",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "e48bf3f5-c226-40bd-90a0-a766e43ba7a5",
+                            Id = "b87cba07-c445-4909-ac10-ddc0fb8aed9c",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
@@ -890,6 +894,10 @@ namespace ManagementSchool.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("AnnualScore")
                         .HasColumnType("float");

@@ -347,7 +347,8 @@ namespace ManagementSchool.Migrations
                     SubjectId = table.Column<int>(type: "int", nullable: false),
                     Value = table.Column<double>(type: "float", nullable: false),
                     SemesterName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ExamType = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ExamType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -402,7 +403,8 @@ namespace ManagementSchool.Migrations
                     SubjectId = table.Column<int>(type: "int", nullable: false),
                     Semester1Score = table.Column<double>(type: "float", nullable: false),
                     Semester2Score = table.Column<double>(type: "float", nullable: false),
-                    AnnualScore = table.Column<double>(type: "float", nullable: false)
+                    AnnualScore = table.Column<double>(type: "float", nullable: false),
+                    AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -473,10 +475,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "20e36968-259c-4334-851b-25fd6739c930", "1", "Admin", "ADMIN" },
-                    { "79179ec1-128f-4484-91e1-e67fcf266c89", "3", "Teacher", "TEACHER" },
-                    { "9f104c4e-a9fc-4c8d-beb8-ff23b556477e", "2", "Student", "STUDENT" },
-                    { "e48bf3f5-c226-40bd-90a0-a766e43ba7a5", "4", "Parent", "PARENT" }
+                    { "41b0a0ca-8ab4-4056-8e89-3f655c436d96", "3", "Teacher", "TEACHER" },
+                    { "b87cba07-c445-4909-ac10-ddc0fb8aed9c", "4", "Parent", "PARENT" },
+                    { "b9b48ce3-78d2-4a3f-b36a-1e0c0198f954", "1", "Admin", "ADMIN" },
+                    { "cfd8c2ca-fd30-44fe-b5d5-4233f8a25fc5", "2", "Student", "STUDENT" }
                 });
 
             migrationBuilder.InsertData(

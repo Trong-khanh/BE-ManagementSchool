@@ -8,6 +8,6 @@ public interface ITeacherService
     Task<IEnumerable<SemesterDto>> GetAllSemestersAsync();
     Task AddScoreAsync(ScoreDto scoreDto, string teacherEmail);
     Task<List<StudentInfoDto>> GetAssignedClassesStudentsAsync(string teacherEmail);
-    double CalculateSemesterAverage(int studentId, int subjectId, string semesterName,ClaimsPrincipal user);
-    double CalculateAnnualAverage(int studentId, int subjectId,ClaimsPrincipal user);
+    double CalculateSemesterAverage(int studentId, int subjectId, string semesterName,ClaimsPrincipal user,string academicYear);
+    double CalculateAnnualAverage(int studentId, int subjectId,ClaimsPrincipal user,string academicYear);
 }

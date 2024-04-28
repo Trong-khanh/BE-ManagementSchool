@@ -10,5 +10,6 @@ public class Score
     public double Value { get; set; } 
     public string SemesterName { get; set; }
     public string ExamType { get; set; }
+    public string AcademicYear { get; set; }
 }
 

@@ -66,12 +66,27 @@ public class TeacherController : ControllerBase
     }
     
     [HttpGet("semester-average")]
-    public ActionResult<double> GetSemesterAverage(int studentId, int subjectId, string semesterName)
+    public ActionResult<double> GetSemesterAverage(int studentId, int subjectId, string semesterName, string academicYear)
     {
         try
         {
-            // Call the service method with the logged-in user's claims
-            var average = _teacherService.CalculateSemesterAverage(studentId, subjectId, semesterName, this.User);
+            // Call the service method with the logged-in user's claims and academic year
+            var average = _teacherService.CalculateSemesterAverage(studentId, subjectId, semesterName, this.User, academicYear);
+            return Ok(average);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    
+    [HttpGet("annual-average")] 
+    public ActionResult<double> GetAnnualAverage(int studentId, int subjectId, string academicYear)
+    {
+        try
+        {
+            // Call the service method with the logged-in user's claims and academic year
+            var average = _teacherService.CalculateAnnualAverage(studentId, subjectId, this.User, academicYear);
             return Ok(average);
         }
         catch (Exception ex)
@@ -80,19 +95,5 @@ public class TeacherController : ControllerBase
         }
     }
 
-    [HttpGet("annual-average")]
-    public ActionResult<double> GetAnnualAverage(int studentId, int subjectId)
-    {
-        try
-        {
-            // Call the service method with the logged-in user's claims
-            var average = _teacherService.CalculateAnnualAverage(studentId, subjectId, this.User);
-            return Ok(average);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
 
 }
