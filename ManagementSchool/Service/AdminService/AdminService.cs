@@ -202,8 +202,7 @@ public class AdminService : IAdminService
 
         return students;
     }
-
-
+    
     public async Task<IEnumerable<Student>> GetStudentsBySchoolYearAsync(string YearName)
     {
         if (string.IsNullOrWhiteSpace(YearName))
@@ -408,10 +407,6 @@ public class AdminService : IAdminService
         if (semesterDto.EndDate <= semesterDto.StartDate)
             throw new ValidateException("EndDate must be greater than StartDate.");
 
-        // Check the count of existing semesters
-        var existingSemestersCount = await _context.Semesters.CountAsync();
-        if (existingSemestersCount >= 2) throw new ValidateException("Cannot create more than two semesters.");
-
         var semester = new Semester
         {
             Name = semesterDto.Name,
@@ -433,15 +428,6 @@ public class AdminService : IAdminService
         var semester = await _context.Semesters.FindAsync(semesterId);
         if (semester == null) throw new ValidateException("Semester not found.");
 
-        // Assuming you want to keep the name unique,
-        // check if the updated name is already taken by another semester.
-        if (!string.Equals(semester.Name, semesterDto.Name, StringComparison.OrdinalIgnoreCase))
-        {
-            var nameExists = await _context.Semesters
-                .AnyAsync(s => s.Name == semesterDto.Name);
-            if (nameExists) throw new ValidateException("A semester with the same name already exists.");
-        }
-
         if (semesterDto.StartDate >= semesterDto.EndDate)
             throw new ValidateException("StartDate must be before EndDate.");
 
@@ -454,7 +440,7 @@ public class AdminService : IAdminService
 
         return semester;
     }
-
+    
     public async Task<bool> DeleteSemesterAsync(int semesterId)
     {
         var semester = await _context.Semesters.FindAsync(semesterId);
