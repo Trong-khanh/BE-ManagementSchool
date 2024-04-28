@@ -20,14 +20,12 @@ public class AdminService : IAdminService
     {
         _context = context;
     }
-
     public class ValidateException : Exception
     {
         public ValidateException(string message) : base(message)
         {
         }
     }
-
     public bool IsValidName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -42,57 +40,92 @@ public class AdminService : IAdminService
     }
 
     public async Task<Student> AddStudentWithParentAsync(StudentDtos studentDto)
+{
+    // Validate inputs
+    IsValidName(studentDto.FullName);
+    IsValidName(studentDto.ParentName); // Make sure the parent's name is also valid
+
+    using (var transaction = await _context.Database.BeginTransactionAsync())
     {
-        // Validate inputs
-        IsValidName(studentDto.FullName);
-        IsValidName(studentDto.ParentName); // Make sure the parent's name is also valid
-
-        using (var transaction = await _context.Database.BeginTransactionAsync())
+        try
         {
-            try
+            // Check if the parent already exists by name or some unique identifier
+            var parent = await _context.Parents.FirstOrDefaultAsync(p => p.ParentName == studentDto.ParentName);
+            
+            // If the parent doesn't exist, create and add the new parent
+            if (parent == null)
             {
-                // Check if the parent already exists by name or some unique identifier
-                var parent = await _context.Parents
-                    .FirstOrDefaultAsync(p => p.ParentName == studentDto.ParentName);
-
-                // If the parent doesn't exist, create and add the new parent
-                if (parent == null)
+                parent = new Parent
                 {
-                    parent = new Parent
-                    {
-                        ParentName = studentDto.ParentName
-                    };
-                    _context.Parents.Add(parent);
-                    await _context.SaveChangesAsync(); // Save to get the new ParentId
-                }
-
-                // Create and add the student with the ParentId from the existing/new parent
-                var student = new Student
-                {
-                    FullName = studentDto.FullName,
-                    Address = studentDto.Address,
-                    ClassId = await _context.Classes
-                        .Where(c => c.ClassName == studentDto.ClassName)
-                        .Select(c => c.ClassId)
-                        .FirstOrDefaultAsync(),
-                    ParentId = parent.ParentId
+                    ParentName = studentDto.ParentName
                 };
-
-                _context.Students.Add(student);
-                await _context.SaveChangesAsync();
-
-                // Commit transaction if all commands succeed
-                await transaction.CommitAsync();
-
-                return student;
+                _context.Parents.Add(parent);
+                await _context.SaveChangesAsync(); // Save to get the new ParentId
             }
-            catch (Exception ex)
+
+            // Check if the AcademicYear provided exists in Semester
+            var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.AcademicYear == studentDto.AcademicYear);
+            if (semester == null)
             {
-                // Rollback the transaction if any exception occurs
-                await transaction.RollbackAsync();
-                throw new ValidateException($"An error occurred while adding the student and parent: {ex.Message}");
+                throw new ValidateException("Invalid AcademicYear provided.");
             }
+
+            // Create and add the student with the ParentId from the existing/new parent
+            var student = new Student
+            {
+                FullName = studentDto.FullName,
+                Address = studentDto.Address,
+                ClassId = await _context.Classes.Where(c => c.ClassName == studentDto.ClassName)
+                            .Select(c => c.ClassId)
+                            .FirstOrDefaultAsync(),
+                ParentId = parent.ParentId,
+                AcademicYear = studentDto.AcademicYear 
+            };
+
+            _context.Students.Add(student);
+            await _context.SaveChangesAsync();
+
+            // Commit transaction if all commands succeed
+            await transaction.CommitAsync();
+
+            return student;
         }
+        catch (Exception ex)
+        {
+            // Rollback the transaction if any exception occurs
+            await transaction.RollbackAsync();
+            throw new ValidateException($"An error occurred while adding the student and parent: {ex.Message}");
+        }
+    }
+}
+
+    public async Task<Student> UpdateStudentAsync(int studentId, StudentDtos studentDto)
+    {
+        var student = await _context.Students.Include(s => s.Parent)
+            .FirstOrDefaultAsync(s => s.StudentId == studentId);
+        if (student == null) throw new ValidateException("Student not found.");
+
+        // Update student details
+        student.FullName = studentDto.FullName;
+        student.Address = studentDto.Address;
+        student.ClassId = await _context.Classes.Where(c => c.ClassName == studentDto.ClassName)
+            .Select(c => c.ClassId)
+            .FirstOrDefaultAsync();
+
+        // Check if the AcademicYear provided exists in Semester
+        var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.AcademicYear == studentDto.AcademicYear);
+        if (semester == null)
+        {
+            throw new ValidateException("Invalid AcademicYear provided.");
+        }
+
+        student.AcademicYear = studentDto.AcademicYear; // Update AcademicYear of Student
+
+        // Update parent details
+        student.Parent.ParentName = studentDto.ParentName;
+
+        await _context.SaveChangesAsync();
+        return student;
     }
 
     public async Task<bool> DeleteStudentAsync(int studentId)
@@ -130,27 +163,9 @@ public class AdminService : IAdminService
             {
                 // Rollback the transaction if any exception occurs
                 await transaction.RollbackAsync();
-                throw; // or log the exception as needed
+                throw new ValidateException($"Student is deleted or does not exist: {ex.Message}");
             }
         }
-    }
-
-
-    public async Task<Student> UpdateStudentAsync(int studentId, StudentDtos studentDto)
-    {
-        var student = await _context.Students.Include(s => s.Parent)
-            .FirstOrDefaultAsync(s => s.StudentId == studentId);
-        if (student == null) throw new ValidateException("Student not found.");
-
-        // Update student and parent details
-        student.FullName = studentDto.FullName;
-        student.Address = studentDto.Address;
-        student.ClassId = await _context.Classes.Where(c => c.ClassName == studentDto.ClassName)
-            .Select(c => c.ClassId).FirstOrDefaultAsync();
-        student.Parent.ParentName = studentDto.ParentName;
-
-        await _context.SaveChangesAsync();
-        return student;
     }
 
     public async Task<IEnumerable<Student>> GetStudentsByClassAsync(string className)
@@ -171,8 +186,6 @@ public class AdminService : IAdminService
             .Where(s => s.ClassId == classInDb.ClassId)
             .ToListAsync();
     }
-
-
 
     public async Task<IEnumerable<Student>> GetStudentsBySchoolYearAsync(string YearName)
     {
@@ -231,7 +244,6 @@ public class AdminService : IAdminService
             SubjectName = subject.SubjectName
         };
     }
-
 
     public async Task<bool> DeleteTeacherAsync(int teacherId)
     {
@@ -328,7 +340,7 @@ public class AdminService : IAdminService
             SubjectName = t.Subject.SubjectName
         });
     }
-    
+
     public async Task AssignTeacherToClassAsync(TeacherClassAssignmentDto assignmentDto)
     {
         // Find the teacher by full name and email
@@ -357,7 +369,7 @@ public class AdminService : IAdminService
         _context.TeacherClasses.Add(teacherClass);
         await _context.SaveChangesAsync();
     }
-    
+
     public async Task<List<TeacherClassAssignmentDto>> GetTeacherClassAssignmentsAsync()
     {
         return await _context.TeacherClasses
@@ -371,31 +383,24 @@ public class AdminService : IAdminService
             })
             .ToListAsync();
     }
+
     public async Task<Semester> AddSemesterAsync(SemesterDto semesterDto)
     {
-        if (semesterDto == null)
-        {
-            throw new ValidateException("The semesterDto field is required.");
-        }
+        if (semesterDto == null) throw new ValidateException("The semesterDto field is required.");
 
         if (semesterDto.EndDate <= semesterDto.StartDate)
-        {
             throw new ValidateException("EndDate must be greater than StartDate.");
-        }
 
         // Check the count of existing semesters
         var existingSemestersCount = await _context.Semesters.CountAsync();
-        if (existingSemestersCount >= 2)
-        {
-            throw new ValidateException("Cannot create more than two semesters.");
-        }
+        if (existingSemestersCount >= 2) throw new ValidateException("Cannot create more than two semesters.");
 
         var semester = new Semester
         {
             Name = semesterDto.Name,
             StartDate = semesterDto.StartDate,
             EndDate = semesterDto.EndDate,
-            AcademicYear = semesterDto.AcademicYear 
+            AcademicYear = semesterDto.AcademicYear
         };
 
         _context.Semesters.Add(semester);
@@ -403,18 +408,13 @@ public class AdminService : IAdminService
 
         return semester;
     }
+
     public async Task<Semester> UpdateSemesterAsync(int semesterId, SemesterDto semesterDto)
     {
-        if (semesterDto == null)
-        {
-            throw new ValidateException("The semesterDto object must be provided.");
-        }
+        if (semesterDto == null) throw new ValidateException("The semesterDto object must be provided.");
 
         var semester = await _context.Semesters.FindAsync(semesterId);
-        if (semester == null)
-        {
-            throw new ValidateException("Semester not found.");
-        }
+        if (semester == null) throw new ValidateException("Semester not found.");
 
         // Assuming you want to keep the name unique,
         // check if the updated name is already taken by another semester.
@@ -422,21 +422,16 @@ public class AdminService : IAdminService
         {
             var nameExists = await _context.Semesters
                 .AnyAsync(s => s.Name == semesterDto.Name);
-            if (nameExists)
-            {
-                throw new ValidateException("A semester with the same name already exists.");
-            }
+            if (nameExists) throw new ValidateException("A semester with the same name already exists.");
         }
 
         if (semesterDto.StartDate >= semesterDto.EndDate)
-        {
             throw new ValidateException("StartDate must be before EndDate.");
-        }
 
         semester.Name = semesterDto.Name;
         semester.StartDate = semesterDto.StartDate;
         semester.EndDate = semesterDto.EndDate;
-        semester.AcademicYear = semesterDto.AcademicYear; 
+        semester.AcademicYear = semesterDto.AcademicYear;
 
         await _context.SaveChangesAsync();
 
@@ -446,10 +441,7 @@ public class AdminService : IAdminService
     public async Task<bool> DeleteSemesterAsync(int semesterId)
     {
         var semester = await _context.Semesters.FindAsync(semesterId);
-        if (semester == null)
-        {
-            return false;
-        }
+        if (semester == null) return false;
 
         _context.Semesters.Remove(semester);
         await _context.SaveChangesAsync();
@@ -465,10 +457,7 @@ public class AdminService : IAdminService
     public async Task<Semester> GetSemesterByIdAsync(int semesterId)
     {
         var semester = await _context.Semesters.FindAsync(semesterId);
-        if (semester == null)
-        {
-            throw new ValidateException("Semester not found.");
-        }
+        if (semester == null) throw new ValidateException("Semester not found.");
 
         return semester;
     }
@@ -478,6 +467,6 @@ public class AdminService : IAdminService
         return await _context.Students
             .Include(s => s.Class) // Include the related class
             .Include(s => s.Parent) // Include the related parent
-            .ToListAsync();    
+            .ToListAsync();
     }
 }

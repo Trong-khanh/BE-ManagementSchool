@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ManagementSchool.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240427173132_db")]
+    [Migration("20240428023747_db")]
     partial class db
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -290,14 +290,9 @@ namespace ManagementSchool.Migrations
                     b.Property<int>("SemesterId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("StudentId")
-                        .HasColumnType("int");
-
                     b.HasKey("ClassId", "SemesterId");
 
                     b.HasIndex("SemesterId");
-
-                    b.HasIndex("StudentId");
 
                     b.ToTable("ClassSemesters");
                 });
@@ -444,6 +439,10 @@ namespace ManagementSchool.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudentId"), 1L, 1);
+
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -687,28 +686,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "9dfce228-cd65-44e9-9ad0-9d7e351cc823",
+                            Id = "20e36968-259c-4334-851b-25fd6739c930",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "d274e239-6b78-49bf-99e6-d07997faf959",
+                            Id = "9f104c4e-a9fc-4c8d-beb8-ff23b556477e",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "c95b6f0e-a78e-4951-a616-88e12145093c",
+                            Id = "79179ec1-128f-4484-91e1-e67fcf266c89",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "03c9be8e-ebae-494a-a89d-ec5d5e3b101f",
+                            Id = "e48bf3f5-c226-40bd-90a0-a766e43ba7a5",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
@@ -943,10 +942,6 @@ namespace ManagementSchool.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ManagementSchool.Entities.Student", null)
-                        .WithMany("ClassSemesters")
-                        .HasForeignKey("StudentId");
-
                     b.Navigation("Class");
 
                     b.Navigation("Semester");
@@ -1172,8 +1167,6 @@ namespace ManagementSchool.Migrations
 
             modelBuilder.Entity("ManagementSchool.Entities.Student", b =>
                 {
-                    b.Navigation("ClassSemesters");
-
                     b.Navigation("Scores");
 
                     b.Navigation("StudentSubjectScores");
