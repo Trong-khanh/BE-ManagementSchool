@@ -53,22 +53,27 @@ public class AdminController : ControllerBase
         }
     }
 
-    [HttpGet("GetStudentsByClass/{className}")]
-    public async Task<IActionResult> GetStudentsByClass(string className)
+    [HttpGet("GetStudentsByClass/{className}/{academicYear}")]
+    public async Task<IActionResult> GetStudentsByClass(string className, string academicYear)
     {
         try
         {
             if (string.IsNullOrWhiteSpace(className))
                 return BadRequest("Class name cannot be empty.");
 
-            var students = await _adminService.GetStudentsByClassAsync(className);
+            var students = await _adminService.GetStudentsByClassAsync(className, academicYear);
             return Ok(students);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
+
 
     [HttpGet("GetStudentsBySchoolYear/{yearName}")]
     public async Task<IActionResult> GetStudentsBySchoolYear(string yearName)

@@ -168,7 +168,7 @@ public class AdminService : IAdminService
         }
     }
 
-    public async Task<IEnumerable<Student>> GetStudentsByClassAsync(string className)
+    public async Task<IEnumerable<Student>> GetStudentsByClassAsync(string className, string academicYear)
     {
         // Decode the className in case it was URL-encoded.
         className = WebUtility.UrlDecode(className);
@@ -176,16 +176,33 @@ public class AdminService : IAdminService
         if (string.IsNullOrWhiteSpace(className))
             throw new ArgumentException("Class name cannot be empty.");
 
+        if (string.IsNullOrWhiteSpace(academicYear))
+            throw new ArgumentException("Academic year cannot be empty.");
+
+        // Find the class in the database.
         var classInDb = await _context.Classes
             .FirstOrDefaultAsync(c => c.ClassName == className);
 
+        // If the class is not found, throw an exception.
         if (classInDb == null)
             throw new ArgumentException($"Class '{className}' not found.");
 
-        return await _context.Students
-            .Where(s => s.ClassId == classInDb.ClassId)
+        // Find the students in the specified class and academic year.
+        var students = await _context.Students
+            .Where(s => s.ClassId == classInDb.ClassId && s.AcademicYear == academicYear)
             .ToListAsync();
+
+        // If no students are found for the specified class and academic year,
+        // you may choose to handle this case differently (e.g., return an empty list, throw an exception, etc.).
+        if (students.Count == 0)
+        {
+            // Here, I'm throwing an exception to indicate that no students were found for the specified criteria.
+            throw new Exception($"No students found for class '{className}' in academic year '{academicYear}'.");
+        }
+
+        return students;
     }
+
 
     public async Task<IEnumerable<Student>> GetStudentsBySchoolYearAsync(string YearName)
     {
