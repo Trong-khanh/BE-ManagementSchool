@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ManagementSchool.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240428163625_db")]
+    [Migration("20240428180336_db")]
     partial class db
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -690,28 +690,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b9b48ce3-78d2-4a3f-b36a-1e0c0198f954",
+                            Id = "b3470635-5621-4c0c-982a-ab666bdd8d99",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "cfd8c2ca-fd30-44fe-b5d5-4233f8a25fc5",
+                            Id = "553773fc-b517-474f-94a4-cc179eccbc57",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "41b0a0ca-8ab4-4056-8e89-3f655c436d96",
+                            Id = "2b436121-4052-4466-8f23-4a42050d0bb6",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "b87cba07-c445-4909-ac10-ddc0fb8aed9c",
+                            Id = "0294f562-4382-4d58-9b2e-5a25fe48eb10",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"

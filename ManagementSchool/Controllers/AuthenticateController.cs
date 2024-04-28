@@ -46,46 +46,59 @@ public class AuthenticateController : ControllerBase
 
     [HttpPost]
     public async Task<IActionResult> Register([FromBody] RegisterUser registerUser, string role)
+{
+    // Check if user already exists
+    var userExist = await _userManager.FindByNameAsync(registerUser.Email);
+    if (userExist != null)
+        return StatusCode(StatusCodes.Status403Forbidden,
+            new Response { Status = "Error", Message = "User already exists." });
+
+    // Check if the role is 'Admin' and ensure only one admin exists
+    if (role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
     {
-        // check user exist or not
-        var userExsit = await _userManager.FindByNameAsync(registerUser.Email);
-        if (userExsit != null)
+        var admins = await _userManager.GetUsersInRoleAsync("Admin");
+        if (admins.Count > 0)
+        {
             return StatusCode(StatusCodes.Status403Forbidden,
-                new Response { Status = "Error", Message = "User already exist" });
-        // Add the user in db
-        IdentityUser user = new()
+                new Response { Status = "Error", Message = "An admin account already exists. No additional admin accounts can be created." });
+        }
+    }
+
+    // Proceed if role exists
+    if (await _roleManager.RoleExistsAsync(role))
+    {
+        IdentityUser user = new IdentityUser
         {
             Email = registerUser.Email,
             SecurityStamp = Guid.NewGuid().ToString(),
             UserName = registerUser.UserName,
         };
 
-        if (await _roleManager.RoleExistsAsync(role))
-        {
-            var result = await _userManager.CreateAsync(user, registerUser.Password);
-            if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new Response { Status = "Error", Message = "User failed to create" });
-
-            //Add roel to user
-            await _userManager.AddToRoleAsync(user, role);
-            // Add token to verify email
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var confirmationslink = Url.Action(nameof(ConfirmEmail), "Authenticate",
-                new { token, email = user.Email }, Request.Scheme);
-            var message = new Message(new string[] { user.Email }, "Email Confirmation", confirmationslink);
-            _emailService.SendEmail(message);
-
-            return StatusCode(StatusCodes.Status200OK,
-                new Response
-                    { Status = "Success", Message = $"User created & Email Sent To {user.Email} Successfully" });
-        }
-        else
-        {
+        var result = await _userManager.CreateAsync(user, registerUser.Password);
+        if (!result.Succeeded)
             return StatusCode(StatusCodes.Status500InternalServerError,
-                new Response { Status = "Error", Message = "Role does not exist" });
-        }
+                new Response { Status = "Error", Message = "User creation failed." });
+
+        // Add role to user
+        await _userManager.AddToRoleAsync(user, role);
+
+        // Generate and send email confirmation token
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var confirmationLink = Url.Action(nameof(ConfirmEmail), "Authenticate",
+            new { token, email = user.Email }, Request.Scheme);
+        var message = new Message(new string[] { user.Email }, "Email Confirmation", confirmationLink);
+        _emailService.SendEmail(message);
+
+        return StatusCode(StatusCodes.Status200OK,
+            new Response { Status = "Success", Message = $"User created and email confirmation sent to {user.Email} successfully." });
     }
+    else
+    {
+        return StatusCode(StatusCodes.Status500InternalServerError,
+            new Response { Status = "Error", Message = "Role does not exist." });
+    }
+}
+
 
     [HttpGet("ConfirmEmail")]
     public async Task<IActionResult> ConfirmEmail(string token, string email)
