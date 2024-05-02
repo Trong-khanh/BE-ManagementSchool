@@ -576,6 +576,39 @@ namespace ManagementSchool.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ManagementSchool.Entities.SummaryOfYear", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"), 1L, 1);
+
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Classification")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FinalGrade")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("SummariesOfYear");
+                });
+
             modelBuilder.Entity("ManagementSchool.Entities.Teacher", b =>
                 {
                     b.Property<int>("TeacherId")
@@ -688,28 +721,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b3470635-5621-4c0c-982a-ab666bdd8d99",
+                            Id = "651da878-22ea-443a-b09e-9c1075b8caab",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "553773fc-b517-474f-94a4-cc179eccbc57",
+                            Id = "e96d639c-155b-4f61-a763-59f5a5406b31",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "2b436121-4052-4466-8f23-4a42050d0bb6",
+                            Id = "693cd81d-6ab4-43c8-8aa3-8005cf316853",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "0294f562-4382-4d58-9b2e-5a25fe48eb10",
+                            Id = "efcadb07-d163-4a9d-80bf-8cabe38ae7f6",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
@@ -899,7 +932,7 @@ namespace ManagementSchool.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("AnnualScore")
+                    b.Property<double?>("AnnualScore")
                         .HasColumnType("float");
 
                     b.Property<double>("Semester1Score")
@@ -1034,6 +1067,17 @@ namespace ManagementSchool.Migrations
                     b.HasOne("ManagementSchool.Entities.Student", null)
                         .WithMany("Subjects")
                         .HasForeignKey("StudentId");
+                });
+
+            modelBuilder.Entity("ManagementSchool.Entities.SummaryOfYear", b =>
+                {
+                    b.HasOne("ManagementSchool.Entities.Student", "Student")
+                        .WithMany("SummariesOfYear")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.Teacher", b =>
@@ -1180,6 +1224,8 @@ namespace ManagementSchool.Migrations
                     b.Navigation("StudentSubjects");
 
                     b.Navigation("Subjects");
+
+                    b.Navigation("SummariesOfYear");
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.Subject", b =>

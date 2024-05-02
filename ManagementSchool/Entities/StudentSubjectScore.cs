@@ -9,6 +9,6 @@ public class StudentSubjectScore
     public Subject Subject { get; set; }
     public double Semester1Score { get; set; }
     public double Semester2Score { get; set; }
-    public double AnnualScore { get; set; }
+    public double ? AnnualScore { get; set; }
     public string AcademicYear { get; set; }
 }

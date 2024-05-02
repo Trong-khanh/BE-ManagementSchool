@@ -13,7 +13,6 @@ namespace ManagementSchool.Controllers;
 [ApiController]
 public class AdminController : ControllerBase
 {
-    
     private readonly IAdminService _adminService;
 
     public AdminController(IAdminService adminService)
@@ -21,7 +20,7 @@ public class AdminController : ControllerBase
         _adminService = adminService;
     }
 
-    
+
     // START CRUD STUDENT 
 
     [HttpPost("AddStudent")]
@@ -74,7 +73,6 @@ public class AdminController : ControllerBase
         }
     }
 
-
     [HttpGet("GetStudentsBySchoolYear/{yearName}")]
     public async Task<IActionResult> GetStudentsBySchoolYear(string yearName)
     {
@@ -95,7 +93,7 @@ public class AdminController : ControllerBase
     [HttpGet("getaAllStudents")]
     public async Task<IActionResult> GetAllStudents()
     {
-        return  Ok(await _adminService.GetAllStudentsAsync());
+        return Ok(await _adminService.GetAllStudentsAsync());
     }
 
     // END CRUD STUDENT 
@@ -196,12 +194,12 @@ public class AdminController : ControllerBase
     }
 
     // END CRUD TEACHER
-    
+
     //====================================================================================================
     //====================================================================================================
-    
+
     // ASSIGN TEACHER TO CLASS
-    
+
     [HttpPost("AssignTeacherToClass")]
     public async Task<IActionResult> AssignTeacherToClass([FromBody] TeacherClassAssignmentDto assignmentDto)
     {
@@ -219,7 +217,7 @@ public class AdminController : ControllerBase
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
-    
+
     [HttpGet("GetTeacherClassAssignments")]
     public async Task<IActionResult> GetTeacherClassAssignments()
     {
@@ -233,7 +231,7 @@ public class AdminController : ControllerBase
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
-    
+
     [HttpPost("AddSemester")]
     public async Task<IActionResult> AddSemester([FromBody] SemesterDto semesterDto)
     {
@@ -266,10 +264,7 @@ public class AdminController : ControllerBase
     public async Task<IActionResult> DeleteSemester(int semesterId)
     {
         var success = await _adminService.DeleteSemesterAsync(semesterId);
-        if (!success)
-        {
-            return NotFound("Semester not found.");
-        }
+        if (!success) return NotFound("Semester not found.");
         return Ok();
     }
 
@@ -293,4 +288,25 @@ public class AdminController : ControllerBase
             return NotFound(ex.Message);
         }
     }
+    
+    [HttpPost("calculate-grades")]
+    public async Task<IActionResult> CalculateFinalGrades([FromQuery] string className, [FromQuery] string academicYear)
+    {
+        if (string.IsNullOrWhiteSpace(className) || string.IsNullOrWhiteSpace(academicYear))
+        {
+            return BadRequest("Both class name and academic year are required.");
+        }
+
+        try
+        {
+            await _adminService.CalculateAndSaveFinalGradesAsync(className, academicYear);
+            return Ok("Final grades calculated and saved successfully.");
+        }
+        catch (System.Exception ex)
+        {
+            // Log the exception details for debugging purposes
+            return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
+    }
+    
 }

@@ -20,12 +20,14 @@ public class AdminService : IAdminService
     {
         _context = context;
     }
+
     public class ValidateException : Exception
     {
         public ValidateException(string message) : base(message)
         {
         }
     }
+
     public bool IsValidName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -40,64 +42,62 @@ public class AdminService : IAdminService
     }
 
     public async Task<Student> AddStudentWithParentAsync(StudentDtos studentDto)
-{
-    // Validate inputs
-    IsValidName(studentDto.FullName);
-    IsValidName(studentDto.ParentName); // Make sure the parent's name is also valid
-
-    using (var transaction = await _context.Database.BeginTransactionAsync())
     {
-        try
+        // Validate inputs
+        IsValidName(studentDto.FullName);
+        IsValidName(studentDto.ParentName); // Make sure the parent's name is also valid
+
+        using (var transaction = await _context.Database.BeginTransactionAsync())
         {
-            // Check if the parent already exists by name or some unique identifier
-            var parent = await _context.Parents.FirstOrDefaultAsync(p => p.ParentName == studentDto.ParentName);
-            
-            // If the parent doesn't exist, create and add the new parent
-            if (parent == null)
+            try
             {
-                parent = new Parent
+                // Check if the parent already exists by name or some unique identifier
+                var parent = await _context.Parents.FirstOrDefaultAsync(p => p.ParentName == studentDto.ParentName);
+
+                // If the parent doesn't exist, create and add the new parent
+                if (parent == null)
                 {
-                    ParentName = studentDto.ParentName
+                    parent = new Parent
+                    {
+                        ParentName = studentDto.ParentName
+                    };
+                    _context.Parents.Add(parent);
+                    await _context.SaveChangesAsync(); // Save to get the new ParentId
+                }
+
+                // Check if the AcademicYear provided exists in Semester
+                var semester =
+                    await _context.Semesters.FirstOrDefaultAsync(s => s.AcademicYear == studentDto.AcademicYear);
+                if (semester == null) throw new ValidateException("Invalid AcademicYear provided.");
+
+                // Create and add the student with the ParentId from the existing/new parent
+                var student = new Student
+                {
+                    FullName = studentDto.FullName,
+                    Address = studentDto.Address,
+                    ClassId = await _context.Classes.Where(c => c.ClassName == studentDto.ClassName)
+                        .Select(c => c.ClassId)
+                        .FirstOrDefaultAsync(),
+                    ParentId = parent.ParentId,
+                    AcademicYear = studentDto.AcademicYear
                 };
-                _context.Parents.Add(parent);
-                await _context.SaveChangesAsync(); // Save to get the new ParentId
+
+                _context.Students.Add(student);
+                await _context.SaveChangesAsync();
+
+                // Commit transaction if all commands succeed
+                await transaction.CommitAsync();
+
+                return student;
             }
-
-            // Check if the AcademicYear provided exists in Semester
-            var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.AcademicYear == studentDto.AcademicYear);
-            if (semester == null)
+            catch (Exception ex)
             {
-                throw new ValidateException("Invalid AcademicYear provided.");
+                // Rollback the transaction if any exception occurs
+                await transaction.RollbackAsync();
+                throw new ValidateException($"An error occurred while adding the student and parent: {ex.Message}");
             }
-
-            // Create and add the student with the ParentId from the existing/new parent
-            var student = new Student
-            {
-                FullName = studentDto.FullName,
-                Address = studentDto.Address,
-                ClassId = await _context.Classes.Where(c => c.ClassName == studentDto.ClassName)
-                            .Select(c => c.ClassId)
-                            .FirstOrDefaultAsync(),
-                ParentId = parent.ParentId,
-                AcademicYear = studentDto.AcademicYear 
-            };
-
-            _context.Students.Add(student);
-            await _context.SaveChangesAsync();
-
-            // Commit transaction if all commands succeed
-            await transaction.CommitAsync();
-
-            return student;
-        }
-        catch (Exception ex)
-        {
-            // Rollback the transaction if any exception occurs
-            await transaction.RollbackAsync();
-            throw new ValidateException($"An error occurred while adding the student and parent: {ex.Message}");
         }
     }
-}
 
     public async Task<Student> UpdateStudentAsync(int studentId, StudentDtos studentDto)
     {
@@ -114,10 +114,7 @@ public class AdminService : IAdminService
 
         // Check if the AcademicYear provided exists in Semester
         var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.AcademicYear == studentDto.AcademicYear);
-        if (semester == null)
-        {
-            throw new ValidateException("Invalid AcademicYear provided.");
-        }
+        if (semester == null) throw new ValidateException("Invalid AcademicYear provided.");
 
         student.AcademicYear = studentDto.AcademicYear; // Update AcademicYear of Student
 
@@ -195,14 +192,12 @@ public class AdminService : IAdminService
         // If no students are found for the specified class and academic year,
         // you may choose to handle this case differently (e.g., return an empty list, throw an exception, etc.).
         if (students.Count == 0)
-        {
             // Here, I'm throwing an exception to indicate that no students were found for the specified criteria.
             throw new Exception($"No students found for class '{className}' in academic year '{academicYear}'.");
-        }
 
         return students;
     }
-    
+
     public async Task<IEnumerable<Student>> GetStudentsBySchoolYearAsync(string YearName)
     {
         if (string.IsNullOrWhiteSpace(YearName))
@@ -440,7 +435,7 @@ public class AdminService : IAdminService
 
         return semester;
     }
-    
+
     public async Task<bool> DeleteSemesterAsync(int semesterId)
     {
         var semester = await _context.Semesters.FindAsync(semesterId);
@@ -472,4 +467,99 @@ public class AdminService : IAdminService
             .Include(s => s.Parent) // Include the related parent
             .ToListAsync();
     }
+
+    public async Task CalculateAndSaveFinalGradesAsync(string className, string academicYear)
+{
+    var students = await _context.Students
+        .Include(s => s.StudentSubjectScores)
+        .Where(s => s.Class.ClassName == className && s.AcademicYear == academicYear)
+        .ToListAsync();
+
+    if (!students.Any())
+    {
+        Console.WriteLine($"No students found for class {className} and academic year {academicYear}.");
+        return;
+    }
+
+    foreach (var student in students)
+    {
+        Console.WriteLine($"Processing student ID {student.StudentId}...");
+        var scores = student.StudentSubjectScores;
+
+        if (!scores.Any())
+        {
+            Console.WriteLine($"No scores found for student ID {student.StudentId}.");
+            continue;
+        }
+
+        double finalGrade = scores.Average(s => s.AnnualScore.HasValue ? s.AnnualScore.Value : 0);
+        bool hasAnyFail = scores.Any(s => s.AnnualScore.HasValue && s.AnnualScore.Value < 5);
+        bool hasAllAboveFive = scores.All(s => s.AnnualScore.HasValue && s.AnnualScore.Value >= 5);
+        bool hasAllAboveSixPointFive = scores.All(s => s.AnnualScore.HasValue && s.AnnualScore.Value >= 6.5);
+
+        string status = "Next Class";
+        string classification = "Bad";
+
+        if (finalGrade < 5)
+        {
+            status = "Resit";
+            classification = "Very Bad";
+        }
+        else if (finalGrade < 6.5)
+        {
+            if (hasAnyFail)
+            {
+                status = "Resit";
+                classification = "Very Bad";
+            }
+            else
+            {
+                status = "Next Class";
+                classification = "Bad";
+            }
+        }
+        else if (finalGrade < 8)
+        {
+            if (hasAllAboveFive)
+            {
+                status = "Next Class";
+                classification = "Good";
+            }
+            else
+            {
+                status = "Next Class";
+                classification = "Bad";
+            }
+        }
+        else if (finalGrade >= 8)
+        {
+            if (hasAllAboveSixPointFive)
+            {
+                status = "Next Class";
+                classification = "Very Good";
+            }
+            else
+            {
+                status = "Next Class";
+                classification = "Good";
+            }
+        }
+
+        var summary = new SummaryOfYear
+        {
+            StudentId = student.StudentId,
+            FinalGrade = (int)finalGrade,
+            Classification = classification,
+            Status = status,
+            AcademicYear = academicYear
+        };
+
+        _context.SummariesOfYear.Add(summary);
+        Console.WriteLine($"Summary created for student ID {student.StudentId}, Status: {summary.Status}, Classification: {summary.Classification}.");
+    }
+
+    await _context.SaveChangesAsync();
+    Console.WriteLine("Changes saved successfully.");
+}
+
 }

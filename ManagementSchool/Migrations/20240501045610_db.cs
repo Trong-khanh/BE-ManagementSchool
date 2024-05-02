@@ -312,6 +312,29 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SummariesOfYear",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FinalGrade = table.Column<int>(type: "int", nullable: false),
+                    Classification = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StudentId = table.Column<int>(type: "int", nullable: false),
+                    AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SummariesOfYear", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_SummariesOfYear_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "StudentId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ClassSubjects",
                 columns: table => new
                 {
@@ -403,7 +426,7 @@ namespace ManagementSchool.Migrations
                     SubjectId = table.Column<int>(type: "int", nullable: false),
                     Semester1Score = table.Column<double>(type: "float", nullable: false),
                     Semester2Score = table.Column<double>(type: "float", nullable: false),
-                    AnnualScore = table.Column<double>(type: "float", nullable: false),
+                    AnnualScore = table.Column<double>(type: "float", nullable: true),
                     AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -475,10 +498,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "0294f562-4382-4d58-9b2e-5a25fe48eb10", "4", "Parent", "PARENT" },
-                    { "2b436121-4052-4466-8f23-4a42050d0bb6", "3", "Teacher", "TEACHER" },
-                    { "553773fc-b517-474f-94a4-cc179eccbc57", "2", "Student", "STUDENT" },
-                    { "b3470635-5621-4c0c-982a-ab666bdd8d99", "1", "Admin", "ADMIN" }
+                    { "651da878-22ea-443a-b09e-9c1075b8caab", "1", "Admin", "ADMIN" },
+                    { "693cd81d-6ab4-43c8-8aa3-8005cf316853", "3", "Teacher", "TEACHER" },
+                    { "e96d639c-155b-4f61-a763-59f5a5406b31", "2", "Student", "STUDENT" },
+                    { "efcadb07-d163-4a9d-80bf-8cabe38ae7f6", "4", "Parent", "PARENT" }
                 });
 
             migrationBuilder.InsertData(
@@ -666,6 +689,11 @@ namespace ManagementSchool.Migrations
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_SummariesOfYear_StudentId",
+                table: "SummariesOfYear",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TeacherClasses_ClassId",
                 table: "TeacherClasses",
                 column: "ClassId");
@@ -715,6 +743,9 @@ namespace ManagementSchool.Migrations
 
             migrationBuilder.DropTable(
                 name: "StudentSubjectScores");
+
+            migrationBuilder.DropTable(
+                name: "SummariesOfYear");
 
             migrationBuilder.DropTable(
                 name: "TeacherClasses");
