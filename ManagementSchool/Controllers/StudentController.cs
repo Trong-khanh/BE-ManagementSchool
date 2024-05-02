@@ -2,7 +2,6 @@ using ManagementSchool.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-
 namespace ManagementSchool.Controllers;
 
 [Route("api/[controller]")]
@@ -28,10 +27,10 @@ public class StudentController : ControllerBase
 
             return Ok(new
             {
-                FullName = student.FullName,
-                ClassName = student.Class.ClassName,
-                Address = student.Address,
-                ParentName = student.Parent.ParentName
+                student.FullName,
+                student.Class.ClassName,
+                student.Address,
+                student.Parent.ParentName
             });
         }
         catch (Exception ex)

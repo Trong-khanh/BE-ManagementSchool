@@ -1,14 +1,9 @@
-using ManagementSchool.Dto;
-using ManagementSchool.Entities;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using ManagementSchool.Dto;
+using ManagementSchool.Entities;
 using ManagementSchool.Models;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ManagementSchool.Service;
 
@@ -19,26 +14,6 @@ public class AdminService : IAdminService
     public AdminService(ApplicationDbContext context)
     {
         _context = context;
-    }
-
-    public class ValidateException : Exception
-    {
-        public ValidateException(string message) : base(message)
-        {
-        }
-    }
-
-    public bool IsValidName(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ValidateException("Name cannot be empty.");
-
-        // Regex pattern for validating name (adjust according to your requirements)
-        var nameRegex = @"^[a-zA-Z\s]+$";
-        if (!Regex.IsMatch(name, nameRegex))
-            throw new ValidateException("Name contains invalid characters.");
-
-        return true;
     }
 
     public async Task<Student> AddStudentWithParentAsync(StudentDtos studentDto)
@@ -386,7 +361,7 @@ public class AdminService : IAdminService
         return await _context.TeacherClasses
             .Include(tc => tc.Teacher)
             .Include(tc => tc.Class)
-            .Select(tc => new TeacherClassAssignmentDto()
+            .Select(tc => new TeacherClassAssignmentDto
             {
                 TeacherFullName = tc.Teacher.Name,
                 TeacherEmail = tc.Teacher.Email,
@@ -469,97 +444,117 @@ public class AdminService : IAdminService
     }
 
     public async Task CalculateAndSaveFinalGradesAsync(string className, string academicYear)
-{
-    var students = await _context.Students
-        .Include(s => s.StudentSubjectScores)
-        .Where(s => s.Class.ClassName == className && s.AcademicYear == academicYear)
-        .ToListAsync();
-
-    if (!students.Any())
     {
-        Console.WriteLine($"No students found for class {className} and academic year {academicYear}.");
-        return;
-    }
+        var students = await _context.Students
+            .Include(s => s.StudentSubjectScores)
+            .Where(s => s.Class.ClassName == className && s.AcademicYear == academicYear)
+            .ToListAsync();
 
-    foreach (var student in students)
-    {
-        Console.WriteLine($"Processing student ID {student.StudentId}...");
-        var scores = student.StudentSubjectScores;
-
-        if (!scores.Any())
+        if (!students.Any())
         {
-            Console.WriteLine($"No scores found for student ID {student.StudentId}.");
-            continue;
+            Console.WriteLine($"No students found for class {className} and academic year {academicYear}.");
+            return;
         }
 
-        double finalGrade = scores.Average(s => s.AnnualScore.HasValue ? s.AnnualScore.Value : 0);
-        bool hasAnyFail = scores.Any(s => s.AnnualScore.HasValue && s.AnnualScore.Value < 5);
-        bool hasAllAboveFive = scores.All(s => s.AnnualScore.HasValue && s.AnnualScore.Value >= 5);
-        bool hasAllAboveSixPointFive = scores.All(s => s.AnnualScore.HasValue && s.AnnualScore.Value >= 6.5);
-
-        string status = "Next Class";
-        string classification = "Bad";
-
-        if (finalGrade < 5)
+        foreach (var student in students)
         {
-            status = "Resit";
-            classification = "Very Bad";
-        }
-        else if (finalGrade < 6.5)
-        {
-            if (hasAnyFail)
+            Console.WriteLine($"Processing student ID {student.StudentId}...");
+            var scores = student.StudentSubjectScores;
+
+            if (!scores.Any())
+            {
+                Console.WriteLine($"No scores found for student ID {student.StudentId}.");
+                continue;
+            }
+
+            var finalGrade = scores.Average(s => s.AnnualScore.HasValue ? s.AnnualScore.Value : 0);
+            var hasAnyFail = scores.Any(s => s.AnnualScore.HasValue && s.AnnualScore.Value < 5);
+            var hasAllAboveFive = scores.All(s => s.AnnualScore.HasValue && s.AnnualScore.Value >= 5);
+            var hasAllAboveSixPointFive = scores.All(s => s.AnnualScore.HasValue && s.AnnualScore.Value >= 6.5);
+
+            var status = "Next Class";
+            var classification = "Bad";
+
+            if (finalGrade < 5)
             {
                 status = "Resit";
                 classification = "Very Bad";
             }
-            else
+            else if (finalGrade < 6.5)
             {
-                status = "Next Class";
-                classification = "Bad";
+                if (hasAnyFail)
+                {
+                    status = "Resit";
+                    classification = "Very Bad";
+                }
+                else
+                {
+                    status = "Next Class";
+                    classification = "Bad";
+                }
             }
-        }
-        else if (finalGrade < 8)
-        {
-            if (hasAllAboveFive)
+            else if (finalGrade < 8)
             {
-                status = "Next Class";
-                classification = "Good";
+                if (hasAllAboveFive)
+                {
+                    status = "Next Class";
+                    classification = "Good";
+                }
+                else
+                {
+                    status = "Next Class";
+                    classification = "Bad";
+                }
             }
-            else
+            else if (finalGrade >= 8)
             {
-                status = "Next Class";
-                classification = "Bad";
+                if (hasAllAboveSixPointFive)
+                {
+                    status = "Next Class";
+                    classification = "Very Good";
+                }
+                else
+                {
+                    status = "Next Class";
+                    classification = "Good";
+                }
             }
-        }
-        else if (finalGrade >= 8)
-        {
-            if (hasAllAboveSixPointFive)
+
+            var summary = new SummaryOfYear
             {
-                status = "Next Class";
-                classification = "Very Good";
-            }
-            else
-            {
-                status = "Next Class";
-                classification = "Good";
-            }
+                StudentId = student.StudentId,
+                FinalGrade = (int)finalGrade,
+                Classification = classification,
+                Status = status,
+                AcademicYear = academicYear
+            };
+
+            _context.SummariesOfYear.Add(summary);
+            Console.WriteLine(
+                $"Summary created for student ID {student.StudentId}, Status: {summary.Status}, Classification: {summary.Classification}.");
         }
 
-        var summary = new SummaryOfYear
-        {
-            StudentId = student.StudentId,
-            FinalGrade = (int)finalGrade,
-            Classification = classification,
-            Status = status,
-            AcademicYear = academicYear
-        };
-
-        _context.SummariesOfYear.Add(summary);
-        Console.WriteLine($"Summary created for student ID {student.StudentId}, Status: {summary.Status}, Classification: {summary.Classification}.");
+        await _context.SaveChangesAsync();
+        Console.WriteLine("Changes saved successfully.");
     }
 
-    await _context.SaveChangesAsync();
-    Console.WriteLine("Changes saved successfully.");
-}
+    public bool IsValidName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ValidateException("Name cannot be empty.");
 
+        // Regex pattern for validating name (adjust according to your requirements)
+        var nameRegex = @"^[a-zA-Z\s]+$";
+        if (!Regex.IsMatch(name, nameRegex))
+            throw new ValidateException("Name contains invalid characters.");
+
+        return true;
+    }
+
+    public class ValidateException : Exception
+    {
+        public ValidateException(string message) : base(message)
+        {
+        }
+    }
 }

@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using ManagementSchool.Models;
 using ManagementSchool.Service;
+using ManagementSchool.Service.ParentService;
 using ManagementSchool.Service.RefreshToken;
 using ManagementSchool.Service.TeacherService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -41,7 +42,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.SaveToken = true;
     options.RequireHttpsMetadata = false;
-    options.TokenValidationParameters = new TokenValidationParameters()
+    options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
@@ -60,11 +61,13 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
+builder.Services.AddScoped<IParentService, ParentService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddAuthorization(options => {
+builder.Services.AddAuthorization(options =>
+{
     options.DefaultPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
@@ -98,10 +101,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    });
+    .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; });
 // builder.Services.AddControllers();
 
 builder.Services.AddCors(options =>
@@ -128,7 +128,6 @@ app.UseCors("AllowSpecificOrigin"); // Apply CORS before MVC or endpoint routing
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 
 app.MapControllers();

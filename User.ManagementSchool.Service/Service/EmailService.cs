@@ -1,5 +1,6 @@
 using MailKit.Net.Smtp;
 using MimeKit;
+using MimeKit.Text;
 using User.ManagementSchool.Service.Models;
 
 namespace User.ManagementSchool.Service.Service;
@@ -25,7 +26,7 @@ public class EmailService : IEmailService
         emailMessage.From.Add(new MailboxAddress("Email confirmation", _emailConfiguration.From));
         emailMessage.To.AddRange(message.To);
         emailMessage.Subject = message.Subject;
-        emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message.Content };
+        emailMessage.Body = new TextPart(TextFormat.Text) { Text = message.Content };
         return emailMessage;
     }
 
@@ -38,11 +39,6 @@ public class EmailService : IEmailService
             client.AuthenticationMechanisms.Remove("XOAUTH2");
             client.Authenticate(_emailConfiguration.Username, _emailConfiguration.Password);
             client.Send(mailMessage);
-        }
-        catch
-        {
-            //log an error message or throw an exception, or both.
-            throw;
         }
         finally
         {

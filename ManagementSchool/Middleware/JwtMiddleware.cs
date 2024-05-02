@@ -6,8 +6,8 @@ namespace ManagementSchool.Middleware;
 
 public class JwtMiddleware
 {
-    private readonly RequestDelegate _next;
     private readonly ILogger<JwtMiddleware> _logger;
+    private readonly RequestDelegate _next;
 
     public JwtMiddleware(RequestDelegate next, ILogger<JwtMiddleware> logger)
     {

@@ -1,10 +1,8 @@
 using ManagementSchool.Dto;
-using ManagementSchool.Entities;
 using ManagementSchool.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace ManagementSchool.Controllers;
 
@@ -288,25 +286,22 @@ public class AdminController : ControllerBase
             return NotFound(ex.Message);
         }
     }
-    
+
     [HttpPost("calculate-grades")]
     public async Task<IActionResult> CalculateFinalGrades([FromQuery] string className, [FromQuery] string academicYear)
     {
         if (string.IsNullOrWhiteSpace(className) || string.IsNullOrWhiteSpace(academicYear))
-        {
             return BadRequest("Both class name and academic year are required.");
-        }
 
         try
         {
             await _adminService.CalculateAndSaveFinalGradesAsync(className, academicYear);
             return Ok("Final grades calculated and saved successfully.");
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             // Log the exception details for debugging purposes
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
-    
 }

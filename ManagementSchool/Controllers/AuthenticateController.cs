@@ -14,25 +14,25 @@ using Newtonsoft.Json;
 using User.ManagementSchool.Service.Models;
 using User.ManagementSchool.Service.Service;
 
-
 namespace ManagementSchool.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 public class AuthenticateController : ControllerBase
 {
-    private readonly UserManager<IdentityUser> _userManager;
-    private readonly SignInManager<IdentityUser> _signInManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
-    private readonly TokenService _tokenService;
-    private readonly ILogger<AuthenticateController> _logger;
     private readonly ApplicationDbContext _context;
+    private readonly IEmailService _emailService;
+    private readonly ILogger<AuthenticateController> _logger;
+    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly SignInManager<IdentityUser> _signInManager;
+    private readonly TokenService _tokenService;
+    private readonly UserManager<IdentityUser> _userManager;
+
     public AuthenticateController(UserManager<IdentityUser> userManager,
         RoleManager<IdentityRole> roleManager, IEmailService emailService, IConfiguration configuration,
-        SignInManager<IdentityUser> signInManager, 
-        TokenService tokenService, ILogger<AuthenticateController> logger, ApplicationDbContext  context)
+        SignInManager<IdentityUser> signInManager,
+        TokenService tokenService, ILogger<AuthenticateController> logger, ApplicationDbContext context)
     {
         _userManager = userManager;
         _roleManager = roleManager;
@@ -46,58 +46,62 @@ public class AuthenticateController : ControllerBase
 
     [HttpPost]
     public async Task<IActionResult> Register([FromBody] RegisterUser registerUser, string role)
-{
-    // Check if user already exists
-    var userExist = await _userManager.FindByNameAsync(registerUser.Email);
-    if (userExist != null)
-        return StatusCode(StatusCodes.Status403Forbidden,
-            new Response { Status = "Error", Message = "User already exists." });
-
-    // Check if the role is 'Admin' and ensure only one admin exists
-    if (role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
     {
-        var admins = await _userManager.GetUsersInRoleAsync("Admin");
-        if (admins.Count > 0)
-        {
+        // Check if user already exists
+        var userExist = await _userManager.FindByNameAsync(registerUser.Email);
+        if (userExist != null)
             return StatusCode(StatusCodes.Status403Forbidden,
-                new Response { Status = "Error", Message = "An admin account already exists. No additional admin accounts can be created." });
-        }
-    }
+                new Response { Status = "Error", Message = "User already exists." });
 
-    // Proceed if role exists
-    if (await _roleManager.RoleExistsAsync(role))
-    {
-        IdentityUser user = new IdentityUser
+        // Check if the role is 'Admin' and ensure only one admin exists
+        if (role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
         {
-            Email = registerUser.Email,
-            SecurityStamp = Guid.NewGuid().ToString(),
-            UserName = registerUser.UserName,
-        };
+            var admins = await _userManager.GetUsersInRoleAsync("Admin");
+            if (admins.Count > 0)
+                return StatusCode(StatusCodes.Status403Forbidden,
+                    new Response
+                    {
+                        Status = "Error",
+                        Message = "An admin account already exists. No additional admin accounts can be created."
+                    });
+        }
 
-        var result = await _userManager.CreateAsync(user, registerUser.Password);
-        if (!result.Succeeded)
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                new Response { Status = "Error", Message = "User creation failed." });
+        // Proceed if role exists
+        if (await _roleManager.RoleExistsAsync(role))
+        {
+            var user = new IdentityUser
+            {
+                Email = registerUser.Email,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                UserName = registerUser.UserName
+            };
 
-        // Add role to user
-        await _userManager.AddToRoleAsync(user, role);
+            var result = await _userManager.CreateAsync(user, registerUser.Password);
+            if (!result.Succeeded)
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new Response { Status = "Error", Message = "User creation failed." });
 
-        // Generate and send email confirmation token
-        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var confirmationLink = Url.Action(nameof(ConfirmEmail), "Authenticate",
-            new { token, email = user.Email }, Request.Scheme);
-        var message = new Message(new string[] { user.Email }, "Email Confirmation", confirmationLink);
-        _emailService.SendEmail(message);
+            // Add role to user
+            await _userManager.AddToRoleAsync(user, role);
 
-        return StatusCode(StatusCodes.Status200OK,
-            new Response { Status = "Success", Message = $"User created and email confirmation sent to {user.Email} successfully." });
-    }
-    else
-    {
+            // Generate and send email confirmation token
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var confirmationLink = Url.Action(nameof(ConfirmEmail), "Authenticate",
+                new { token, email = user.Email }, Request.Scheme);
+            var message = new Message(new[] { user.Email }, "Email Confirmation", confirmationLink);
+            _emailService.SendEmail(message);
+
+            return StatusCode(StatusCodes.Status200OK,
+                new Response
+                {
+                    Status = "Success",
+                    Message = $"User created and email confirmation sent to {user.Email} successfully."
+                });
+        }
+
         return StatusCode(StatusCodes.Status500InternalServerError,
             new Response { Status = "Error", Message = "Role does not exist." });
     }
-}
 
 
     [HttpGet("ConfirmEmail")]
@@ -119,13 +123,10 @@ public class AuthenticateController : ControllerBase
     [HttpPost("Login")]
     public async Task<IActionResult> Login([FromBody] LoginUser loginUser)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        _logger.LogInformation("Attempting login for {User}",  loginUser.UserName);
-    
+        _logger.LogInformation("Attempting login for {User}", loginUser.UserName);
+
         var user = await _userManager.FindByNameAsync(loginUser.UserName);
         if (user == null)
         {
@@ -133,68 +134,65 @@ public class AuthenticateController : ControllerBase
             return Unauthorized(new { message = "Invalid login attempt." });
         }
 
-        var result = await _signInManager.PasswordSignInAsync(user, loginUser.Password, loginUser.RememberMe, lockoutOnFailure: false);
+        var result = await _signInManager.PasswordSignInAsync(user, loginUser.Password, loginUser.RememberMe, false);
         if (result.Succeeded)
         {
             _logger.LogInformation("Signin succeeded for {User}", loginUser.UserName);
-            var roles = await _userManager.GetRolesAsync(user); 
-            var accessToken = await _tokenService.GenerateAccessToken(user); 
-            var refreshToken = _tokenService.GenerateRefreshToken(user.Id, Guid.NewGuid().ToString()); 
+            var roles = await _userManager.GetRolesAsync(user);
+            var accessToken = await _tokenService.GenerateAccessToken(user);
+            var refreshToken = _tokenService.GenerateRefreshToken(user.Id, Guid.NewGuid().ToString());
             await SaveRefreshTokenAsync(refreshToken);
-            
+
             var userRole = roles.FirstOrDefault() ?? "User"; // Adjust based on your role logic
 
-            return Ok(new {
+            return Ok(new
+            {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken.Token,
                 User = JsonConvert.SerializeObject(user),
                 Role = userRole
             });
         }
-        else
-        {
-            _logger.LogWarning("Signin failed for {User}.", loginUser.UserName);
-            return Unauthorized(new { message = "Username or password is incorrect" });
-        }
+
+        _logger.LogWarning("Signin failed for {User}.", loginUser.UserName);
+        return Unauthorized(new { message = "Username or password is incorrect" });
     }
-    
+
     [HttpPost("refresh-token")]
-    public async Task<IActionResult> RefreshToken( RefreshTokenRequestDto request)
+    public async Task<IActionResult> RefreshToken(RefreshTokenRequestDto request)
     {
         var refreshToken = await _context.RefreshTokens
             .SingleOrDefaultAsync(rt => rt.Token == request.Token && !rt.IsRevoked);
-        if (refreshToken == null) {
-            return BadRequest(new { message = "Invalid refresh token." });
-        }
-        if (refreshToken.ExpiresUtc < DateTime.UtcNow) {
+        if (refreshToken == null) return BadRequest(new { message = "Invalid refresh token." });
+        if (refreshToken.ExpiresUtc < DateTime.UtcNow)
             return Unauthorized(new { message = "Refresh token has expired. Please log in again." });
-        }
         var user = await _userManager.FindByIdAsync(refreshToken.UserId);
-        if (user == null) {
-            return BadRequest(new { message = "User not found." });
-        }
+        if (user == null) return BadRequest(new { message = "User not found." });
         var newAccessToken = await _tokenService.GenerateAccessToken(user);
         _logger.LogInformation("Return new access token");
 
-        return Ok(new {
+        return Ok(new
+        {
             AccessToken = newAccessToken
         });
     }
-    
+
     private async Task SaveRefreshTokenAsync(RefreshToken refreshToken)
     {
         var existingToken = await _context.RefreshTokens
             .FirstOrDefaultAsync(rt => rt.UserId == refreshToken.UserId && !rt.IsRevoked);
 
-        if (existingToken != null) {
+        if (existingToken != null)
+        {
             existingToken.Token = refreshToken.Token;
             existingToken.IssuedUtc = refreshToken.IssuedUtc;
             existingToken.ExpiresUtc = refreshToken.ExpiresUtc;
             existingToken.JwtId = refreshToken.JwtId;
             existingToken.IsRevoked = refreshToken.IsRevoked;
-            existingToken.ReplacedByToken = null; 
+            existingToken.ReplacedByToken = null;
         }
-        else {
+        else
+        {
             await _context.RefreshTokens.AddAsync(refreshToken);
         }
 

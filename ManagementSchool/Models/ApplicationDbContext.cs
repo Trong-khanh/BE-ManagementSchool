@@ -126,12 +126,12 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .HasOne(sss => sss.Subject)
             .WithMany(sub => sub.StudentSubjectScores)
             .HasForeignKey(sss => sss.SubjectId);
-        
+
         // Configure one-to-many relationship between Student and SummaryOfYear
         modelBuilder.Entity<SummaryOfYear>()
-            .HasOne(sy => sy.Student)  // One Student
-            .WithMany(s => s.SummariesOfYear)  // Many Summaries
-            .HasForeignKey(sy => sy.StudentId);  // Foreign key in SummaryOfYear
+            .HasOne(sy => sy.Student) // One Student
+            .WithMany(s => s.SummariesOfYear) // Many Summaries
+            .HasForeignKey(sy => sy.StudentId); // Foreign key in SummaryOfYear
 
 
         // Seed date for grade

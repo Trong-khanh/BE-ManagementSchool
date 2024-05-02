@@ -6,5 +6,5 @@ public class StudentDtos
     public string Address { get; set; }
     public string ClassName { get; set; }
     public string ParentName { get; set; }
-    public string AcademicYear { get; set; } 
+    public string AcademicYear { get; set; }
 }
