@@ -26,6 +26,6 @@ public interface IAdminService
     Task<Semester> GetSemesterByIdAsync(int semesterId);
     Task<IEnumerable<Student>> GetAllStudentsAsync();
     Task CalculateAndSaveFinalGradesAsync(string className, string academicYear);
-   
+    Task<bool> UpgradeClassAsync(int oldClassId, string oldAcademicYear, int newClassId, string newAcademicYear);
 
 }

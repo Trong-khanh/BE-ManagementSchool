@@ -305,6 +305,30 @@ public class AdminController : ControllerBase
         }
     }
     
+    [HttpPost("UpgradeClass")]
+    public async Task<IActionResult> UpgradeClass([FromQuery] int oldClassId, [FromQuery] string oldAcademicYear, [FromQuery] int newClassId, [FromQuery] string newAcademicYear)
+    {
+        try
+        {
+            bool result = await _adminService.UpgradeClassAsync(oldClassId, oldAcademicYear, newClassId, newAcademicYear);
+            if (result)
+            {
+                return Ok("The student was next new class successfully .");
+            }
+            else
+            {
+                return BadRequest("The error occurred while upgrading the class. Please try agai.");
+            }
+        }
+        catch (AdminService.ValidateException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred in processing the request: {ex.Message}");
+        }
+    }
 
     
 

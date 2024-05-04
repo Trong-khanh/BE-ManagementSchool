@@ -538,6 +538,42 @@ public class AdminService : IAdminService
         Console.WriteLine("Changes saved successfully.");
     }
     
+    public async Task<bool> UpgradeClassAsync(int oldClassId, string oldAcademicYear, int newClassId, string newAcademicYear)
+    {
+        // Check new academic year exists
+        var semesterExists = await _context.Semesters.AnyAsync(s => s.AcademicYear == newAcademicYear);
+        if (!semesterExists)
+        {
+            throw new ValidateException("New academic year does not exist.");
+        }
+
+        var summaries = await _context.SummariesOfYear
+            .Include(s => s.Student)
+            .Where(s => s.Student.ClassId == oldClassId && s.AcademicYear == oldAcademicYear)
+            .ToListAsync();
+
+        if (summaries.Count == 0)
+        {
+            throw new ValidateException("Class or Academic Year does not exist.");
+        }
+
+        foreach (var summary in summaries)
+        {
+            if (summary.Status == "Next Class")
+            {
+                summary.Student.ClassId = newClassId;
+                summary.Student.AcademicYear = newAcademicYear;
+            }
+            else if (summary.Status == "Resit")
+            {
+                summary.Student.AcademicYear = newAcademicYear; 
+            }
+        }
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+    
     public bool IsValidName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
