@@ -1,4 +1,5 @@
 using ManagementSchool.Service;
+using ManagementSchool.Service.StudentService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,11 +9,11 @@ namespace ManagementSchool.Controllers;
 [ApiController]
 public class StudentController : ControllerBase
 {
-    private readonly IAdminService _adminService;
+    private readonly IStudentService _studentService;
 
-    public StudentController(IAdminService adminService)
+    public StudentController(IStudentService studentService)
     {
-        _adminService = adminService;
+        _studentService = studentService;
     }
 
     [Authorize(Roles = "Student")]
@@ -21,7 +22,7 @@ public class StudentController : ControllerBase
     {
         try
         {
-            var student = await _adminService.GetStudentByIdAsync(studentId);
+            var student = await _studentService.GetStudentByIdAsync(studentId);
             if (student == null)
                 return NotFound("Student not found.");
 

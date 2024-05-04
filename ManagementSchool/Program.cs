@@ -4,6 +4,7 @@ using ManagementSchool.Models;
 using ManagementSchool.Service;
 using ManagementSchool.Service.ParentService;
 using ManagementSchool.Service.RefreshToken;
+using ManagementSchool.Service.StudentService;
 using ManagementSchool.Service.TeacherService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -62,6 +63,7 @@ builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IParentService, ParentService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
