@@ -498,10 +498,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "651da878-22ea-443a-b09e-9c1075b8caab", "1", "Admin", "ADMIN" },
-                    { "693cd81d-6ab4-43c8-8aa3-8005cf316853", "3", "Teacher", "TEACHER" },
-                    { "e96d639c-155b-4f61-a763-59f5a5406b31", "2", "Student", "STUDENT" },
-                    { "efcadb07-d163-4a9d-80bf-8cabe38ae7f6", "4", "Parent", "PARENT" }
+                    { "25541304-ff52-4d3d-a02f-44a2883c78cf", "3", "Teacher", "TEACHER" },
+                    { "48ad8e5d-0aa4-4d62-892e-997634871539", "4", "Parent", "PARENT" },
+                    { "8095d28b-a6ad-4f86-91ab-cb4d3fd6763f", "2", "Student", "STUDENT" },
+                    { "f66ca0db-8df9-477c-af9a-35fb937c64b1", "1", "Admin", "ADMIN" }
                 });
 
             migrationBuilder.InsertData(

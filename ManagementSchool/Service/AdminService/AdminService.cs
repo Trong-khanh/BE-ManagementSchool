@@ -230,7 +230,6 @@ public class AdminService : IAdminService
             SubjectName = subject.SubjectName
         };
     }
-
     public async Task<bool> DeleteTeacherAsync(int teacherId)
     {
         var teacher = await _context.Teachers.FindAsync(teacherId);
@@ -242,7 +241,6 @@ public class AdminService : IAdminService
 
         return true;
     }
-
     public async Task<bool> DeleteTeacherByNameAsync(string teacherName)
     {
         var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Name == teacherName);
@@ -254,7 +252,6 @@ public class AdminService : IAdminService
 
         return true;
     }
-
     public async Task<TeacherDto?> UpdateTeacherAsync(int teacherId, TeacherDto teacherDto)
     {
         if (teacherDto == null)
@@ -292,22 +289,20 @@ public class AdminService : IAdminService
         };
         return result;
     }
-
-    public async Task<IEnumerable<TeacherDto>> GetAllTeachersAsync()
+    public async Task<IEnumerable<TeacherWithSubjectDto>> GetAllTeachersAsync()
     {
         var teachers = await _context.Teachers
             .Include(t => t.Subject)
             .ToListAsync();
 
-        return teachers.Select(t => new TeacherDto
-        {
+        return teachers.Select(t => new TeacherWithSubjectDto {
+            TeacherId = t.TeacherId,
             Name = t.Name,
             Email = t.Email,
             SubjectId = t.SubjectId,
             SubjectName = t.Subject.SubjectName
         });
     }
-
     public async Task<IEnumerable<TeacherDto>> GetTeachersBySubjectAsync(string subjectName)
     {
         if (string.IsNullOrWhiteSpace(subjectName))
@@ -326,7 +321,6 @@ public class AdminService : IAdminService
             SubjectName = t.Subject.SubjectName
         });
     }
-
     public async Task AssignTeacherToClassAsync(TeacherClassAssignmentDto assignmentDto)
     {
         // Find the teacher by full name and email
@@ -355,7 +349,6 @@ public class AdminService : IAdminService
         _context.TeacherClasses.Add(teacherClass);
         await _context.SaveChangesAsync();
     }
-
     public async Task<List<TeacherClassAssignmentDto>> GetTeacherClassAssignmentsAsync()
     {
         return await _context.TeacherClasses
@@ -369,7 +362,6 @@ public class AdminService : IAdminService
             })
             .ToListAsync();
     }
-
     public async Task<Semester> AddSemesterAsync(SemesterDto semesterDto)
     {
         if (semesterDto == null) throw new ValidateException("The semesterDto field is required.");
@@ -390,7 +382,6 @@ public class AdminService : IAdminService
 
         return semester;
     }
-
     public async Task<Semester> UpdateSemesterAsync(int semesterId, SemesterDto semesterDto)
     {
         if (semesterDto == null) throw new ValidateException("The semesterDto object must be provided.");

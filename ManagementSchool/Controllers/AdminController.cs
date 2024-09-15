@@ -172,8 +172,7 @@ public class AdminController : ControllerBase
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
-
-
+    
     [HttpGet("GetTeachersBySubject/{subjectName}")]
     public async Task<IActionResult> GetTeachersBySubject(string subjectName)
     {
@@ -229,7 +228,9 @@ public class AdminController : ControllerBase
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
-
+    
+    // START CRUD SEMESTER//
+    
     [HttpPost("AddSemester")]
     public async Task<IActionResult> AddSemester([FromBody] SemesterDto semesterDto)
     {
@@ -287,6 +288,7 @@ public class AdminController : ControllerBase
         }
     }
 
+    // END CRUD SEMESTER //
     [HttpPost("calculate-grades")]
     public async Task<IActionResult> CalculateFinalGrades([FromQuery] string className, [FromQuery] string academicYear)
     {
