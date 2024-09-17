@@ -229,6 +229,58 @@ public class AdminController : ControllerBase
         }
     }
     
+    [HttpPut("UpdateTeacherClassAssignment")]
+    public async Task<IActionResult> UpdateTeacherClassAssignment([FromBody] UpdateTeacherAssignmentDto assignmentDto)
+    {
+        try
+        {
+            await _adminService.UpdateTeacherClassAssignmentAsync(assignmentDto);
+            return Ok("Teacher's class assignment updated successfully.");
+        }
+        catch (AdminService.ValidateException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
+    }
+
+    [HttpDelete("DeleteTeacherFromClass")]
+    public async Task<IActionResult> DeleteTeacherFromClass([FromBody] TeacherClassAssignmentDto assignmentDto)
+    {
+        try
+        {
+            await _adminService.DeleteTeacherFromClassAsync(assignmentDto);
+            return Ok("Teacher removed from class successfully.");
+        }
+        catch (AdminService.ValidateException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
+    }
+
+    [HttpDelete("ResetAllTeacherClassAssignments")]
+    public async Task<IActionResult> ResetAllTeacherClassAssignments()
+    {
+        try
+        {
+            await _adminService.ResetAllTeacherClassAssignmentsAsync();
+            return Ok("All teacher-class assignments reset successfully.");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
+    }
+    
+    // END ASSIGN TEACHER TO CLASS
+    
     // START CRUD SEMESTER//
     
     [HttpPost("AddSemester")]

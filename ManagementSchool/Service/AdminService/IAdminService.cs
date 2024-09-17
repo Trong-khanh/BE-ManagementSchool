@@ -19,6 +19,9 @@ public interface IAdminService
     Task<IEnumerable<TeacherDto>> GetTeachersBySubjectAsync(string subjectName);
     Task AssignTeacherToClassAsync(TeacherClassAssignmentDto assignmentDto);
     Task<List<TeacherClassAssignmentDto>> GetTeacherClassAssignmentsAsync();
+    Task UpdateTeacherClassAssignmentAsync(UpdateTeacherAssignmentDto assignmentDto);
+    Task DeleteTeacherFromClassAsync(TeacherClassAssignmentDto assignmentDto);
+    Task ResetAllTeacherClassAssignmentsAsync();
     Task<Semester> AddSemesterAsync(SemesterDto semesterDto);
     Task<Semester> UpdateSemesterAsync(int semesterId, SemesterDto semesterDto);
     Task<bool> DeleteSemesterAsync(int semesterId);

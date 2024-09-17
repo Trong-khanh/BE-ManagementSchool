@@ -362,6 +362,66 @@ public class AdminService : IAdminService
             })
             .ToListAsync();
     }
+    
+    public async Task UpdateTeacherClassAssignmentAsync(UpdateTeacherAssignmentDto assignmentDto)
+    {
+        // Tìm giáo viên bằng tên và email
+        var teacher = await _context.Teachers
+            .Include(t => t.TeacherClasses)
+            .ThenInclude(tc => tc.Class)
+            .FirstOrDefaultAsync(t => t.Name == assignmentDto.TeacherFullName && t.Email == assignmentDto.TeacherEmail);
+    
+        if (teacher == null)
+            throw new ValidateException("Teacher not found.");
+
+        // Kiểm tra lớp mà giáo viên hiện đang được gán
+        var currentClassAssignment = teacher.TeacherClasses
+            .FirstOrDefault(tc => tc.Class.ClassName == assignmentDto.CurrentClassName);
+    
+        if (currentClassAssignment == null)
+            throw new ValidateException("Teacher is not assigned to this class.");
+
+        // Tìm lớp mới để gán cho giáo viên
+        var newClassEntity = await _context.Classes
+            .FirstOrDefaultAsync(c => c.ClassName == assignmentDto.NewClassName);
+    
+        if (newClassEntity == null)
+            throw new ValidateException("New class not found.");
+
+        // Cập nhật lớp cho giáo viên
+        currentClassAssignment.ClassId = newClassEntity.ClassId;
+
+        // Lưu thay đổi vào cơ sở dữ liệu
+        await _context.SaveChangesAsync();
+    }
+
+    
+    public async Task DeleteTeacherFromClassAsync(TeacherClassAssignmentDto assignmentDto)
+    {
+        var teacherClass = await _context.TeacherClasses
+            .Include(tc => tc.Teacher)
+            .Include(tc => tc.Class)
+            .FirstOrDefaultAsync(tc => tc.Teacher.Name == assignmentDto.TeacherFullName &&
+                                       tc.Teacher.Email == assignmentDto.TeacherEmail &&
+                                       tc.Class.ClassName == assignmentDto.ClassName);
+
+        if (teacherClass == null)
+            throw new ValidateException("Teacher is not assigned to this class.");
+
+        _context.TeacherClasses.Remove(teacherClass);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task ResetAllTeacherClassAssignmentsAsync()
+    {
+        var allTeacherClasses = await _context.TeacherClasses.ToListAsync();
+
+        if (allTeacherClasses.Any())
+        {
+            _context.TeacherClasses.RemoveRange(allTeacherClasses);
+            await _context.SaveChangesAsync();
+        }
+    }
     public async Task<Semester> AddSemesterAsync(SemesterDto semesterDto)
     {
         if (semesterDto == null) throw new ValidateException("The semesterDto field is required.");
@@ -401,7 +461,6 @@ public class AdminService : IAdminService
 
         return semester;
     }
-
     public async Task<bool> DeleteSemesterAsync(int semesterId)
     {
         var semester = await _context.Semesters.FindAsync(semesterId);
@@ -412,7 +471,6 @@ public class AdminService : IAdminService
 
         return true;
     }
-
     public async Task<IEnumerable<Semester>> GetAllSemestersAsync()
     {
         return await _context.Semesters.ToListAsync();
