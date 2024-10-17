@@ -68,8 +68,7 @@ public class TeacherService : ITeacherService
         _context.Scores.Add(score);
         await _context.SaveChangesAsync();
     }
-
-// Trong service
+    
     public async Task<List<StudentInfoDto>> GetAssignedClassesStudentsAsync(ClaimsPrincipal user)
     {
         // Lấy email từ claims trong JWT token
@@ -79,16 +78,18 @@ public class TeacherService : ITeacherService
 
         // Lấy danh sách học sinh trong các lớp mà giáo viên này dạy
         var assignedClassStudents = await _context.TeacherClasses
-            .Include(tc => tc.Class)
-            .ThenInclude(c => c.Students)
-            .Where(tc => tc.Teacher.Email == emailClaim)
+            .Include(tc => tc.Class) // Lấy thông tin lớp
+            .ThenInclude(c => c.Students) // Lấy học sinh trong lớp
+            .Include(tc => tc.Teacher) // Lấy thông tin giáo viên
+            .Include(tc => tc.Teacher.Subject) // Lấy thông tin môn học của giáo viên
+            .Where(tc => tc.Teacher.Email == emailClaim) // Lọc theo email giáo viên
             .SelectMany(tc => tc.Class.Students.Select(s => new StudentInfoDto
             {
                 StudentFullName = s.FullName,
                 ClassName = tc.Class.ClassName,
-                SubjectName = s.StudentSubjects.Any()
-                    ? s.StudentSubjects.FirstOrDefault().Subject.SubjectName
-                    : "No Subject",
+                SubjectName = tc.Teacher.Subject != null 
+                    ? tc.Teacher.Subject.SubjectName 
+                    : "No Subject", // Nếu không có môn học thì hiển thị "No Subject"
                 ScoreValue = s.Scores.Any() ? s.Scores.FirstOrDefault().Value : 0,
                 ExamType = s.Scores.Any() ? s.Scores.FirstOrDefault().ExamType : "No Exam",
                 Semester = s.Scores.Any() ? s.Scores.FirstOrDefault().SemesterName : "No Semester"
@@ -97,6 +98,8 @@ public class TeacherService : ITeacherService
 
         return assignedClassStudents;
     }
+
+
 
 
     public double CalculateSemesterAverage(int studentId, int subjectId, string semesterName, ClaimsPrincipal user,
