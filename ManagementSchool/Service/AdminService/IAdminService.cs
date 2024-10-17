@@ -9,7 +9,7 @@ public interface IAdminService
     Task<bool> DeleteStudentAsync(int studentId);
     Task<Student> UpdateStudentAsync(int studentId, StudentDtos studentDtos);
     Task<IEnumerable<Student>> GetStudentsByClassAsync(string className, string academicYear);
-    Task<IEnumerable<Student>> GetStudentsBySchoolYearAsync(string YearName);
+    Task<IEnumerable<Student>> GetStudentsBySchoolYearAsync(string yearName);
     Task<Student> GetStudentByIdAsync(int studentId);
     Task<TeacherDto?> AddTeacherAsync(TeacherDto teacherDto);
     Task<bool> DeleteTeacherAsync(int teacherId);
@@ -17,10 +17,10 @@ public interface IAdminService
     Task<IEnumerable<TeacherWithSubjectDto>> GetAllTeachersAsync();
     Task<bool> DeleteTeacherByNameAsync(string teacherName);
     Task<IEnumerable<TeacherDto>> GetTeachersBySubjectAsync(string subjectName);
-    Task AssignTeacherToClassAsync(TeacherClassAssignmentDto assignmentDto);
-    Task<List<TeacherClassAssignmentDto>> GetTeacherClassAssignmentsAsync();
-    Task UpdateTeacherClassAssignmentAsync(UpdateTeacherAssignmentDto assignmentDto);
-    Task DeleteTeacherFromClassAsync(TeacherClassAssignmentDto assignmentDto);
+    Task AssignTeacherToClassAsync(TeacherClassAssignDto assignDto);
+    Task<List<TeacherClassAssignDto>> GetTeacherClassAssignedAsync();
+    Task UpdateTeacherClassAssignmentAsync(UpdateTeacherAssignDto assignDto);
+    Task DeleteTeacherFromClassAsync(TeacherClassAssignDto assignDto);
     Task ResetAllTeacherClassAssignmentsAsync();
     Task<Semester> AddSemesterAsync(SemesterDto semesterDto);
     Task<Semester> UpdateSemesterAsync(int semesterId, SemesterDto semesterDto);
@@ -30,5 +30,4 @@ public interface IAdminService
     Task<IEnumerable<Student>> GetAllStudentsAsync();
     Task CalculateAndSaveFinalGradesAsync(string className, string academicYear);
     Task<bool> UpgradeClassAsync(int oldClassId, string oldAcademicYear, int newClassId, string newAcademicYear);
-
 }

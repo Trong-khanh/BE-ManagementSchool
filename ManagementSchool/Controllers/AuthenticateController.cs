@@ -143,8 +143,7 @@ public class AuthenticateController : ControllerBase
             var refreshToken = _tokenService.GenerateRefreshToken(user.Id, Guid.NewGuid().ToString());
             await SaveRefreshTokenAsync(refreshToken);
 
-            var userRole = roles.FirstOrDefault() ?? "User"; // Adjust based on your role logic
-
+            var userRole = roles.FirstOrDefault() ?? "User";
             return Ok(new
             {
                 AccessToken = accessToken,

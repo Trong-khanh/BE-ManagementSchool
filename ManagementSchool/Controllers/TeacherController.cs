@@ -51,18 +51,24 @@ public class TeacherController : ControllerBase
     }
 
     [HttpGet("GetStudentsInAssignedClasses")]
-    public async Task<IActionResult> GetStudentsInAssignedClasses(string teacherEmail)
+    public async Task<IActionResult> GetStudentsInAssignedClasses()
     {
         try
         {
-            var students = await _teacherService.GetAssignedClassesStudentsAsync(teacherEmail);
+            // Gọi dịch vụ để lấy danh sách học sinh
+            var students = await _teacherService.GetAssignedClassesStudentsAsync(User);
             return Ok(students);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
         }
         catch (Exception ex)
         {
             return StatusCode(500, $"Server error: {ex.Message}");
         }
     }
+
 
     [HttpGet("semester-average")]
     public ActionResult<double> GetSemesterAverage(int studentId, int subjectId, string semesterName,

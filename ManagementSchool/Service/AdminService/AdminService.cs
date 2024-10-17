@@ -230,6 +230,7 @@ public class AdminService : IAdminService
             SubjectName = subject.SubjectName
         };
     }
+
     public async Task<bool> DeleteTeacherAsync(int teacherId)
     {
         var teacher = await _context.Teachers.FindAsync(teacherId);
@@ -241,6 +242,7 @@ public class AdminService : IAdminService
 
         return true;
     }
+
     public async Task<bool> DeleteTeacherByNameAsync(string teacherName)
     {
         var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Name == teacherName);
@@ -252,6 +254,7 @@ public class AdminService : IAdminService
 
         return true;
     }
+
     public async Task<TeacherDto?> UpdateTeacherAsync(int teacherId, TeacherDto teacherDto)
     {
         if (teacherDto == null)
@@ -289,13 +292,15 @@ public class AdminService : IAdminService
         };
         return result;
     }
+
     public async Task<IEnumerable<TeacherWithSubjectDto>> GetAllTeachersAsync()
     {
         var teachers = await _context.Teachers
             .Include(t => t.Subject)
             .ToListAsync();
 
-        return teachers.Select(t => new TeacherWithSubjectDto {
+        return teachers.Select(t => new TeacherWithSubjectDto
+        {
             TeacherId = t.TeacherId,
             Name = t.Name,
             Email = t.Email,
@@ -303,6 +308,7 @@ public class AdminService : IAdminService
             SubjectName = t.Subject.SubjectName
         });
     }
+
     public async Task<IEnumerable<TeacherDto>> GetTeachersBySubjectAsync(string subjectName)
     {
         if (string.IsNullOrWhiteSpace(subjectName))
@@ -321,13 +327,16 @@ public class AdminService : IAdminService
             SubjectName = t.Subject.SubjectName
         });
     }
-    public async Task AssignTeacherToClassAsync(TeacherClassAssignmentDto assignmentDto)
+
+    public async Task AssignTeacherToClassAsync(TeacherClassAssignDto assignmentDto)
     {
         // Find the teacher by full name and email
         var teacher = await _context.Teachers
+            .Include(t => t.Subject) // Bao gồm cả môn học
             .Include(t => t.TeacherClasses)
             .ThenInclude(tc => tc.Class)
             .FirstOrDefaultAsync(t => t.Name == assignmentDto.TeacherFullName && t.Email == assignmentDto.TeacherEmail);
+
         if (teacher == null)
             throw new ValidateException("Teacher with the provided full name and email not found.");
 
@@ -344,47 +353,51 @@ public class AdminService : IAdminService
         var teacherClass = new TeacherClass
         {
             TeacherId = teacher.TeacherId,
-            ClassId = classEntity.ClassId // Use the ClassId of the retrieved class entity
+            ClassId = classEntity.ClassId
         };
         _context.TeacherClasses.Add(teacherClass);
         await _context.SaveChangesAsync();
+        assignmentDto.SubjectName = teacher.Subject.SubjectName;
     }
-    public async Task<List<TeacherClassAssignmentDto>> GetTeacherClassAssignmentsAsync()
+
+    public async Task<List<TeacherClassAssignDto>> GetTeacherClassAssignedAsync()
     {
         return await _context.TeacherClasses
             .Include(tc => tc.Teacher)
+            .ThenInclude(t => t.Subject)
             .Include(tc => tc.Class)
-            .Select(tc => new TeacherClassAssignmentDto
+            .Select(tc => new TeacherClassAssignDto
             {
                 TeacherFullName = tc.Teacher.Name,
                 TeacherEmail = tc.Teacher.Email,
-                ClassName = tc.Class.ClassName
+                ClassName = tc.Class.ClassName,
+                SubjectName = tc.Teacher.Subject.SubjectName
             })
             .ToListAsync();
     }
-    
-    public async Task UpdateTeacherClassAssignmentAsync(UpdateTeacherAssignmentDto assignmentDto)
+
+    public async Task UpdateTeacherClassAssignmentAsync(UpdateTeacherAssignDto assignDto)
     {
         // Tìm giáo viên bằng tên và email
         var teacher = await _context.Teachers
             .Include(t => t.TeacherClasses)
             .ThenInclude(tc => tc.Class)
-            .FirstOrDefaultAsync(t => t.Name == assignmentDto.TeacherFullName && t.Email == assignmentDto.TeacherEmail);
-    
+            .FirstOrDefaultAsync(t => t.Name == assignDto.TeacherFullName && t.Email == assignDto.TeacherEmail);
+
         if (teacher == null)
             throw new ValidateException("Teacher not found.");
 
         // Kiểm tra lớp mà giáo viên hiện đang được gán
         var currentClassAssignment = teacher.TeacherClasses
-            .FirstOrDefault(tc => tc.Class.ClassName == assignmentDto.CurrentClassName);
-    
+            .FirstOrDefault(tc => tc.Class.ClassName == assignDto.CurrentClassName);
+
         if (currentClassAssignment == null)
             throw new ValidateException("Teacher is not assigned to this class.");
 
         // Tìm lớp mới để gán cho giáo viên
         var newClassEntity = await _context.Classes
-            .FirstOrDefaultAsync(c => c.ClassName == assignmentDto.NewClassName);
-    
+            .FirstOrDefaultAsync(c => c.ClassName == assignDto.NewClassName);
+
         if (newClassEntity == null)
             throw new ValidateException("New class not found.");
 
@@ -395,8 +408,7 @@ public class AdminService : IAdminService
         await _context.SaveChangesAsync();
     }
 
-    
-    public async Task DeleteTeacherFromClassAsync(TeacherClassAssignmentDto assignmentDto)
+    public async Task DeleteTeacherFromClassAsync(TeacherClassAssignDto assignmentDto)
     {
         var teacherClass = await _context.TeacherClasses
             .Include(tc => tc.Teacher)
@@ -422,6 +434,7 @@ public class AdminService : IAdminService
             await _context.SaveChangesAsync();
         }
     }
+
     public async Task<Semester> AddSemesterAsync(SemesterDto semesterDto)
     {
         if (semesterDto == null) throw new ValidateException("The semesterDto field is required.");
@@ -442,6 +455,7 @@ public class AdminService : IAdminService
 
         return semester;
     }
+
     public async Task<Semester> UpdateSemesterAsync(int semesterId, SemesterDto semesterDto)
     {
         if (semesterDto == null) throw new ValidateException("The semesterDto object must be provided.");
@@ -461,6 +475,7 @@ public class AdminService : IAdminService
 
         return semester;
     }
+
     public async Task<bool> DeleteSemesterAsync(int semesterId)
     {
         var semester = await _context.Semesters.FindAsync(semesterId);
@@ -471,6 +486,7 @@ public class AdminService : IAdminService
 
         return true;
     }
+
     public async Task<IEnumerable<Semester>> GetAllSemestersAsync()
     {
         return await _context.Semesters.ToListAsync();
@@ -586,8 +602,9 @@ public class AdminService : IAdminService
         await _context.SaveChangesAsync();
         Console.WriteLine("Changes saved successfully.");
     }
-    
-    public async Task<bool> UpgradeClassAsync(int oldClassId, string oldAcademicYear, int newClassId, string newAcademicYear)
+
+    public async Task<bool> UpgradeClassAsync(int oldClassId, string oldAcademicYear, int newClassId,
+        string newAcademicYear)
     {
         // Check new academic year exists
         var semesterExists = await _context.Semesters.AnyAsync(s => s.AcademicYear == newAcademicYear);
@@ -615,14 +632,14 @@ public class AdminService : IAdminService
             }
             else if (summary.Status == "Resit")
             {
-                summary.Student.AcademicYear = newAcademicYear; 
+                summary.Student.AcademicYear = newAcademicYear;
             }
         }
 
         await _context.SaveChangesAsync();
         return true;
     }
-    
+
     public bool IsValidName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))

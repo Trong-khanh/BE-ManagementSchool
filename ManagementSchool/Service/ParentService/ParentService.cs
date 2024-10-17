@@ -15,11 +15,12 @@ namespace ManagementSchool.Service.ParentService
             _context = context;
         }
 
-        public async Task<List<StudentScoreInfoDto>> GetStudentInfoAsync(string className, string studentName, string academicYear)
+        public async Task<List<StudentScoreInfoDto>> GetStudentInfoAsync(string className, string studentName,
+            string academicYear)
         {
             var studentScores = await _context.Students
-                .Where(s => s.FullName == studentName && 
-                            s.Class.ClassName == className && 
+                .Where(s => s.FullName == studentName &&
+                            s.Class.ClassName == className &&
                             s.AcademicYear == academicYear)
                 .SelectMany(s => s.Scores, (s, score) => new StudentScoreInfoDto
                 {

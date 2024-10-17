@@ -59,7 +59,6 @@ public class TeacherService : ITeacherService
         var score = new Score
         {
             StudentId = scoreDto.StudentId,
-            SubjectId = scoreDto.SubjectId,
             Value = scoreDto.Value,
             SemesterName = scoreDto.SemesterName,
             ExamType = scoreDto.ExamType,
@@ -70,12 +69,19 @@ public class TeacherService : ITeacherService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<StudentInfoDto>> GetAssignedClassesStudentsAsync(string teacherEmail)
+// Trong service
+    public async Task<List<StudentInfoDto>> GetAssignedClassesStudentsAsync(ClaimsPrincipal user)
     {
+        // Lấy email từ claims trong JWT token
+        var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        if (emailClaim == null)
+            throw new UnauthorizedAccessException("Email claim not found in token.");
+
+        // Lấy danh sách học sinh trong các lớp mà giáo viên này dạy
         var assignedClassStudents = await _context.TeacherClasses
             .Include(tc => tc.Class)
             .ThenInclude(c => c.Students)
-            .Where(tc => tc.Teacher.Email == teacherEmail)
+            .Where(tc => tc.Teacher.Email == emailClaim)
             .SelectMany(tc => tc.Class.Students.Select(s => new StudentInfoDto
             {
                 StudentFullName = s.FullName,
@@ -91,6 +97,7 @@ public class TeacherService : ITeacherService
 
         return assignedClassStudents;
     }
+
 
     public double CalculateSemesterAverage(int studentId, int subjectId, string semesterName, ClaimsPrincipal user,
         string academicYear)

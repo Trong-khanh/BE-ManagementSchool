@@ -19,6 +19,5 @@ public class StudentService : IStudentService
             .Include(s => s.Class)
             .Include(s => s.Parent)
             .FirstOrDefaultAsync(s => s.StudentId == studentId);
-
     }
 }

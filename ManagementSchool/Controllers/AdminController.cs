@@ -172,7 +172,7 @@ public class AdminController : ControllerBase
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
-    
+
     [HttpGet("GetTeachersBySubject/{subjectName}")]
     public async Task<IActionResult> GetTeachersBySubject(string subjectName)
     {
@@ -198,11 +198,11 @@ public class AdminController : ControllerBase
     // ASSIGN TEACHER TO CLASS
 
     [HttpPost("AssignTeacherToClass")]
-    public async Task<IActionResult> AssignTeacherToClass([FromBody] TeacherClassAssignmentDto assignmentDto)
+    public async Task<IActionResult> AssignTeacherToClass([FromBody] TeacherClassAssignDto assigntDto)
     {
         try
         {
-            await _adminService.AssignTeacherToClassAsync(assignmentDto);
+            await _adminService.AssignTeacherToClassAsync(assigntDto);
             return Ok("Teacher assigned to class successfully.");
         }
         catch (AdminService.ValidateException ex)
@@ -215,12 +215,12 @@ public class AdminController : ControllerBase
         }
     }
 
-    [HttpGet("GetTeacherClassAssignments")]
+    [HttpGet("GetTeacherClassAssigned")]
     public async Task<IActionResult> GetTeacherClassAssignments()
     {
         try
         {
-            var assignments = await _adminService.GetTeacherClassAssignmentsAsync();
+            var assignments = await _adminService.GetTeacherClassAssignedAsync();
             return Ok(assignments);
         }
         catch (Exception ex)
@@ -228,13 +228,13 @@ public class AdminController : ControllerBase
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
-    
+
     [HttpPut("UpdateTeacherClassAssignment")]
-    public async Task<IActionResult> UpdateTeacherClassAssignment([FromBody] UpdateTeacherAssignmentDto assignmentDto)
+    public async Task<IActionResult> UpdateTeacherClassAssignment([FromBody] UpdateTeacherAssignDto assignDto)
     {
         try
         {
-            await _adminService.UpdateTeacherClassAssignmentAsync(assignmentDto);
+            await _adminService.UpdateTeacherClassAssignmentAsync(assignDto);
             return Ok("Teacher's class assignment updated successfully.");
         }
         catch (AdminService.ValidateException ex)
@@ -248,11 +248,11 @@ public class AdminController : ControllerBase
     }
 
     [HttpDelete("DeleteTeacherFromClass")]
-    public async Task<IActionResult> DeleteTeacherFromClass([FromBody] TeacherClassAssignmentDto assignmentDto)
+    public async Task<IActionResult> DeleteTeacherFromClass([FromBody] TeacherClassAssignDto assignDto)
     {
         try
         {
-            await _adminService.DeleteTeacherFromClassAsync(assignmentDto);
+            await _adminService.DeleteTeacherFromClassAsync(assignDto);
             return Ok("Teacher removed from class successfully.");
         }
         catch (AdminService.ValidateException ex)
@@ -278,11 +278,11 @@ public class AdminController : ControllerBase
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
-    
+
     // END ASSIGN TEACHER TO CLASS
-    
+
     // START CRUD SEMESTER//
-    
+
     [HttpPost("AddSemester")]
     public async Task<IActionResult> AddSemester([FromBody] SemesterDto semesterDto)
     {
@@ -358,13 +358,15 @@ public class AdminController : ControllerBase
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
-    
+
     [HttpPost("UpgradeClass")]
-    public async Task<IActionResult> UpgradeClass([FromQuery] int oldClassId, [FromQuery] string oldAcademicYear, [FromQuery] int newClassId, [FromQuery] string newAcademicYear)
+    public async Task<IActionResult> UpgradeClass([FromQuery] int oldClassId, [FromQuery] string oldAcademicYear,
+        [FromQuery] int newClassId, [FromQuery] string newAcademicYear)
     {
         try
         {
-            bool result = await _adminService.UpgradeClassAsync(oldClassId, oldAcademicYear, newClassId, newAcademicYear);
+            bool result =
+                await _adminService.UpgradeClassAsync(oldClassId, oldAcademicYear, newClassId, newAcademicYear);
             if (result)
             {
                 return Ok("The student was next new class successfully .");
@@ -383,7 +385,4 @@ public class AdminController : ControllerBase
             return StatusCode(500, $"An error occurred in processing the request: {ex.Message}");
         }
     }
-
-    
-
 }
