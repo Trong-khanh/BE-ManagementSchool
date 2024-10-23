@@ -423,80 +423,93 @@ public class AdminService : IAdminService
         }
     }
 
-    public async Task<Semester> AddSemesterAsync(SemesterDto semesterDto)
+public async Task<Semester> AddSemesterAsync(SemesterDto semesterDto)
+{
+    if (semesterDto == null)
+        throw new ValidateException("The semesterDto field is required.");
+
+    // Validate StartDate and EndDate
+    if (semesterDto.EndDate <= semesterDto.StartDate)
+        throw new ValidateException("EndDate must be greater than StartDate.");
+
+    // Validate SemesterType
+    if (!Enum.IsDefined(typeof(SemesterType), semesterDto.SemesterType))
+        throw new ValidateException("Invalid SemesterType specified.");
+
+    var semester = new Semester
     {
-        if (semesterDto == null) throw new ValidateException("The semesterDto field is required.");
+        SemesterType = semesterDto.SemesterType,
+        StartDate = semesterDto.StartDate,
+        EndDate = semesterDto.EndDate,
+        AcademicYear = semesterDto.AcademicYear
+    };
 
-        if (semesterDto.EndDate <= semesterDto.StartDate)
-            throw new ValidateException("EndDate must be greater than StartDate.");
+    _context.Semesters.Add(semester);
+    await _context.SaveChangesAsync();
 
-        var semester = new Semester
+    return semester;
+}
+
+public async Task<Semester> UpdateSemesterAsync(int semesterId, SemesterDto semesterDto)
+{
+    if (semesterDto == null)
+        throw new ValidateException("The semesterDto object must be provided.");
+
+    var semester = await _context.Semesters.FindAsync(semesterId);
+    if (semester == null)
+        throw new ValidateException("Semester not found.");
+
+    // Validate StartDate and EndDate
+    if (semesterDto.StartDate >= semesterDto.EndDate)
+        throw new ValidateException("StartDate must be before EndDate.");
+
+    // Validate SemesterType
+    if (!Enum.IsDefined(typeof(SemesterType), semesterDto.SemesterType))
+        throw new ValidateException("Invalid SemesterType specified.");
+
+    semester.SemesterType = semesterDto.SemesterType;
+    semester.StartDate = semesterDto.StartDate;
+    semester.EndDate = semesterDto.EndDate;
+    semester.AcademicYear = semesterDto.AcademicYear;
+
+    await _context.SaveChangesAsync();
+
+    return semester;
+}
+
+public async Task<bool> DeleteSemesterAsync(int semesterId)
+{
+    var semester = await _context.Semesters.FindAsync(semesterId);
+    if (semester == null) return false;
+
+    _context.Semesters.Remove(semester);
+    await _context.SaveChangesAsync();
+
+    return true;
+}
+
+public async Task<IEnumerable<Semester>> GetAllSemestersAsync()
+{
+    return await _context.Semesters
+        .Select(s => new Semester
         {
-            SemesterType = semesterDto.SemesterType,
-            StartDate = semesterDto.StartDate,
-            EndDate = semesterDto.EndDate,
-            AcademicYear = semesterDto.AcademicYear
-        };
+            SemesterId = s.SemesterId,
+            SemesterType = s.SemesterType,
+            StartDate = s.StartDate,
+            EndDate = s.EndDate,
+            AcademicYear = s.AcademicYear
+        })
+        .ToListAsync();
+}
 
-        _context.Semesters.Add(semester);
-        await _context.SaveChangesAsync();
+public async Task<Semester> GetSemesterByIdAsync(int semesterId)
+{
+    var semester = await _context.Semesters.FindAsync(semesterId);
+    if (semester == null)
+        throw new ValidateException("Semester not found.");
 
-        return semester;
-    }
-
-    public async Task<Semester> UpdateSemesterAsync(int semesterId, SemesterDto semesterDto)
-    {
-        if (semesterDto == null) throw new ValidateException("The semesterDto object must be provided.");
-
-        var semester = await _context.Semesters.FindAsync(semesterId);
-        if (semester == null) throw new ValidateException("Semester not found.");
-
-        if (semesterDto.StartDate >= semesterDto.EndDate)
-            throw new ValidateException("StartDate must be before EndDate.");
-
-        semester.SemesterType = semesterDto.SemesterType;
-        semester.StartDate = semesterDto.StartDate;
-        semester.EndDate = semesterDto.EndDate;
-        semester.AcademicYear = semesterDto.AcademicYear;
-
-        await _context.SaveChangesAsync();
-
-        return semester;
-    }
-
-    public async Task<bool> DeleteSemesterAsync(int semesterId)
-    {
-        var semester = await _context.Semesters.FindAsync(semesterId);
-        if (semester == null) return false;
-
-        _context.Semesters.Remove(semester);
-        await _context.SaveChangesAsync();
-
-        return true;
-    }
-
-    public async Task<IEnumerable<Semester>> GetAllSemestersAsync()
-    {
-        return await _context.Semesters
-            .Select(s => new Semester
-            {
-                SemesterId = s.SemesterId,
-                SemesterType = s.SemesterType,
-                StartDate = s.StartDate,
-                EndDate = s.EndDate,
-                AcademicYear = s.AcademicYear
-            })
-            .ToListAsync();
-    }
-
-
-    public async Task<Semester> GetSemesterByIdAsync(int semesterId)
-    {
-        var semester = await _context.Semesters.FindAsync(semesterId);
-        if (semester == null) throw new ValidateException("Semester not found.");
-
-        return semester;
-    }
+    return semester;
+}
 
     public async Task<IEnumerable<Student>> GetAllStudentsAsync()
     {

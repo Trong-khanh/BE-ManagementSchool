@@ -18,19 +18,19 @@ public class TeacherController : ControllerBase
         _teacherService = teacherService;
     }
 
-    [HttpGet("ViewAllSemesters")]
-    public async Task<IActionResult> GetAllSemesters()
-    {
-        try
-        {
-            var semesters = await _teacherService.GetAllSemestersAsync();
-            return Ok(semesters);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
-    }
+    // [HttpGet("ViewAllSemesters")]
+    // public async Task<IActionResult> GetAllSemesters()
+    // {
+    //     try
+    //     {
+    //         var semesters = await _teacherService.GetAllSemestersAsync();
+    //         return Ok(semesters);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(500, $"Internal server error: {ex.Message}");
+    //     }
+    // }
 
     [HttpPost("AddScore")]
     public async Task<IActionResult> AddScore([FromBody] ScoreDto scoreDto, string teacherEmail)

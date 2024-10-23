@@ -187,22 +187,22 @@ public class TeacherService : ITeacherService
     //
     //     _context.SaveChanges();
     // }
-    public async Task<IEnumerable<SemesterDto>> GetAllSemestersAsync()
-    {
-        // Retrieve all semesters from the database
-        var semesters = await _context.Semesters
-            .Select(s => new SemesterDto
-            {
-                SemesterId = s.SemesterId,
-                SemesterType = s.SemesterType,
-                StartDate = s.StartDate,
-                EndDate = s.EndDate,
-                AcademicYear = s.AcademicYear
-            })
-            .ToListAsync();
-
-        return semesters; // Return the list of SemesterDto
-    }
+    // public async Task<IEnumerable<SemesterDto>> GetAllSemestersAsync()
+    // {
+    //     // Retrieve all semesters from the database
+    //     var semesters = await _context.Semesters
+    //         .Select(s => new SemesterDto
+    //         {
+    //             SemesterId = s.SemesterId,
+    //             SemesterType = s.SemesterType,
+    //             StartDate = s.StartDate,
+    //             EndDate = s.EndDate,
+    //             AcademicYear = s.AcademicYear
+    //         })
+    //         .ToListAsync();
+    //
+    //     return semesters; // Return the list of SemesterDto
+    // }
 
     public Task AddScoreAsync(ScoreDto scoreDto, string teacherEmail)
     {
