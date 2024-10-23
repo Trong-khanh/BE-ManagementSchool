@@ -173,18 +173,6 @@ public class AdminService : IAdminService
         return students;
     }
 
-    public async Task<IEnumerable<Student>> GetStudentsBySchoolYearAsync(string YearName)
-    {
-        if (string.IsNullOrWhiteSpace(YearName))
-            throw new ArgumentException("Year name cannot be empty.");
-
-        return await _context.Students
-            .Include(s => s.Class)
-            .ThenInclude(c => c.Grade)
-            .Where(s => s.Class.Grade.YearName == YearName)
-            .ToListAsync();
-    }
-
     public async Task<Student> GetStudentByIdAsync(int studentId)
     {
         return await _context.Students
@@ -444,7 +432,7 @@ public class AdminService : IAdminService
 
         var semester = new Semester
         {
-            Name = semesterDto.Name,
+            SemesterType = semesterDto.SemesterType,
             StartDate = semesterDto.StartDate,
             EndDate = semesterDto.EndDate,
             AcademicYear = semesterDto.AcademicYear
@@ -466,7 +454,7 @@ public class AdminService : IAdminService
         if (semesterDto.StartDate >= semesterDto.EndDate)
             throw new ValidateException("StartDate must be before EndDate.");
 
-        semester.Name = semesterDto.Name;
+        semester.SemesterType = semesterDto.SemesterType;
         semester.StartDate = semesterDto.StartDate;
         semester.EndDate = semesterDto.EndDate;
         semester.AcademicYear = semesterDto.AcademicYear;
@@ -489,8 +477,18 @@ public class AdminService : IAdminService
 
     public async Task<IEnumerable<Semester>> GetAllSemestersAsync()
     {
-        return await _context.Semesters.ToListAsync();
+        return await _context.Semesters
+            .Select(s => new Semester
+            {
+                SemesterId = s.SemesterId,
+                SemesterType = s.SemesterType,
+                StartDate = s.StartDate,
+                EndDate = s.EndDate,
+                AcademicYear = s.AcademicYear
+            })
+            .ToListAsync();
     }
+
 
     public async Task<Semester> GetSemesterByIdAsync(int semesterId)
     {
@@ -508,101 +506,152 @@ public class AdminService : IAdminService
             .ToListAsync();
     }
 
-    public async Task CalculateAndSaveFinalGradesAsync(string className, string academicYear)
+    // public async Task CalculateAndSaveFinalGradesAsync(string className, string academicYear)
+    // {
+    //     var students = await _context.Students
+    //         .Include(s => s.StudentSubjectScores)
+    //         .Where(s => s.Class.ClassName == className && s.AcademicYear == academicYear)
+    //         .ToListAsync();
+    //
+    //     if (!students.Any())
+    //     {
+    //         Console.WriteLine($"No students found for class {className} and academic year {academicYear}.");
+    //         return;
+    //     }
+    //
+    //     foreach (var student in students)
+    //     {
+    //         Console.WriteLine($"Processing student ID {student.StudentId}...");
+    //         var scores = student.StudentSubjectScores;
+    //
+    //         if (!scores.Any())
+    //         {
+    //             Console.WriteLine($"No scores found for student ID {student.StudentId}.");
+    //             continue;
+    //         }
+    //
+    //         var finalGrade = scores.Average(s => s.AnnualScore.HasValue ? s.AnnualScore.Value : 0);
+    //         var hasAnyFail = scores.Any(s => s.AnnualScore.HasValue && s.AnnualScore.Value < 5);
+    //         var hasAllAboveFive = scores.All(s => s.AnnualScore.HasValue && s.AnnualScore.Value >= 5);
+    //         var hasAllAboveSixPointFive = scores.All(s => s.AnnualScore.HasValue && s.AnnualScore.Value >= 6.5);
+    //
+    //         var status = "Next Class";
+    //         var classification = "Bad";
+    //
+    //         if (finalGrade < 5)
+    //         {
+    //             status = "Resit";
+    //             classification = "Very Bad";
+    //         }
+    //         else if (finalGrade < 6.5)
+    //         {
+    //             if (hasAnyFail)
+    //             {
+    //                 status = "Resit";
+    //                 classification = "Very Bad";
+    //             }
+    //             else
+    //             {
+    //                 status = "Next Class";
+    //                 classification = "Bad";
+    //             }
+    //         }
+    //         else if (finalGrade < 8)
+    //         {
+    //             if (hasAllAboveFive)
+    //             {
+    //                 status = "Next Class";
+    //                 classification = "Good";
+    //             }
+    //             else
+    //             {
+    //                 status = "Next Class";
+    //                 classification = "Bad";
+    //             }
+    //         }
+    //         else if (finalGrade >= 8)
+    //         {
+    //             if (hasAllAboveSixPointFive)
+    //             {
+    //                 status = "Next Class";
+    //                 classification = "Very Good";
+    //             }
+    //             else
+    //             {
+    //                 status = "Next Class";
+    //                 classification = "Good";
+    //             }
+    //         }
+    //
+    //         var summary = new SummaryOfYear
+    //         {
+    //             StudentId = student.StudentId,
+    //             FinalGrade = (int)finalGrade,
+    //             Classification = classification,
+    //             Status = status,
+    //             AcademicYear = academicYear
+    //         };
+    //
+    //         _context.SummariesOfYear.Add(summary);
+    //         Console.WriteLine(
+    //             $"Summary created for student ID {student.StudentId}, Status: {summary.Status}, Classification: {summary.Classification}.");
+    //     }
+    //
+    //     await _context.SaveChangesAsync();
+    //     Console.WriteLine("Changes saved successfully.");
+    // }
+    
+    public async Task<Class> AddClassAsync(ClassDto newClassDto)
     {
-        var students = await _context.Students
-            .Include(s => s.StudentSubjectScores)
-            .Where(s => s.Class.ClassName == className && s.AcademicYear == academicYear)
-            .ToListAsync();
+        if (string.IsNullOrWhiteSpace(newClassDto.ClassName))
+            throw new ArgumentException("Class name cannot be empty.");
 
-        if (!students.Any())
+        var newClass = new Class
         {
-            Console.WriteLine($"No students found for class {className} and academic year {academicYear}.");
-            return;
-        }
+            ClassName = newClassDto.ClassName
+        };
 
-        foreach (var student in students)
-        {
-            Console.WriteLine($"Processing student ID {student.StudentId}...");
-            var scores = student.StudentSubjectScores;
-
-            if (!scores.Any())
-            {
-                Console.WriteLine($"No scores found for student ID {student.StudentId}.");
-                continue;
-            }
-
-            var finalGrade = scores.Average(s => s.AnnualScore.HasValue ? s.AnnualScore.Value : 0);
-            var hasAnyFail = scores.Any(s => s.AnnualScore.HasValue && s.AnnualScore.Value < 5);
-            var hasAllAboveFive = scores.All(s => s.AnnualScore.HasValue && s.AnnualScore.Value >= 5);
-            var hasAllAboveSixPointFive = scores.All(s => s.AnnualScore.HasValue && s.AnnualScore.Value >= 6.5);
-
-            var status = "Next Class";
-            var classification = "Bad";
-
-            if (finalGrade < 5)
-            {
-                status = "Resit";
-                classification = "Very Bad";
-            }
-            else if (finalGrade < 6.5)
-            {
-                if (hasAnyFail)
-                {
-                    status = "Resit";
-                    classification = "Very Bad";
-                }
-                else
-                {
-                    status = "Next Class";
-                    classification = "Bad";
-                }
-            }
-            else if (finalGrade < 8)
-            {
-                if (hasAllAboveFive)
-                {
-                    status = "Next Class";
-                    classification = "Good";
-                }
-                else
-                {
-                    status = "Next Class";
-                    classification = "Bad";
-                }
-            }
-            else if (finalGrade >= 8)
-            {
-                if (hasAllAboveSixPointFive)
-                {
-                    status = "Next Class";
-                    classification = "Very Good";
-                }
-                else
-                {
-                    status = "Next Class";
-                    classification = "Good";
-                }
-            }
-
-            var summary = new SummaryOfYear
-            {
-                StudentId = student.StudentId,
-                FinalGrade = (int)finalGrade,
-                Classification = classification,
-                Status = status,
-                AcademicYear = academicYear
-            };
-
-            _context.SummariesOfYear.Add(summary);
-            Console.WriteLine(
-                $"Summary created for student ID {student.StudentId}, Status: {summary.Status}, Classification: {summary.Classification}.");
-        }
-
+        _context.Classes.Add(newClass);
         await _context.SaveChangesAsync();
-        Console.WriteLine("Changes saved successfully.");
+        return newClass;
+    }
+    
+    public async Task<Class> UpdateClassAsync(int classId, ClassDto updatedClassDto)
+    {
+        var existingClass = await _context.Classes.FindAsync(classId);
+        if (existingClass == null)
+            throw new KeyNotFoundException($"Class with ID {classId} not found.");
+
+        existingClass.ClassName = updatedClassDto.ClassName;
+        await _context.SaveChangesAsync();
+        return existingClass;
     }
 
+    public async Task<bool> DeleteClassAsync(int classId)
+    {
+        var classToDelete = await _context.Classes.FindAsync(classId);
+        if (classToDelete == null)
+            throw new KeyNotFoundException($"Class with ID {classId} not found.");
+
+        _context.Classes.Remove(classToDelete);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+
+    public async Task<IEnumerable<Class>> GetAllClassesAsync()
+    {
+        return await _context.Classes.ToListAsync();
+    }
+
+    public async Task<Class> GetClassByIdAsync(int classId)
+    {
+        var result = await _context.Classes.FindAsync(classId);
+        if (result == null)
+            throw new KeyNotFoundException($"Class with ID {classId} not found.");
+        return result;
+    }
+    
     public async Task<bool> UpgradeClassAsync(int oldClassId, string oldAcademicYear, int newClassId,
         string newAcademicYear)
     {

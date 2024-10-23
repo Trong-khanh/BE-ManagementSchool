@@ -1,49 +1,52 @@
+using ManagementSchool.Entities;
 using ManagementSchool.Models;
 
-namespace ManagementSchool.Dto;
-
-public class ScoreDto
+namespace ManagementSchool.Dto
 {
-    private static readonly HashSet<string> ValidExamTypes = new()
+    public class ScoreDto
     {
-        "Test when class begins",
-        "15 minutes test",
-        "45 minutes test",
-        "semester test"
-    };
+        public int StudentId { get; set; }
+        public double Value { get; set; }
+        public int SemesterId { get; set; } // Renamed to SemesterId
+        public ExamType ExamType { get; set; }
+        public int ClassId { get; set; }
 
-    public int StudentId { get; set; }
-    public int SubjectId { get; set; }
-    public double Value { get; set; }
-    public string SemesterName { get; set; }
-    public string ExamType { get; set; }
-    public int ClassId { get; set; }
-    public string AcademicYear { get; set; } // Trường mới thêm
 
-    public void Initialize(int studentId, int subjectId, double value, string semesterName, string examType,
-        int teacherId, string academicYear, ApplicationDbContext context)
-    {
-        var teacher = context.Teachers.FirstOrDefault(ts => ts.TeacherId == teacherId && ts.SubjectId == subjectId);
-        if (teacher == null) throw new ArgumentException("Môn học không được giao cho giáo viên này.");
+        public ScoreDto(int studentId, double value, int semesterId, ExamType examType, int classId)
+        {
+            StudentId = studentId;
+            Value = ValidateScore(value);
+            SemesterId = semesterId;
+            ExamType = examType;
+            ClassId = classId;
+        }
 
-        if (value < 0 || value > 10) throw new ArgumentException("Điểm số phải nằm trong khoảng từ 0 đến 10.");
+        private double ValidateScore(double value)
+        {
+            if (value < 0 || value > 10)
+                throw new ArgumentException("Score must be between 0 and 10.");
+            return value;
+        }
 
-        var semester = context.Semesters.FirstOrDefault(s => s.Name == semesterName);
-        if (semester == null) throw new ArgumentException("Học kỳ không tồn tại.");
+        public static void ValidateSemester(int semesterId, string academicYear, ApplicationDbContext context)
+        {
+            // Check if the semester exists
+            var semester = context.Semesters.Find(semesterId);
+            if (semester == null)
+                throw new ArgumentException("Semester does not exist.");
 
-        // Kiểm tra năm học có phù hợp không
-        if (semester.AcademicYear != academicYear)
-            throw new ArgumentException("Năm học không phù hợp với học kỳ đã chọn.");
+            // Check if the academic year matches
+            if (semester.AcademicYear != academicYear)
+                throw new ArgumentException("Academic year does not match the selected semester.");
+        }
 
-        if (!ValidExamTypes.Contains(examType))
-            throw new ArgumentException(
-                "Loại kỳ thi không hợp lệ. Vui lòng nhập loại hợp lệ như 'Test when class begins', '15 minutes test', '45 minutes test', hoặc 'semester test'.");
-
-        StudentId = studentId;
-        SubjectId = subjectId;
-        Value = value;
-        SemesterName = semesterName;
-        ExamType = examType;
-        AcademicYear = academicYear; // Thiết lập năm học
+        public static void ValidateExamType(string examType)
+        {
+            if (!Enum.TryParse<ExamType>(examType, true, out var parsedExamType))
+            {
+                throw new ArgumentException(
+                    "Invalid exam type. Please enter a valid type such as 'TestWhenClassBegins', 'FifteenMinutesTest', 'FortyFiveMinutesTest', or 'SemesterTest'.");
+            }
+        }
     }
 }

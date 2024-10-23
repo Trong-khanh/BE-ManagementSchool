@@ -9,8 +9,8 @@ public interface ITeacherService
     Task AddScoreAsync(ScoreDto scoreDto, string teacherEmail);
     Task<List<StudentInfoDto>> GetAssignedClassesStudentsAsync(ClaimsPrincipal user);
 
-    double CalculateSemesterAverage(int studentId, int subjectId, string semesterName, ClaimsPrincipal user,
-        string academicYear);
-
-    double CalculateAnnualAverage(int studentId, int subjectId, ClaimsPrincipal user, string academicYear);
+    // double CalculateSemesterAverage(int studentId, int subjectId, string semesterName, ClaimsPrincipal user,
+    //     string academicYear);
+    //
+    // double CalculateAnnualAverage(int studentId, int subjectId, ClaimsPrincipal user, string academicYear);
 }

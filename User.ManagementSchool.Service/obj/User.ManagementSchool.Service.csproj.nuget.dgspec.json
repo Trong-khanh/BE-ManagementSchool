@@ -59,7 +59,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/Users/thanletrongkhanh/.dotnet/sdk/6.0.418/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.425/RuntimeIdentifierGraph.json"
         }
       }
     }

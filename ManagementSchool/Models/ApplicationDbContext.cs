@@ -13,7 +13,6 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     }
 
     public DbSet<Class> Classes { get; set; }
-    public DbSet<Grade> SchoolYears { get; set; }
     public DbSet<Student> Students { get; set; }
     public DbSet<Teacher?> Teachers { get; set; }
     public DbSet<Parent> Parents { get; set; }
@@ -24,7 +23,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<ClassSemester> ClassSemesters { get; set; }
     public DbSet<Score> Scores { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
-    public DbSet<StudentSubjectScore> StudentSubjectScores { get; set; }
+
     public DbSet<Semester> Semesters { get; set; }
     public DbSet<SummaryOfYear> SummariesOfYear { get; set; }
 
@@ -32,11 +31,6 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     {
         base.OnModelCreating(modelBuilder);
         SeedRoles(modelBuilder);
-
-        modelBuilder.Entity<Class>()
-            .HasOne(sy => sy.Grade)
-            .WithMany(c => c.Classes)
-            .HasForeignKey(sy => sy.SchoolYearId);
 
         // Relationship with Student
         modelBuilder.Entity<Student>()
@@ -115,43 +109,33 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .WithMany(sub => sub.Scores)
             .HasForeignKey(s => s.SubjectId);
 
-        // Thiết lập mối quan hệ giữa StudentSubjectScore và Student
-        modelBuilder.Entity<StudentSubjectScore>()
-            .HasOne(sss => sss.Student)
-            .WithMany(s => s.StudentSubjectScores)
-            .HasForeignKey(sss => sss.StudentId);
-
-// Thiết lập mối quan hệ giữa StudentSubjectScore và Subject
-        modelBuilder.Entity<StudentSubjectScore>()
-            .HasOne(sss => sss.Subject)
-            .WithMany(sub => sub.StudentSubjectScores)
-            .HasForeignKey(sss => sss.SubjectId);
-
         // Configure one-to-many relationship between Student and SummaryOfYear
         modelBuilder.Entity<SummaryOfYear>()
             .HasOne(sy => sy.Student) // One Student
-            .WithMany(s => s.SummariesOfYear) // Many Summaries
-            .HasForeignKey(sy => sy.StudentId); // Foreign key in SummaryOfYear
+            .WithMany(s => s.SummariesOfYear); // Many Summaries
 
+        modelBuilder.Entity<Score>()
+            .HasOne(s => s.Semester)
+            .WithMany(s => s.Scores)
+            .HasForeignKey(s => s.SemesterId);
 
-        // Seed date for grade
-        modelBuilder.Entity<Grade>().HasData(
-            new Grade { GradeId = 1, YearName = "10" },
-            new Grade { GradeId = 2, YearName = "11" },
-            new Grade { GradeId = 3, YearName = "12" }
-        );
+        // Lưu SemesterType dưới dạng chuỗi
+        modelBuilder.Entity<Semester>()
+            .Property(s => s.SemesterType)
+            .HasConversion(
+                v => v.ToString(), // Lưu dưới dạng chuỗi
+                v => (SemesterType)Enum.Parse(typeof(SemesterType), v)); // Chuyển đổi chuỗi thành enum khi lấy ra
 
-        // Seed data for class, one grade have 13 class
-        for (var year = 1; year <= 3; year++)
-        for (var classNum = 1; classNum <= 13; classNum++)
-            modelBuilder.Entity<Class>().HasData(
-                new Class
-                {
-                    ClassId = year * 100 + classNum,
-                    ClassName = $"{year + 9}/{classNum}", // This will result in "10/1", "10/2", ..., "12/13"
-                    SchoolYearId = year
-                }
-            );
+// Lưu ExamType dưới dạng chuỗi
+        modelBuilder.Entity<Score>()
+            .Property(s => s.ExamType)
+            .HasConversion(
+                v => v.ToString(),
+                v => (ExamType)Enum.Parse(typeof(ExamType), v)); // Chuyển đổi chuỗi thành enum khi lấy ra
+
+        modelBuilder.Entity<Semester>()
+            .Property(s => s.SemesterType)
+            .HasConversion<int>();
 
         // Seed data for Subject 
         modelBuilder.Entity<Subject>().HasData(

@@ -70,35 +70,35 @@ public class TeacherController : ControllerBase
     }
 
 
-    [HttpGet("semester-average")]
-    public ActionResult<double> GetSemesterAverage(int studentId, int subjectId, string semesterName,
-        string academicYear)
-    {
-        try
-        {
-            // Call the service method with the logged-in user's claims and academic year
-            var average =
-                _teacherService.CalculateSemesterAverage(studentId, subjectId, semesterName, User, academicYear);
-            return Ok(average);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
+    // [HttpGet("semester-average")]
+    // public ActionResult<double> GetSemesterAverage(int studentId, int subjectId, string semesterName,
+    //     string academicYear)
+    // {
+    //     try
+    //     {
+    //         // Call the service method with the logged-in user's claims and academic year
+    //         var average =
+    //             _teacherService.CalculateSemesterAverage(studentId, subjectId, semesterName, User, academicYear);
+    //         return Ok(average);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return BadRequest(ex.Message);
+    //     }
+    // }
 
-    [HttpGet("annual-average")]
-    public ActionResult<double> GetAnnualAverage(int studentId, int subjectId, string academicYear)
-    {
-        try
-        {
-            // Call the service method with the logged-in user's claims and academic year
-            var average = _teacherService.CalculateAnnualAverage(studentId, subjectId, User, academicYear);
-            return Ok(average);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
+    // [HttpGet("annual-average")]
+    // public ActionResult<double> GetAnnualAverage(int studentId, int subjectId, string academicYear)
+    // {
+    //     try
+    //     {
+    //         // Call the service method with the logged-in user's claims and academic year
+    //         var average = _teacherService.CalculateAnnualAverage(studentId, subjectId, User, academicYear);
+    //         return Ok(average);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return BadRequest(ex.Message);
+    //     }
+    // }
 }

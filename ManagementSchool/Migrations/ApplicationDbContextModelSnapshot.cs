@@ -34,250 +34,9 @@ namespace ManagementSchool.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SchoolYearId")
-                        .HasColumnType("int");
-
                     b.HasKey("ClassId");
 
-                    b.HasIndex("SchoolYearId");
-
                     b.ToTable("Classes");
-
-                    b.HasData(
-                        new
-                        {
-                            ClassId = 101,
-                            ClassName = "10/1",
-                            SchoolYearId = 1
-                        },
-                        new
-                        {
-                            ClassId = 102,
-                            ClassName = "10/2",
-                            SchoolYearId = 1
-                        },
-                        new
-                        {
-                            ClassId = 103,
-                            ClassName = "10/3",
-                            SchoolYearId = 1
-                        },
-                        new
-                        {
-                            ClassId = 104,
-                            ClassName = "10/4",
-                            SchoolYearId = 1
-                        },
-                        new
-                        {
-                            ClassId = 105,
-                            ClassName = "10/5",
-                            SchoolYearId = 1
-                        },
-                        new
-                        {
-                            ClassId = 106,
-                            ClassName = "10/6",
-                            SchoolYearId = 1
-                        },
-                        new
-                        {
-                            ClassId = 107,
-                            ClassName = "10/7",
-                            SchoolYearId = 1
-                        },
-                        new
-                        {
-                            ClassId = 108,
-                            ClassName = "10/8",
-                            SchoolYearId = 1
-                        },
-                        new
-                        {
-                            ClassId = 109,
-                            ClassName = "10/9",
-                            SchoolYearId = 1
-                        },
-                        new
-                        {
-                            ClassId = 110,
-                            ClassName = "10/10",
-                            SchoolYearId = 1
-                        },
-                        new
-                        {
-                            ClassId = 111,
-                            ClassName = "10/11",
-                            SchoolYearId = 1
-                        },
-                        new
-                        {
-                            ClassId = 112,
-                            ClassName = "10/12",
-                            SchoolYearId = 1
-                        },
-                        new
-                        {
-                            ClassId = 113,
-                            ClassName = "10/13",
-                            SchoolYearId = 1
-                        },
-                        new
-                        {
-                            ClassId = 201,
-                            ClassName = "11/1",
-                            SchoolYearId = 2
-                        },
-                        new
-                        {
-                            ClassId = 202,
-                            ClassName = "11/2",
-                            SchoolYearId = 2
-                        },
-                        new
-                        {
-                            ClassId = 203,
-                            ClassName = "11/3",
-                            SchoolYearId = 2
-                        },
-                        new
-                        {
-                            ClassId = 204,
-                            ClassName = "11/4",
-                            SchoolYearId = 2
-                        },
-                        new
-                        {
-                            ClassId = 205,
-                            ClassName = "11/5",
-                            SchoolYearId = 2
-                        },
-                        new
-                        {
-                            ClassId = 206,
-                            ClassName = "11/6",
-                            SchoolYearId = 2
-                        },
-                        new
-                        {
-                            ClassId = 207,
-                            ClassName = "11/7",
-                            SchoolYearId = 2
-                        },
-                        new
-                        {
-                            ClassId = 208,
-                            ClassName = "11/8",
-                            SchoolYearId = 2
-                        },
-                        new
-                        {
-                            ClassId = 209,
-                            ClassName = "11/9",
-                            SchoolYearId = 2
-                        },
-                        new
-                        {
-                            ClassId = 210,
-                            ClassName = "11/10",
-                            SchoolYearId = 2
-                        },
-                        new
-                        {
-                            ClassId = 211,
-                            ClassName = "11/11",
-                            SchoolYearId = 2
-                        },
-                        new
-                        {
-                            ClassId = 212,
-                            ClassName = "11/12",
-                            SchoolYearId = 2
-                        },
-                        new
-                        {
-                            ClassId = 213,
-                            ClassName = "11/13",
-                            SchoolYearId = 2
-                        },
-                        new
-                        {
-                            ClassId = 301,
-                            ClassName = "12/1",
-                            SchoolYearId = 3
-                        },
-                        new
-                        {
-                            ClassId = 302,
-                            ClassName = "12/2",
-                            SchoolYearId = 3
-                        },
-                        new
-                        {
-                            ClassId = 303,
-                            ClassName = "12/3",
-                            SchoolYearId = 3
-                        },
-                        new
-                        {
-                            ClassId = 304,
-                            ClassName = "12/4",
-                            SchoolYearId = 3
-                        },
-                        new
-                        {
-                            ClassId = 305,
-                            ClassName = "12/5",
-                            SchoolYearId = 3
-                        },
-                        new
-                        {
-                            ClassId = 306,
-                            ClassName = "12/6",
-                            SchoolYearId = 3
-                        },
-                        new
-                        {
-                            ClassId = 307,
-                            ClassName = "12/7",
-                            SchoolYearId = 3
-                        },
-                        new
-                        {
-                            ClassId = 308,
-                            ClassName = "12/8",
-                            SchoolYearId = 3
-                        },
-                        new
-                        {
-                            ClassId = 309,
-                            ClassName = "12/9",
-                            SchoolYearId = 3
-                        },
-                        new
-                        {
-                            ClassId = 310,
-                            ClassName = "12/10",
-                            SchoolYearId = 3
-                        },
-                        new
-                        {
-                            ClassId = 311,
-                            ClassName = "12/11",
-                            SchoolYearId = 3
-                        },
-                        new
-                        {
-                            ClassId = 312,
-                            ClassName = "12/12",
-                            SchoolYearId = 3
-                        },
-                        new
-                        {
-                            ClassId = 313,
-                            ClassName = "12/13",
-                            SchoolYearId = 3
-                        });
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.ClassSemester", b =>
@@ -318,40 +77,6 @@ namespace ManagementSchool.Migrations
                     b.ToTable("ClassSubjects");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Grade", b =>
-                {
-                    b.Property<int>("GradeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GradeId"), 1L, 1);
-
-                    b.Property<string>("YearName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("GradeId");
-
-                    b.ToTable("SchoolYears");
-
-                    b.HasData(
-                        new
-                        {
-                            GradeId = 1,
-                            YearName = "10"
-                        },
-                        new
-                        {
-                            GradeId = 2,
-                            YearName = "11"
-                        },
-                        new
-                        {
-                            GradeId = 3,
-                            YearName = "12"
-                        });
-                });
-
             modelBuilder.Entity("ManagementSchool.Entities.Parent", b =>
                 {
                     b.Property<int>("ParentId")
@@ -369,44 +94,6 @@ namespace ManagementSchool.Migrations
                     b.ToTable("Parents");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Score", b =>
-                {
-                    b.Property<int>("ScoreId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScoreId"), 1L, 1);
-
-                    b.Property<string>("AcademicYear")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ExamType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SemesterName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SubjectId")
-                        .HasColumnType("int");
-
-                    b.Property<double>("Value")
-                        .HasColumnType("float");
-
-                    b.HasKey("ScoreId");
-
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("SubjectId");
-
-                    b.ToTable("Scores");
-                });
-
             modelBuilder.Entity("ManagementSchool.Entities.Semester", b =>
                 {
                     b.Property<int>("SemesterId")
@@ -422,9 +109,8 @@ namespace ManagementSchool.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("SemesterType")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -721,28 +407,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "006d13da-1bff-4e9d-aa74-026f33bebfa9",
+                            Id = "4060a7fb-27c3-4d4a-8610-56971e719a0b",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "5d7b931d-42c9-43c4-82ed-e3e8498083a6",
+                            Id = "9066902d-176e-4c53-a80e-6c83f780d62a",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "469774e5-a2a3-4ac9-aaaf-89db216f848c",
+                            Id = "e7aee922-dbdf-4003-b481-fccd641dbea1",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "d84c117b-17ba-4833-98f5-767d207b9915",
+                            Id = "4e5045a9-b127-4850-86fe-9c7a8bc1e97d",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
@@ -920,26 +606,23 @@ namespace ManagementSchool.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("StudentSubjectScore", b =>
+            modelBuilder.Entity("Score", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ScoreId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScoreId"), 1L, 1);
 
-                    b.Property<string>("AcademicYear")
+                    b.Property<string>("ExamType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("AnnualScore")
+                    b.Property<double>("ScoreValue")
                         .HasColumnType("float");
 
-                    b.Property<double>("Semester1Score")
-                        .HasColumnType("float");
-
-                    b.Property<double>("Semester2Score")
-                        .HasColumnType("float");
+                    b.Property<int>("SemesterId")
+                        .HasColumnType("int");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("int");
@@ -947,24 +630,15 @@ namespace ManagementSchool.Migrations
                     b.Property<int>("SubjectId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("ScoreId");
+
+                    b.HasIndex("SemesterId");
 
                     b.HasIndex("StudentId");
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("StudentSubjectScores");
-                });
-
-            modelBuilder.Entity("ManagementSchool.Entities.Class", b =>
-                {
-                    b.HasOne("ManagementSchool.Entities.Grade", "Grade")
-                        .WithMany("Classes")
-                        .HasForeignKey("SchoolYearId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Grade");
+                    b.ToTable("Scores");
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.ClassSemester", b =>
@@ -1001,25 +675,6 @@ namespace ManagementSchool.Migrations
                         .IsRequired();
 
                     b.Navigation("Class");
-
-                    b.Navigation("Subject");
-                });
-
-            modelBuilder.Entity("ManagementSchool.Entities.Score", b =>
-                {
-                    b.HasOne("ManagementSchool.Entities.Student", "Student")
-                        .WithMany("Scores")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ManagementSchool.Entities.Subject", "Subject")
-                        .WithMany("Scores")
-                        .HasForeignKey("SubjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Student");
 
                     b.Navigation("Subject");
                 });
@@ -1170,19 +825,27 @@ namespace ManagementSchool.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StudentSubjectScore", b =>
+            modelBuilder.Entity("Score", b =>
                 {
+                    b.HasOne("ManagementSchool.Entities.Semester", "Semester")
+                        .WithMany("Scores")
+                        .HasForeignKey("SemesterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ManagementSchool.Entities.Student", "Student")
-                        .WithMany("StudentSubjectScores")
+                        .WithMany("Scores")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ManagementSchool.Entities.Subject", "Subject")
-                        .WithMany("StudentSubjectScores")
+                        .WithMany("Scores")
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Semester");
 
                     b.Navigation("Student");
 
@@ -1200,11 +863,6 @@ namespace ManagementSchool.Migrations
                     b.Navigation("TeacherClasses");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Grade", b =>
-                {
-                    b.Navigation("Classes");
-                });
-
             modelBuilder.Entity("ManagementSchool.Entities.Parent", b =>
                 {
                     b.Navigation("Students");
@@ -1213,13 +871,13 @@ namespace ManagementSchool.Migrations
             modelBuilder.Entity("ManagementSchool.Entities.Semester", b =>
                 {
                     b.Navigation("ClassSemesters");
+
+                    b.Navigation("Scores");
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.Student", b =>
                 {
                     b.Navigation("Scores");
-
-                    b.Navigation("StudentSubjectScores");
 
                     b.Navigation("StudentSubjects");
 
@@ -1233,8 +891,6 @@ namespace ManagementSchool.Migrations
                     b.Navigation("ClassSubjects");
 
                     b.Navigation("Scores");
-
-                    b.Navigation("StudentSubjectScores");
 
                     b.Navigation("StudentSubjects");
 

@@ -27,9 +27,6 @@ namespace ManagementSchool.Service.ParentService
                     StudentFullName = s.FullName,
                     ClassName = s.Class.ClassName,
                     SubjectName = score.Subject.SubjectName,
-                    ScoreValue = score.Value,
-                    ExamType = score.ExamType,
-                    Semester = score.SemesterName,
                     AcademicYear = s.AcademicYear
                 })
                 .ToListAsync();

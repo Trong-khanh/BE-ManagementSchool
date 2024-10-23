@@ -1,4 +1,5 @@
 using ManagementSchool.Dto;
+using ManagementSchool.Entities;
 using ManagementSchool.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -71,22 +72,22 @@ public class AdminController : ControllerBase
         }
     }
 
-    [HttpGet("GetStudentsBySchoolYear/{yearName}")]
-    public async Task<IActionResult> GetStudentsBySchoolYear(string yearName)
-    {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(yearName))
-                return BadRequest("Year name cannot be empty.");
-
-            var students = await _adminService.GetStudentsBySchoolYearAsync(yearName);
-            return Ok(students);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"An error occurred: {ex.Message}");
-        }
-    }
+    // [HttpGet("GetStudentsBySchoolYear/{yearName}")]
+    // public async Task<IActionResult> GetStudentsBySchoolYear(string yearName)
+    // {
+    //     try
+    //     {
+    //         if (string.IsNullOrWhiteSpace(yearName))
+    //             return BadRequest("Year name cannot be empty.");
+    //
+    //         var students = await _adminService.GetStudentsBySchoolYearAsync(yearName);
+    //         return Ok(students);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(500, $"An error occurred: {ex.Message}");
+    //     }
+    // }
 
     [HttpGet("getaAllStudents")]
     public async Task<IActionResult> GetAllStudents()
@@ -340,24 +341,99 @@ public class AdminController : ControllerBase
         }
     }
 
-    // END CRUD SEMESTER //
-    [HttpPost("calculate-grades")]
-    public async Task<IActionResult> CalculateFinalGrades([FromQuery] string className, [FromQuery] string academicYear)
-    {
-        if (string.IsNullOrWhiteSpace(className) || string.IsNullOrWhiteSpace(academicYear))
-            return BadRequest("Both class name and academic year are required.");
+    // // END CRUD SEMESTER //
+    // [HttpPost("calculate-grades")]
+    // public async Task<IActionResult> CalculateFinalGrades([FromQuery] string className, [FromQuery] string academicYear)
+    // {
+    //     if (string.IsNullOrWhiteSpace(className) || string.IsNullOrWhiteSpace(academicYear))
+    //         return BadRequest("Both class name and academic year are required.");
+    //
+    //     try
+    //     {
+    //         await _adminService.CalculateAndSaveFinalGradesAsync(className, academicYear);
+    //         return Ok("Final grades calculated and saved successfully.");
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         // Log the exception details for debugging purposes
+    //         return StatusCode(500, $"An error occurred: {ex.Message}");
+    //     }
+    // }
+    
+    // Create
+        [HttpPost("AddClass")]
+        public async Task<ActionResult<Class>> AddClass([FromBody] ClassDto newClassDto) // Sử dụng ClassDto
+        {
+            try
+            {
+                var result = await _adminService.AddClassAsync(newClassDto);
+                return CreatedAtAction(nameof(GetClassById), new { id = result.ClassId }, result); // Trả về 201 Created
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
-        try
+        // Read All
+        [HttpGet("GetAllClasses")]
+        public async Task<ActionResult<IEnumerable<Class>>> GetAllClasses()
         {
-            await _adminService.CalculateAndSaveFinalGradesAsync(className, academicYear);
-            return Ok("Final grades calculated and saved successfully.");
+            var classes = await _adminService.GetAllClassesAsync();
+            return Ok(classes);
         }
-        catch (Exception ex)
+
+        // Read One
+        [HttpGet("GetClass/{id}")]
+        public async Task<ActionResult<Class>> GetClassById(int id)
         {
-            // Log the exception details for debugging purposes
-            return StatusCode(500, $"An error occurred: {ex.Message}");
+            try
+            {
+                var result = await _adminService.GetClassByIdAsync(id);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
-    }
+
+        // Update
+        [HttpPut("UpdateClass/{id}")]
+        public async Task<IActionResult> UpdateClass(int id, [FromBody] ClassDto updatedClassDto) // Sử dụng ClassDto
+        {
+            try
+            {
+                var result = await _adminService.UpdateClassAsync(id, updatedClassDto);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // Delete
+        [HttpDelete("DeleteClass/{id}")]
+        public async Task<IActionResult> DeleteClass(int id)
+        {
+            try
+            {
+                var result = await _adminService.DeleteClassAsync(id);
+                if (result)
+                    return Ok("Class deleted successfully");
+                return NotFound($"Class with ID {id} not found");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+    
 
     [HttpPost("UpgradeClass")]
     public async Task<IActionResult> UpgradeClass([FromQuery] int oldClassId, [FromQuery] string oldAcademicYear,

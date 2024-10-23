@@ -9,7 +9,6 @@ public interface IAdminService
     Task<bool> DeleteStudentAsync(int studentId);
     Task<Student> UpdateStudentAsync(int studentId, StudentDtos studentDtos);
     Task<IEnumerable<Student>> GetStudentsByClassAsync(string className, string academicYear);
-    Task<IEnumerable<Student>> GetStudentsBySchoolYearAsync(string yearName);
     Task<Student> GetStudentByIdAsync(int studentId);
     Task<TeacherDto?> AddTeacherAsync(TeacherDto teacherDto);
     Task<bool> DeleteTeacherAsync(int teacherId);
@@ -27,7 +26,14 @@ public interface IAdminService
     Task<bool> DeleteSemesterAsync(int semesterId);
     Task<IEnumerable<Semester>> GetAllSemestersAsync();
     Task<Semester> GetSemesterByIdAsync(int semesterId);
+
     Task<IEnumerable<Student>> GetAllStudentsAsync();
-    Task CalculateAndSaveFinalGradesAsync(string className, string academicYear);
+
+    // Task CalculateAndSaveFinalGradesAsync(string className, string academicYear);
     Task<bool> UpgradeClassAsync(int oldClassId, string oldAcademicYear, int newClassId, string newAcademicYear);
+    Task<Class> AddClassAsync(ClassDto newClassDto); // Thay đổi để nhận ClassDto
+    Task<Class> UpdateClassAsync(int classId, ClassDto updatedClassDto); // Thay đổi để nhận ClassDto
+    Task<bool> DeleteClassAsync(int classId);
+    Task<IEnumerable<Class>> GetAllClassesAsync();
+    Task<Class> GetClassByIdAsync(int classId);
 }
