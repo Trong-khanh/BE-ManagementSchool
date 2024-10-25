@@ -62,19 +62,6 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Parents",
-                columns: table => new
-                {
-                    ParentId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ParentName = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Parents", x => x.ParentId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Semesters",
                 columns: table => new
                 {
@@ -228,8 +215,8 @@ namespace ManagementSchool.Migrations
                     FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ClassId = table.Column<int>(type: "int", nullable: false),
-                    ParentId = table.Column<int>(type: "int", nullable: false),
-                    AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ParentName = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -239,12 +226,6 @@ namespace ManagementSchool.Migrations
                         column: x => x.ClassId,
                         principalTable: "Classes",
                         principalColumn: "ClassId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Students_Parents_ParentId",
-                        column: x => x.ParentId,
-                        principalTable: "Parents",
-                        principalColumn: "ParentId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -453,10 +434,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "4060a7fb-27c3-4d4a-8610-56971e719a0b", "1", "Admin", "ADMIN" },
-                    { "4e5045a9-b127-4850-86fe-9c7a8bc1e97d", "4", "Parent", "PARENT" },
-                    { "9066902d-176e-4c53-a80e-6c83f780d62a", "2", "Student", "STUDENT" },
-                    { "e7aee922-dbdf-4003-b481-fccd641dbea1", "3", "Teacher", "TEACHER" }
+                    { "103c98e6-afba-487f-b3f4-f6167516749e", "1", "Admin", "ADMIN" },
+                    { "508bc70b-e1aa-47e5-8426-b0c111b05703", "4", "Parent", "PARENT" },
+                    { "65ccf043-ac6d-4703-972e-7b0e67cba6a0", "3", "Teacher", "TEACHER" },
+                    { "96f488d1-2d5c-40e1-82bb-15474ffdd5d5", "2", "Student", "STUDENT" }
                 });
 
             migrationBuilder.InsertData(
@@ -558,11 +539,6 @@ namespace ManagementSchool.Migrations
                 column: "ClassId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Students_ParentId",
-                table: "Students",
-                column: "ParentId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_StudentSubjects_StudentId",
                 table: "StudentSubjects",
                 column: "StudentId");
@@ -656,9 +632,6 @@ namespace ManagementSchool.Migrations
 
             migrationBuilder.DropTable(
                 name: "Classes");
-
-            migrationBuilder.DropTable(
-                name: "Parents");
         }
     }
 }

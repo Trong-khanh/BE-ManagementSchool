@@ -77,23 +77,6 @@ namespace ManagementSchool.Migrations
                     b.ToTable("ClassSubjects");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Parent", b =>
-                {
-                    b.Property<int>("ParentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ParentId"), 1L, 1);
-
-                    b.Property<string>("ParentName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ParentId");
-
-                    b.ToTable("Parents");
-                });
-
             modelBuilder.Entity("ManagementSchool.Entities.Semester", b =>
                 {
                     b.Property<int>("SemesterId")
@@ -143,14 +126,13 @@ namespace ManagementSchool.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ParentId")
-                        .HasColumnType("int");
+                    b.Property<string>("ParentName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("StudentId");
 
                     b.HasIndex("ClassId");
-
-                    b.HasIndex("ParentId");
 
                     b.ToTable("Students");
                 });
@@ -407,28 +389,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "4060a7fb-27c3-4d4a-8610-56971e719a0b",
+                            Id = "103c98e6-afba-487f-b3f4-f6167516749e",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "9066902d-176e-4c53-a80e-6c83f780d62a",
+                            Id = "96f488d1-2d5c-40e1-82bb-15474ffdd5d5",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "e7aee922-dbdf-4003-b481-fccd641dbea1",
+                            Id = "65ccf043-ac6d-4703-972e-7b0e67cba6a0",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "4e5045a9-b127-4850-86fe-9c7a8bc1e97d",
+                            Id = "508bc70b-e1aa-47e5-8426-b0c111b05703",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
@@ -687,15 +669,7 @@ namespace ManagementSchool.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ManagementSchool.Entities.Parent", "Parent")
-                        .WithMany("Students")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Class");
-
-                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.StudentSubject", b =>
@@ -861,11 +835,6 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Students");
 
                     b.Navigation("TeacherClasses");
-                });
-
-            modelBuilder.Entity("ManagementSchool.Entities.Parent", b =>
-                {
-                    b.Navigation("Students");
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.Semester", b =>

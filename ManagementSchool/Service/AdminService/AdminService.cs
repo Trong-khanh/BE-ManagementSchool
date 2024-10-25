@@ -4,6 +4,7 @@ using ManagementSchool.Dto;
 using ManagementSchool.Entities;
 using ManagementSchool.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Extensions;
 
 namespace ManagementSchool.Service;
 
@@ -20,124 +21,64 @@ public class AdminService : IAdminService
     {
         // Validate inputs
         IsValidName(studentDto.FullName);
-        IsValidName(studentDto.ParentName); // Make sure the parent's name is also valid
+        IsValidName(studentDto.ParentName); // Kiểm tra tên của Parent
 
-        using (var transaction = await _context.Database.BeginTransactionAsync())
-        {
-            try
-            {
-                // Check if the parent already exists by name or some unique identifier
-                var parent = await _context.Parents.FirstOrDefaultAsync(p => p.ParentName == studentDto.ParentName);
-
-                // If the parent doesn't exist, create and add the new parent
-                if (parent == null)
-                {
-                    parent = new Parent
-                    {
-                        ParentName = studentDto.ParentName
-                    };
-                    _context.Parents.Add(parent);
-                    await _context.SaveChangesAsync(); // Save to get the new ParentId
-                }
-
-                // Check if the AcademicYear provided exists in Semester
-                var semester =
-                    await _context.Semesters.FirstOrDefaultAsync(s => s.AcademicYear == studentDto.AcademicYear);
-                if (semester == null) throw new ValidateException("Invalid AcademicYear provided.");
-
-                // Create and add the student with the ParentId from the existing/new parent
-                var student = new Student
-                {
-                    FullName = studentDto.FullName,
-                    Address = studentDto.Address,
-                    ClassId = await _context.Classes.Where(c => c.ClassName == studentDto.ClassName)
-                        .Select(c => c.ClassId)
-                        .FirstOrDefaultAsync(),
-                    ParentId = parent.ParentId,
-                    AcademicYear = studentDto.AcademicYear
-                };
-
-                _context.Students.Add(student);
-                await _context.SaveChangesAsync();
-
-                // Commit transaction if all commands succeed
-                await transaction.CommitAsync();
-
-                return student;
-            }
-            catch (Exception ex)
-            {
-                // Rollback the transaction if any exception occurs
-                await transaction.RollbackAsync();
-                throw new ValidateException($"An error occurred while adding the student and parent: {ex.Message}");
-            }
-        }
-    }
-
-    public async Task<Student> UpdateStudentAsync(int studentId, StudentDtos studentDto)
-    {
-        var student = await _context.Students.Include(s => s.Parent)
-            .FirstOrDefaultAsync(s => s.StudentId == studentId);
-        if (student == null) throw new ValidateException("Student not found.");
-
-        // Update student details
-        student.FullName = studentDto.FullName;
-        student.Address = studentDto.Address;
-        student.ClassId = await _context.Classes.Where(c => c.ClassName == studentDto.ClassName)
-            .Select(c => c.ClassId)
-            .FirstOrDefaultAsync();
-
-        // Check if the AcademicYear provided exists in Semester
+        // Kiểm tra nếu AcademicYear tồn tại trong Semester
         var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.AcademicYear == studentDto.AcademicYear);
         if (semester == null) throw new ValidateException("Invalid AcademicYear provided.");
 
-        student.AcademicYear = studentDto.AcademicYear; // Update AcademicYear of Student
+        // Tạo và thêm student
+        var student = new Student
+        {
+            FullName = studentDto.FullName,
+            Address = studentDto.Address,
+            ClassId = await _context.Classes
+                .Where(c => c.ClassName == studentDto.ClassName)
+                .Select(c => c.ClassId)
+                .FirstOrDefaultAsync(),
+            AcademicYear = studentDto.AcademicYear,
+            ParentName = studentDto.ParentName
+        };
 
-        // Update parent details
-        student.Parent.ParentName = studentDto.ParentName;
+        _context.Students.Add(student);
+        await _context.SaveChangesAsync();
+
+        return student;
+    }
+    
+    public async Task<Student> UpdateStudentAsync(int studentId, StudentDtos studentDto)
+    {
+        var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentId == studentId);
+        if (student == null) throw new ValidateException("Student not found.");
+
+        // Cập nhật thông tin student
+        student.FullName = studentDto.FullName;
+        student.Address = studentDto.Address;
+        student.ClassId = await _context.Classes
+            .Where(c => c.ClassName == studentDto.ClassName)
+            .Select(c => c.ClassId)
+            .FirstOrDefaultAsync();
+
+        // Kiểm tra nếu AcademicYear tồn tại trong Semester
+        var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.AcademicYear == studentDto.AcademicYear);
+        if (semester == null) throw new ValidateException("Invalid AcademicYear provided.");
+
+        student.AcademicYear = studentDto.AcademicYear;
+        student.ParentName = studentDto.ParentName;
 
         await _context.SaveChangesAsync();
         return student;
     }
-
+    
     public async Task<bool> DeleteStudentAsync(int studentId)
     {
-        var student = await _context.Students.Include(s => s.Parent)
-            .FirstOrDefaultAsync(s => s.StudentId == studentId);
+        var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentId == studentId);
         if (student == null) return false;
 
-        // Check if the parent is associated with any other students
-        var otherStudents = await _context.Students
-            .Where(s => s.ParentId == student.ParentId && s.StudentId != studentId)
-            .ToListAsync();
+        _context.Students.Remove(student);
+        await _context.SaveChangesAsync();
 
-        using (var transaction = await _context.Database.BeginTransactionAsync())
-        {
-            try
-            {
-                // If the parent is not associated with any other students, delete the parent
-                if (!otherStudents.Any())
-                {
-                    var parent = await _context.Parents.FindAsync(student.ParentId);
-                    if (parent != null) _context.Parents.Remove(parent);
-                }
-
-                // Delete the student
-                _context.Students.Remove(student);
-                await _context.SaveChangesAsync();
-
-                // Commit transaction if all commands succeed
-                await transaction.CommitAsync();
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                // Rollback the transaction if any exception occurs
-                await transaction.RollbackAsync();
-                throw new ValidateException($"Student is deleted or does not exist: {ex.Message}");
-            }
-        }
+        return true;
     }
 
     public async Task<IEnumerable<Student>> GetStudentsByClassAsync(string className, string academicYear)
@@ -177,7 +118,6 @@ public class AdminService : IAdminService
     {
         return await _context.Students
             .Include(s => s.Class)
-            .Include(s => s.Parent)
             .FirstOrDefaultAsync(s => s.StudentId == studentId);
     }
 
@@ -242,7 +182,7 @@ public class AdminService : IAdminService
 
         return true;
     }
-
+    
     public async Task<TeacherDto?> UpdateTeacherAsync(int teacherId, TeacherDto teacherDto)
     {
         if (teacherDto == null)
@@ -423,99 +363,108 @@ public class AdminService : IAdminService
         }
     }
 
-public async Task<Semester> AddSemesterAsync(SemesterDto semesterDto)
-{
-    if (semesterDto == null)
-        throw new ValidateException("The semesterDto field is required.");
-
-    // Validate StartDate and EndDate
-    if (semesterDto.EndDate <= semesterDto.StartDate)
-        throw new ValidateException("EndDate must be greater than StartDate.");
-
-    // Validate SemesterType
-    if (!Enum.IsDefined(typeof(SemesterType), semesterDto.SemesterType))
-        throw new ValidateException("Invalid SemesterType specified.");
-
-    var semester = new Semester
+    public async Task<Semester> AddSemesterAsync(SemesterDto semesterDto)
     {
-        SemesterType = semesterDto.SemesterType,
-        StartDate = semesterDto.StartDate,
-        EndDate = semesterDto.EndDate,
-        AcademicYear = semesterDto.AcademicYear
-    };
+        if (semesterDto == null)
+            throw new ValidateException("The semesterDto field is required.");
 
-    _context.Semesters.Add(semester);
-    await _context.SaveChangesAsync();
+        // Validate StartDate and EndDate
+        if (semesterDto.EndDate <= semesterDto.StartDate)
+            throw new ValidateException("EndDate must be greater than StartDate.");
 
-    return semester;
-}
+        // Convert SemesterType string to enum
+        if (!Enum.TryParse<SemesterType>(semesterDto.SemesterType.Replace(" ", ""), out var semesterType))
+            throw new ValidateException("Invalid SemesterType specified.");
 
-public async Task<Semester> UpdateSemesterAsync(int semesterId, SemesterDto semesterDto)
-{
-    if (semesterDto == null)
-        throw new ValidateException("The semesterDto object must be provided.");
-
-    var semester = await _context.Semesters.FindAsync(semesterId);
-    if (semester == null)
-        throw new ValidateException("Semester not found.");
-
-    // Validate StartDate and EndDate
-    if (semesterDto.StartDate >= semesterDto.EndDate)
-        throw new ValidateException("StartDate must be before EndDate.");
-
-    // Validate SemesterType
-    if (!Enum.IsDefined(typeof(SemesterType), semesterDto.SemesterType))
-        throw new ValidateException("Invalid SemesterType specified.");
-
-    semester.SemesterType = semesterDto.SemesterType;
-    semester.StartDate = semesterDto.StartDate;
-    semester.EndDate = semesterDto.EndDate;
-    semester.AcademicYear = semesterDto.AcademicYear;
-
-    await _context.SaveChangesAsync();
-
-    return semester;
-}
-
-public async Task<bool> DeleteSemesterAsync(int semesterId)
-{
-    var semester = await _context.Semesters.FindAsync(semesterId);
-    if (semester == null) return false;
-
-    _context.Semesters.Remove(semester);
-    await _context.SaveChangesAsync();
-
-    return true;
-}
-
-public async Task<IEnumerable<Semester>> GetAllSemestersAsync()
-{
-    return await _context.Semesters
-        .Select(s => new Semester
+        var semester = new Semester
         {
-            SemesterId = s.SemesterId,
-            SemesterType = s.SemesterType,
-            StartDate = s.StartDate,
-            EndDate = s.EndDate,
-            AcademicYear = s.AcademicYear
-        })
-        .ToListAsync();
-}
+            SemesterType = semesterType,
+            StartDate = semesterDto.StartDate,
+            EndDate = semesterDto.EndDate,
+            AcademicYear = semesterDto.AcademicYear
+        };
 
-public async Task<Semester> GetSemesterByIdAsync(int semesterId)
-{
-    var semester = await _context.Semesters.FindAsync(semesterId);
-    if (semester == null)
-        throw new ValidateException("Semester not found.");
+        _context.Semesters.Add(semester);
+        await _context.SaveChangesAsync();
 
-    return semester;
-}
+        return semester;
+    }
+
+    public async Task<Semester> UpdateSemesterAsync(int semesterId, SemesterDto semesterDto)
+    {
+        if (semesterDto == null)
+            throw new ValidateException("The semesterDto object must be provided.");
+
+        var semester = await _context.Semesters.FindAsync(semesterId);
+        if (semester == null)
+            throw new ValidateException("Semester not found.");
+
+        // Validate StartDate and EndDate
+        if (semesterDto.StartDate >= semesterDto.EndDate)
+            throw new ValidateException("StartDate must be before EndDate.");
+
+        // Convert SemesterType string to enum
+        if (!Enum.TryParse<SemesterType>(semesterDto.SemesterType.Replace(" ", ""), out var semesterType))
+            throw new ValidateException("Invalid SemesterType specified.");
+
+        semester.SemesterType = semesterType; // Update enum
+        semester.StartDate = semesterDto.StartDate;
+        semester.EndDate = semesterDto.EndDate;
+        semester.AcademicYear = semesterDto.AcademicYear;
+
+        await _context.SaveChangesAsync();
+
+        return semester;
+    }
+    
+    public async Task<bool> DeleteSemesterAsync(int semesterId)
+    {
+        var semester = await _context.Semesters.FindAsync(semesterId);
+        if (semester == null) return false;
+
+        _context.Semesters.Remove(semester);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<IEnumerable<SemesterDto>> GetAllSemestersAsync()
+    {
+        return await _context.Semesters
+            .Select(s => new SemesterDto
+            {
+                SemesterId = s.SemesterId, // Use SemesterId instead of Id
+                SemesterType = s.SemesterType.GetDisplayName(),
+                StartDate = s.StartDate,
+                EndDate = s.EndDate,
+                AcademicYear = s.AcademicYear
+            })
+            .ToListAsync();
+    }
+    
+    public async Task<SemesterDto> GetSemesterByIdAsync(int semesterId)
+    {
+        // Find the semester using the provided semesterId
+        var semester = await _context.Semesters.FindAsync(semesterId);
+
+        // Check if the semester was found
+        if (semester == null)
+            throw new ValidateException("Semester not found.");
+
+        // Return a new SemesterDto with the details
+        return new SemesterDto
+        {
+            SemesterType = semester.SemesterType.ToString(),
+            StartDate = semester.StartDate,
+            EndDate = semester.EndDate,
+            AcademicYear = semester.AcademicYear
+        };
+    }
 
     public async Task<IEnumerable<Student>> GetAllStudentsAsync()
     {
         return await _context.Students
             .Include(s => s.Class) // Include the related class
-            .Include(s => s.Parent) // Include the related parent
             .ToListAsync();
     }
 
@@ -613,7 +562,7 @@ public async Task<Semester> GetSemesterByIdAsync(int semesterId)
     //     await _context.SaveChangesAsync();
     //     Console.WriteLine("Changes saved successfully.");
     // }
-    
+
     public async Task<Class> AddClassAsync(ClassDto newClassDto)
     {
         if (string.IsNullOrWhiteSpace(newClassDto.ClassName))
@@ -628,7 +577,7 @@ public async Task<Semester> GetSemesterByIdAsync(int semesterId)
         await _context.SaveChangesAsync();
         return newClass;
     }
-    
+
     public async Task<Class> UpdateClassAsync(int classId, ClassDto updatedClassDto)
     {
         var existingClass = await _context.Classes.FindAsync(classId);
@@ -664,7 +613,7 @@ public async Task<Semester> GetSemesterByIdAsync(int semesterId)
             throw new KeyNotFoundException($"Class with ID {classId} not found.");
         return result;
     }
-    
+
     public async Task<bool> UpgradeClassAsync(int oldClassId, string oldAcademicYear, int newClassId,
         string newAcademicYear)
     {

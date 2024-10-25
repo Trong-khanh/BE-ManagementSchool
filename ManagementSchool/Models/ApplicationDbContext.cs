@@ -15,7 +15,6 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<Class> Classes { get; set; }
     public DbSet<Student> Students { get; set; }
     public DbSet<Teacher?> Teachers { get; set; }
-    public DbSet<Parent> Parents { get; set; }
     public DbSet<TeacherClass> TeacherClasses { get; set; }
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<StudentSubject> StudentSubjects { get; set; }
@@ -49,12 +48,6 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .HasOne(c => c.Class)
             .WithMany(cs => cs.ClassSubjects)
             .HasForeignKey(c => c.ClassId);
-
-        // Relationship with Parent
-        modelBuilder.Entity<Student>()
-            .HasOne(p => p.Parent)
-            .WithMany(s => s.Students)
-            .HasForeignKey(p => p.ParentId);
 
         // Relationship with StudentSubject
         modelBuilder.Entity<StudentSubject>()

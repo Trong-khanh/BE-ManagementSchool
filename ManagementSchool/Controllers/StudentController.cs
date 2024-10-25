@@ -31,7 +31,7 @@ public class StudentController : ControllerBase
                 student.FullName,
                 student.Class.ClassName,
                 student.Address,
-                student.Parent.ParentName
+                student.ParentName
             });
         }
         catch (Exception ex)

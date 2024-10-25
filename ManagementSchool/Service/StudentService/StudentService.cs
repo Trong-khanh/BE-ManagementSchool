@@ -17,7 +17,6 @@ public class StudentService : IStudentService
     {
         return await _context.Students
             .Include(s => s.Class)
-            .Include(s => s.Parent)
             .FirstOrDefaultAsync(s => s.StudentId == studentId);
     }
 }

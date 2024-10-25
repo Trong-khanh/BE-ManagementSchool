@@ -18,37 +18,46 @@ public class TeacherController : ControllerBase
         _teacherService = teacherService;
     }
 
-    // [HttpGet("ViewAllSemesters")]
-    // public async Task<IActionResult> GetAllSemesters()
-    // {
-    //     try
-    //     {
-    //         var semesters = await _teacherService.GetAllSemestersAsync();
-    //         return Ok(semesters);
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return StatusCode(500, $"Internal server error: {ex.Message}");
-    //     }
-    // }
-
-    [HttpPost("AddScore")]
-    public async Task<IActionResult> AddScore([FromBody] ScoreDto scoreDto, string teacherEmail)
+    [HttpGet("ViewAllSemesters")]
+    public async Task<IActionResult> GetAllSemesters()
     {
         try
         {
-            await _teacherService.AddScoreAsync(scoreDto, teacherEmail);
-            return Ok("Score added successfully.");
-        }
-        catch (AdminService.ValidateException ex)
-        {
-            return BadRequest(ex.Message);
+            var semesters = await _teacherService.GetAllSemestersAsync();
+            
+            // Check if data exists
+            if (semesters == null || !semesters.Any())
+            {
+                return NotFound("No semesters found.");
+            }
+
+            return Ok(semesters);
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"An error occurred: {ex.Message}");
+            // Log the exception if logging is set up (optional)
+            return StatusCode(500, "Internal server error: " + ex.Message);
         }
     }
+
+
+    // [HttpPost("AddScore")]
+    // public async Task<IActionResult> AddScore([FromBody] ScoreDto scoreDto, string teacherEmail)
+    // {
+    //     try
+    //     {
+    //         await _teacherService.AddScoreAsync(scoreDto, teacherEmail);
+    //         return Ok("Score added successfully.");
+    //     }
+    //     catch (AdminService.ValidateException ex)
+    //     {
+    //         return BadRequest(ex.Message);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(500, $"An error occurred: {ex.Message}");
+    //     }
+    // }
 
     [HttpGet("GetStudentsInAssignedClasses")]
     public async Task<IActionResult> GetStudentsInAssignedClasses()

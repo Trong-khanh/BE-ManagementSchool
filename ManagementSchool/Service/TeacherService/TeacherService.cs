@@ -3,6 +3,7 @@ using ManagementSchool.Dto;
 using ManagementSchool.Entities;
 using ManagementSchool.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Extensions;
 
 namespace ManagementSchool.Service.TeacherService;
 
@@ -68,9 +69,43 @@ public class TeacherService : ITeacherService
 // }
 
 
-    // public async Task<List<StudentInfoDto>> GetAssignedClassesStudentsAsync(ClaimsPrincipal user)
+    public async Task<List<StudentInfoDto>> GetAssignedClassesStudentsAsync(ClaimsPrincipal user)
+    {
+        // Lấy TeacherId từ Claims
+        var teacherEmail = user.FindFirstValue(ClaimTypes.Email);
+    
+        // Tìm giáo viên kèm theo các lớp và học sinh liên quan
+        var teacher = await _context.Teachers
+            .Include(t => t.TeacherClasses)
+            .ThenInclude(tc => tc.Class)
+            .ThenInclude(c => c.Students)
+            .FirstOrDefaultAsync(t => t.Email == teacherEmail);
+
+        // Nếu không tìm thấy giáo viên, trả về danh sách rỗng
+        if (teacher == null)
+        {
+            return new List<StudentInfoDto>(); 
+        }
+
+        // Tạo danh sách học sinh từ các lớp mà giáo viên được giao
+        var students = teacher.TeacherClasses
+            .SelectMany(tc => tc.Class.Students.Select(s => new StudentInfoDto
+            {
+                StudentFullName = s.FullName,             
+                ClassName = tc.Class.ClassName,             
+            }))
+            .ToList();
+
+        return students;
+    }
+
+// Ví dụ hàm để lấy điểm cho học sinh
+    // private double GetScoreForStudent(int studentId, int classId)
     // {
+    //     // Logic để lấy điểm cho học sinh trong lớp (chưa định nghĩa trong mã nguồn)
+    //     return 0; // Thay thế bằng giá trị điểm thực tế
     // }
+
 
     // public double CalculateSemesterAverage(int studentId, int subjectId, string semesterName, ClaimsPrincipal user,
     //     string academicYear)
@@ -131,7 +166,7 @@ public class TeacherService : ITeacherService
     //
     //     return roundedAverage;
     // }
-
+    //
     // public double CalculateAnnualAverage(int studentId, int subjectId, ClaimsPrincipal user, string academicYear)
     // {
     //     var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
@@ -154,7 +189,7 @@ public class TeacherService : ITeacherService
     //
     //     return roundedAnnualAverage;
     // }
-
+    //
     // private void SaveSemesterScore(int studentId, int subjectId, string semesterName, double score, string academicYear)
     // {
     //     var studentSubjectScore = _context.StudentSubjectScores
@@ -187,30 +222,18 @@ public class TeacherService : ITeacherService
     //
     //     _context.SaveChanges();
     // }
-    // public async Task<IEnumerable<SemesterDto>> GetAllSemestersAsync()
-    // {
-    //     // Retrieve all semesters from the database
-    //     var semesters = await _context.Semesters
-    //         .Select(s => new SemesterDto
-    //         {
-    //             SemesterId = s.SemesterId,
-    //             SemesterType = s.SemesterType,
-    //             StartDate = s.StartDate,
-    //             EndDate = s.EndDate,
-    //             AcademicYear = s.AcademicYear
-    //         })
-    //         .ToListAsync();
-    //
-    //     return semesters; // Return the list of SemesterDto
-    // }
-
-    public Task AddScoreAsync(ScoreDto scoreDto, string teacherEmail)
+    public async Task<IEnumerable<SemesterDto>> GetAllSemestersAsync()
     {
-        throw new NotImplementedException();
+        return await _context.Semesters
+            .Select(s => new SemesterDto
+            {
+                SemesterId = s.SemesterId,
+                SemesterType = s.SemesterType.GetDisplayName(),
+                StartDate = s.StartDate,
+                EndDate = s.EndDate,
+                AcademicYear = s.AcademicYear
+            })
+            .ToListAsync();
     }
-
-    public Task<List<StudentInfoDto>> GetAssignedClassesStudentsAsync(ClaimsPrincipal user)
-    {
-        throw new NotImplementedException();
-    }
+    
 }

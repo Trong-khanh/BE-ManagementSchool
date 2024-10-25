@@ -312,7 +312,7 @@ public class AdminController : ControllerBase
         }
     }
 
-    [HttpDelete("DeleteSemester/{semesterId}")]
+    [HttpDelete("DeleteSemesters/{semesterId}")]
     public async Task<IActionResult> DeleteSemester(int semesterId)
     {
         var success = await _adminService.DeleteSemesterAsync(semesterId);
