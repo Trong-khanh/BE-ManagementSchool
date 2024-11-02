@@ -40,24 +40,19 @@ public class TeacherController : ControllerBase
         }
     }
 
-
-    // [HttpPost("AddScore")]
-    // public async Task<IActionResult> AddScore([FromBody] ScoreDto scoreDto, string teacherEmail)
-    // {
-    //     try
-    //     {
-    //         await _teacherService.AddScoreAsync(scoreDto, teacherEmail);
-    //         return Ok("Score added successfully.");
-    //     }
-    //     catch (AdminService.ValidateException ex)
-    //     {
-    //         return BadRequest(ex.Message);
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return StatusCode(500, $"An error occurred: {ex.Message}");
-    //     }
-    // }
+    [HttpPost("AddScore")]
+    public async Task<IActionResult> AddScoreForStudent([FromBody] ScoreDto scoreDto)
+    {
+        try
+        {
+            await _teacherService.AddScoreForStudentAsync(User, scoreDto);
+            return Ok(new { Message = "Score added successfully." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
 
     [HttpGet("GetStudentsInAssignedClasses")]
     public async Task<IActionResult> GetStudentsInAssignedClasses()

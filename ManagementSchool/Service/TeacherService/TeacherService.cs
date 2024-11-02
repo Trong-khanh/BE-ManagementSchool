@@ -10,102 +10,63 @@ namespace ManagementSchool.Service.TeacherService;
 public class TeacherService : ITeacherService
 {
     private readonly ApplicationDbContext _context;
+    private readonly ILogger<TeacherService> _logger;
 
-    public TeacherService(ApplicationDbContext context)
+    public TeacherService(ApplicationDbContext context, ILogger<TeacherService> logger)
     {
         _context = context;
+        _logger = logger;
     }
-
-
-// public async Task AddScoreAsync(ScoreDto scoreDto, string teacherEmail)
-// {
-//     // Bước 1: Kiểm tra sự tồn tại của giáo viên
-//     var teacher = await _context.Teachers
-//         .FirstOrDefaultAsync(t => t.Email == teacherEmail);
-//     if (teacher == null)
-//         throw new AdminService.ValidateException("Teacher does not exist.");
-//
-//     // Bước 2: Kiểm tra giáo viên có được giao lớp hay không
-//     var isTeacherAssigned = await _context.TeacherClasses
-//         .AnyAsync(tc => tc.TeacherId == teacher.TeacherId && tc.ClassId == scoreDto.ClassId);
-//     if (!isTeacherAssigned)
-//         throw new AdminService.ValidateException("Teacher is not assigned to the selected class.");
-//
-//     // Bước 3: Kiểm tra sự tồn tại của học kỳ
-//     var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.Name == scoreDto.SemesterName);
-//     if (semester == null)
-//         throw new AdminService.ValidateException("Semester not found. Please enter a valid semester.");
-//
-//     // Bước 4: Kiểm tra năm học có khớp với học kỳ không
-//     if (semester.AcademicYear != scoreDto.AcademicYear)
-//         throw new AdminService.ValidateException("Academic year does not match with the semester.");
-//
-//     // Bước 5: Kiểm tra giá trị điểm hợp lệ
-//     if (scoreDto.Value < 0 || scoreDto.Value > 10)
-//         throw new ArgumentException("Score must be between 0 and 10.");
-//
-//     // Bước 6: Lấy tên lớp của học sinh
-//     var studentClass = await _context.Classes
-//         .Where(c => c.ClassId == scoreDto.ClassId)
-//         .Select(c => c.ClassName)
-//         .FirstOrDefaultAsync();
-//     if (studentClass == null)
-//         throw new AdminService.ValidateException("Class not found for the given student.");
-//
-//     // Bước 7: Thêm điểm vào bảng Score
-//     var score = new Score
-//     {
-//         StudentId = scoreDto.StudentId,
-//         SubjectId = teacher.SubjectId,
-//         Value = scoreDto.Value,
-//         SemesterName = scoreDto.SemesterName,
-//         ExamType = scoreDto.ExamType,
-//         AcademicYear = scoreDto.AcademicYear,
-//         ClassName = studentClass
-//     };
-//
-//     _context.Scores.Add(score);
-//     await _context.SaveChangesAsync();
-// }
 
 
     public async Task<List<StudentInfoDto>> GetAssignedClassesStudentsAsync(ClaimsPrincipal user)
     {
-        // Lấy TeacherId từ Claims
         var teacherEmail = user.FindFirstValue(ClaimTypes.Email);
-    
-        // Tìm giáo viên kèm theo các lớp và học sinh liên quan
-        var teacher = await _context.Teachers
-            .Include(t => t.TeacherClasses)
-            .ThenInclude(tc => tc.Class)
-            .ThenInclude(c => c.Students)
-            .FirstOrDefaultAsync(t => t.Email == teacherEmail);
 
-        // Nếu không tìm thấy giáo viên, trả về danh sách rỗng
-        if (teacher == null)
-        {
-            return new List<StudentInfoDto>(); 
-        }
-
-        // Tạo danh sách học sinh từ các lớp mà giáo viên được giao
-        var students = teacher.TeacherClasses
+        // Lấy danh sách các học sinh mà giáo viên này phụ trách, cùng thông tin lớp và môn học
+        var students = await _context.TeacherClasses
+            .Where(tc => tc.Teacher.Email == teacherEmail)
             .SelectMany(tc => tc.Class.Students.Select(s => new StudentInfoDto
             {
-                StudentFullName = s.FullName,             
-                ClassName = tc.Class.ClassName,             
+                StudentId = s.StudentId,
+                StudentFullName = s.FullName,
+                ClassName = tc.Class.ClassName,
+                SubjectId = tc.Teacher.SubjectId,
+                SubjectName = tc.Teacher.Subject.SubjectName ?? "No Subject Assigned"
             }))
-            .ToList();
+            .ToListAsync();
 
         return students;
     }
 
-// Ví dụ hàm để lấy điểm cho học sinh
-    // private double GetScoreForStudent(int studentId, int classId)
-    // {
-    //     // Logic để lấy điểm cho học sinh trong lớp (chưa định nghĩa trong mã nguồn)
-    //     return 0; // Thay thế bằng giá trị điểm thực tế
-    // }
 
+    public async Task AddScoreForStudentAsync(ClaimsPrincipal user, ScoreDto scoreDto)
+    {
+        // Lấy email của giáo viên từ ClaimsPrincipal
+        var teacherEmail = user.FindFirstValue(ClaimTypes.Email);
+
+        // Tìm giáo viên với email này và chỉ lấy các lớp mà giáo viên được phân công
+        var teacher = await _context.Teachers
+            .Include(t => t.TeacherClasses)
+            .ThenInclude(tc => tc.Class)
+            .FirstOrDefaultAsync(t => t.Email == teacherEmail);
+
+        // Chuyển chuỗi ExamType thành enum
+        var examTypeEnum = Enum.Parse<ExamType>(scoreDto.ExamType);
+
+        // Tạo đối tượng Score để thêm vào cơ sở dữ liệu
+        var score = new Score
+        {
+            StudentId = scoreDto.StudentId,
+            SubjectId = teacher.SubjectId,
+            SemesterId = scoreDto.SemesterId,
+            ScoreValue = scoreDto.ScoreValue,
+            ExamType = examTypeEnum
+        };
+        _context.Scores.Add(score);
+        await _context.SaveChangesAsync();
+    }
+    
 
     // public double CalculateSemesterAverage(int studentId, int subjectId, string semesterName, ClaimsPrincipal user,
     //     string academicYear)
@@ -235,5 +196,4 @@ public class TeacherService : ITeacherService
             })
             .ToListAsync();
     }
-    
 }

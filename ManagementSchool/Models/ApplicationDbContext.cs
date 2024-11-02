@@ -124,7 +124,9 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .Property(s => s.ExamType)
             .HasConversion(
                 v => v.ToString(),
-                v => (ExamType)Enum.Parse(typeof(ExamType), v)); // Chuyển đổi chuỗi thành enum khi lấy ra
+                v => (ExamType)Enum.Parse(typeof(ExamType), v)
+            );
+
 
         modelBuilder.Entity<Semester>()
             .Property(s => s.SemesterType)
