@@ -38,8 +38,7 @@ public class TeacherService : ITeacherService
 
         return students;
     }
-
-
+    
     public async Task AddScoreForStudentAsync(ClaimsPrincipal user, ScoreDto scoreDto)
     {
         // Lấy email của giáo viên từ ClaimsPrincipal
@@ -67,6 +66,35 @@ public class TeacherService : ITeacherService
         await _context.SaveChangesAsync();
     }
     
+    public async Task<List<ScoreDto>> GetScoresForStudentAsync(int studentId, int? subjectId = null, int? semesterId = null)
+    {
+        var query = _context.Scores
+            .Where(s => s.StudentId == studentId)
+            .AsQueryable();
+
+        // Thêm các bộ lọc theo subjectId và semesterId nếu có
+        if (subjectId.HasValue)
+        {
+            query = query.Where(s => s.SubjectId == subjectId);
+        }
+        if (semesterId.HasValue)
+        {
+            query = query.Where(s => s.SemesterId == semesterId);
+        }
+
+        var scores = await query
+            .Select(s => new ScoreDto
+            {
+                StudentId = s.StudentId,
+                SubjectId = s.SubjectId,
+                SemesterId = s.SemesterId,
+                ScoreValue = s.ScoreValue,
+                ExamType = s.ExamType.ToString()
+            })
+            .ToListAsync();
+
+        return scores;
+    }
 
     // public double CalculateSemesterAverage(int studentId, int subjectId, string semesterName, ClaimsPrincipal user,
     //     string academicYear)

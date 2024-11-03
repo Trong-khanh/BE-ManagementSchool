@@ -39,21 +39,7 @@ public class TeacherController : ControllerBase
             return StatusCode(500, "Internal server error: " + ex.Message);
         }
     }
-
-    [HttpPost("AddScore")]
-    public async Task<IActionResult> AddScoreForStudent([FromBody] ScoreDto scoreDto)
-    {
-        try
-        {
-            await _teacherService.AddScoreForStudentAsync(User, scoreDto);
-            return Ok(new { Message = "Score added successfully." });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { Message = ex.Message });
-        }
-    }
-
+    
     [HttpGet("GetStudentsInAssignedClasses")]
     public async Task<IActionResult> GetStudentsInAssignedClasses()
     {
@@ -70,6 +56,39 @@ public class TeacherController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, $"Server error: {ex.Message}");
+        }
+    }
+
+    [HttpPost("AddScore")]
+    public async Task<IActionResult> AddScoreForStudent([FromBody] ScoreDto scoreDto)
+    {
+        try
+        {
+            await _teacherService.AddScoreForStudentAsync(User, scoreDto);
+            return Ok(new { Message = "Score added successfully." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+    
+    [HttpGet(" GetScoreStudent/{studentId}")]
+    public async Task<IActionResult> GetScoresForStudent(int studentId, [FromQuery] int? subjectId = null, [FromQuery] int? semesterId = null)
+    
+    {
+        try
+        {
+            var scores = await _teacherService.GetScoresForStudentAsync(studentId, subjectId, semesterId);
+            if (scores == null || scores.Count == 0)
+            {
+                return NotFound("Không tìm thấy điểm cho sinh viên.");
+            }
+            return Ok(scores);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = $"Lỗi khi tải dữ liệu: {ex.Message}" });
         }
     }
 
