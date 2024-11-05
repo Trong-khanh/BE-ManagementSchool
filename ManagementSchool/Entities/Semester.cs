@@ -9,5 +9,6 @@ namespace ManagementSchool.Entities
         public string AcademicYear { get; set; }
         public ICollection<Score> Scores { get; set; }
         public ICollection<ClassSemester> ClassSemesters { get; set; }
+        public ICollection<StudentAverageScore> AverageScores { get; set; }
     }
 }

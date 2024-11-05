@@ -13,4 +13,6 @@ public class Score
     public virtual Student Student { get; set; }
     public virtual Subject Subject { get; set; }
     public virtual Semester Semester { get; set; }
+    public ICollection<StudentAverageScore> StudentAverageScores { get; set; }
+
 }

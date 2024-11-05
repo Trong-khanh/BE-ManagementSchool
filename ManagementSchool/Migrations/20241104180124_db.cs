@@ -67,7 +67,7 @@ namespace ManagementSchool.Migrations
                 {
                     SemesterId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    SemesterType = table.Column<int>(type: "int", nullable: false),
+                    SemesterType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -404,6 +404,48 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "StudentAverageScores",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StudentId = table.Column<int>(type: "int", nullable: false),
+                    SubjectId = table.Column<int>(type: "int", nullable: false),
+                    SemesterId = table.Column<int>(type: "int", nullable: false),
+                    AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SemesterAverage = table.Column<double>(type: "float", nullable: false),
+                    AnnualAverage = table.Column<double>(type: "float", nullable: true),
+                    ScoreId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentAverageScores", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StudentAverageScores_Scores_ScoreId",
+                        column: x => x.ScoreId,
+                        principalTable: "Scores",
+                        principalColumn: "ScoreId");
+                    table.ForeignKey(
+                        name: "FK_StudentAverageScores_Semesters_SemesterId",
+                        column: x => x.SemesterId,
+                        principalTable: "Semesters",
+                        principalColumn: "SemesterId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StudentAverageScores_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "StudentId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StudentAverageScores_Subjects_SubjectId",
+                        column: x => x.SubjectId,
+                        principalTable: "Subjects",
+                        principalColumn: "SubjectId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TeacherClasses",
                 columns: table => new
                 {
@@ -434,10 +476,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "04c1bc98-7a84-4340-a4fd-fee709890f16", "2", "Student", "STUDENT" },
-                    { "2ac01966-a9bc-4909-9798-129b89b84c23", "4", "Parent", "PARENT" },
-                    { "4b43b622-4ad3-4d49-8836-a485fa63912c", "3", "Teacher", "TEACHER" },
-                    { "dac5cc91-84a1-4a7f-976f-bdbb7f5474bc", "1", "Admin", "ADMIN" }
+                    { "044e1eff-b922-4c59-afc9-a2c7566603f4", "3", "Teacher", "TEACHER" },
+                    { "56407f14-4eb7-4cfb-9015-a38d8fb53d03", "2", "Student", "STUDENT" },
+                    { "82e0b33f-8e51-459c-9ab7-a2b83270dbe6", "4", "Parent", "PARENT" },
+                    { "8b87ad82-94a4-428b-ba57-3107a3445148", "1", "Admin", "ADMIN" }
                 });
 
             migrationBuilder.InsertData(
@@ -534,6 +576,26 @@ namespace ManagementSchool.Migrations
                 column: "SubjectId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_StudentAverageScores_ScoreId",
+                table: "StudentAverageScores",
+                column: "ScoreId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentAverageScores_SemesterId",
+                table: "StudentAverageScores",
+                column: "SemesterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentAverageScores_StudentId",
+                table: "StudentAverageScores",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StudentAverageScores_SubjectId",
+                table: "StudentAverageScores",
+                column: "SubjectId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Students_ClassId",
                 table: "Students",
                 column: "ClassId");
@@ -601,7 +663,7 @@ namespace ManagementSchool.Migrations
                 name: "RefreshTokens");
 
             migrationBuilder.DropTable(
-                name: "Scores");
+                name: "StudentAverageScores");
 
             migrationBuilder.DropTable(
                 name: "StudentSubjects");
@@ -619,10 +681,13 @@ namespace ManagementSchool.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Semesters");
+                name: "Scores");
 
             migrationBuilder.DropTable(
                 name: "Teachers");
+
+            migrationBuilder.DropTable(
+                name: "Semesters");
 
             migrationBuilder.DropTable(
                 name: "Subjects");

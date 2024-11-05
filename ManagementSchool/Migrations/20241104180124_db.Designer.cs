@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ManagementSchool.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241031163942_db")]
+    [Migration("20241104180124_db")]
     partial class db
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -94,8 +94,9 @@ namespace ManagementSchool.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("SemesterType")
-                        .HasColumnType("int");
+                    b.Property<string>("SemesterType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -137,6 +138,49 @@ namespace ManagementSchool.Migrations
                     b.HasIndex("ClassId");
 
                     b.ToTable("Students");
+                });
+
+            modelBuilder.Entity("ManagementSchool.Entities.StudentAverageScore", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("AnnualAverage")
+                        .HasColumnType("float");
+
+                    b.Property<int?>("ScoreId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("SemesterAverage")
+                        .HasColumnType("float");
+
+                    b.Property<int>("SemesterId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScoreId");
+
+                    b.HasIndex("SemesterId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("SubjectId");
+
+                    b.ToTable("StudentAverageScores");
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.StudentSubject", b =>
@@ -391,28 +435,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "dac5cc91-84a1-4a7f-976f-bdbb7f5474bc",
+                            Id = "8b87ad82-94a4-428b-ba57-3107a3445148",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "04c1bc98-7a84-4340-a4fd-fee709890f16",
+                            Id = "56407f14-4eb7-4cfb-9015-a38d8fb53d03",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "4b43b622-4ad3-4d49-8836-a485fa63912c",
+                            Id = "044e1eff-b922-4c59-afc9-a2c7566603f4",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "2ac01966-a9bc-4909-9798-129b89b84c23",
+                            Id = "82e0b33f-8e51-459c-9ab7-a2b83270dbe6",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
@@ -674,6 +718,37 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Class");
                 });
 
+            modelBuilder.Entity("ManagementSchool.Entities.StudentAverageScore", b =>
+                {
+                    b.HasOne("Score", null)
+                        .WithMany("StudentAverageScores")
+                        .HasForeignKey("ScoreId");
+
+                    b.HasOne("ManagementSchool.Entities.Semester", "Semester")
+                        .WithMany("AverageScores")
+                        .HasForeignKey("SemesterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ManagementSchool.Entities.Student", "Student")
+                        .WithMany("AverageScores")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ManagementSchool.Entities.Subject", "Subject")
+                        .WithMany("AverageScores")
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Semester");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Subject");
+                });
+
             modelBuilder.Entity("ManagementSchool.Entities.StudentSubject", b =>
                 {
                     b.HasOne("ManagementSchool.Entities.Student", "Student")
@@ -841,6 +916,8 @@ namespace ManagementSchool.Migrations
 
             modelBuilder.Entity("ManagementSchool.Entities.Semester", b =>
                 {
+                    b.Navigation("AverageScores");
+
                     b.Navigation("ClassSemesters");
 
                     b.Navigation("Scores");
@@ -848,6 +925,8 @@ namespace ManagementSchool.Migrations
 
             modelBuilder.Entity("ManagementSchool.Entities.Student", b =>
                 {
+                    b.Navigation("AverageScores");
+
                     b.Navigation("Scores");
 
                     b.Navigation("StudentSubjects");
@@ -859,6 +938,8 @@ namespace ManagementSchool.Migrations
 
             modelBuilder.Entity("ManagementSchool.Entities.Subject", b =>
                 {
+                    b.Navigation("AverageScores");
+
                     b.Navigation("ClassSubjects");
 
                     b.Navigation("Scores");
@@ -871,6 +952,11 @@ namespace ManagementSchool.Migrations
             modelBuilder.Entity("ManagementSchool.Entities.Teacher", b =>
                 {
                     b.Navigation("TeacherClasses");
+                });
+
+            modelBuilder.Entity("Score", b =>
+                {
+                    b.Navigation("StudentAverageScores");
                 });
 #pragma warning restore 612, 618
         }

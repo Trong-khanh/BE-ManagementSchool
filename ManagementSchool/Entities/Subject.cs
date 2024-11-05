@@ -8,4 +8,5 @@ public class Subject
     public ICollection<StudentSubject> StudentSubjects { get; set; }
     public ICollection<ClassSubject> ClassSubjects { get; set; }
     public ICollection<Score> Scores { get; set; }
+    public ICollection<StudentAverageScore> AverageScores { get; set; }
 }

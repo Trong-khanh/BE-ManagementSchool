@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using ManagementSchool.Dto;
 using ManagementSchool.Service;
 using ManagementSchool.Service.TeacherService;
@@ -91,7 +92,42 @@ public class TeacherController : ControllerBase
             return BadRequest(new { message = $"Lỗi khi tải dữ liệu: {ex.Message}" });
         }
     }
+    
+    [HttpGet("CalculateSemesterAverage")]
+    public async Task<IActionResult> CalculateSemesterAverage(
+        int studentId,
+        int semesterId)
+    {
+        // Lấy user đã xác thực
+        ClaimsPrincipal user = HttpContext.User;
 
+        try
+        {
+            // Gọi phương thức service để tính điểm trung bình học kỳ
+            double average = await _teacherService.CalculateSemesterAverageAsync(studentId, semesterId, user);
+
+            // Trả về điểm trung bình đã tính toán
+            return Ok(new { SemesterAverage = average });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { Message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return StatusCode(500, new { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            // Xử lý bất kỳ ngoại lệ nào khác có thể xảy ra
+            return StatusCode(500, new { Message = "An error occurred while calculating the semester average.", Details = ex.Message });
+        }
+    } 
+}
 
     // [HttpGet("semester-average")]
     // public ActionResult<double> GetSemesterAverage(int studentId, int subjectId, string semesterName,
@@ -124,4 +160,3 @@ public class TeacherController : ControllerBase
     //         return BadRequest(ex.Message);
     //     }
     // }
-}
