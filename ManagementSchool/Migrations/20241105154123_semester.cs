@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ManagementSchool.Migrations
 {
-    public partial class db : Migration
+    public partial class semester : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -413,7 +413,8 @@ namespace ManagementSchool.Migrations
                     SubjectId = table.Column<int>(type: "int", nullable: false),
                     SemesterId = table.Column<int>(type: "int", nullable: false),
                     AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SemesterAverage = table.Column<double>(type: "float", nullable: false),
+                    SemesterAverage1 = table.Column<double>(type: "float", nullable: true),
+                    SemesterAverage2 = table.Column<double>(type: "float", nullable: true),
                     AnnualAverage = table.Column<double>(type: "float", nullable: true),
                     ScoreId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -476,10 +477,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "044e1eff-b922-4c59-afc9-a2c7566603f4", "3", "Teacher", "TEACHER" },
-                    { "56407f14-4eb7-4cfb-9015-a38d8fb53d03", "2", "Student", "STUDENT" },
-                    { "82e0b33f-8e51-459c-9ab7-a2b83270dbe6", "4", "Parent", "PARENT" },
-                    { "8b87ad82-94a4-428b-ba57-3107a3445148", "1", "Admin", "ADMIN" }
+                    { "20f3333a-f4b6-46a3-91be-879d35c63c07", "4", "Parent", "PARENT" },
+                    { "3074ff86-0ca4-48b3-808f-07439fcb5dfa", "1", "Admin", "ADMIN" },
+                    { "81a8777f-f183-42af-8ce7-e6e3a9603cd6", "2", "Student", "STUDENT" },
+                    { "d6791944-6640-43b5-a5c6-d6ae2dff3441", "3", "Teacher", "TEACHER" }
                 });
 
             migrationBuilder.InsertData(

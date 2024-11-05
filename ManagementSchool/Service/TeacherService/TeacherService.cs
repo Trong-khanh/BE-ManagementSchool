@@ -114,7 +114,7 @@ public async Task<double> CalculateSemesterAverageAsync(int studentId, int semes
     // Lấy subjectId từ teacher
     var subjectId = teacher.SubjectId;
 
-    // Lấy năm học từ bảng Semester dựa trên semesterId
+    // Lấy năm học và học kỳ từ bảng Semester dựa trên semesterId
     var semester = await _context.Semesters
         .FirstOrDefaultAsync(s => s.SemesterId == semesterId);
     if (semester == null)
@@ -188,7 +188,7 @@ public async Task<double> CalculateSemesterAverageAsync(int studentId, int semes
 
     // Lưu điểm trung bình vào bảng StudentAverageScores
     var studentAverageScore = await _context.StudentAverageScores
-        .FirstOrDefaultAsync(s => s.StudentId == studentId && s.SubjectId == subjectId && s.SemesterId == semesterId && s.AcademicYear == academicYear);
+        .FirstOrDefaultAsync(s => s.StudentId == studentId && s.SubjectId == subjectId && s.AcademicYear == academicYear);
 
     if (studentAverageScore == null)
     {
@@ -196,27 +196,31 @@ public async Task<double> CalculateSemesterAverageAsync(int studentId, int semes
         {
             StudentId = studentId,
             SubjectId = subjectId,
-            SemesterId = semesterId,
             AcademicYear = academicYear,
-            SemesterAverage = roundedAverage
+            SemesterId = semesterId,
+            SemesterAverage1 = semesterId == 1 ? roundedAverage : (double?)null,
+            SemesterAverage2 = semesterId == 2 ? roundedAverage : (double?)null
         };
         await _context.StudentAverageScores.AddAsync(studentAverageScore);
     }
     else
     {
-        studentAverageScore.SemesterAverage = roundedAverage;
+        if (semesterId == 1)
+            studentAverageScore.SemesterAverage1 = roundedAverage;
+        else if (semesterId == 2)
+            studentAverageScore.SemesterAverage2 = roundedAverage;
+    }
+
+    // Tính toán điểm trung bình cả năm nếu có đủ hai học kỳ
+    if (studentAverageScore.SemesterAverage1.HasValue && studentAverageScore.SemesterAverage2.HasValue)
+    {
+        studentAverageScore.AnnualAverage = Math.Round((studentAverageScore.SemesterAverage1.Value + studentAverageScore.SemesterAverage2.Value) / 2, 1);
     }
 
     await _context.SaveChangesAsync();
 
     return roundedAverage;
 }
-
-
-
-
-
-
     // public double CalculateAnnualAverage(int studentId, int subjectId, ClaimsPrincipal user, string academicYear)
     // {
     //     var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
@@ -238,39 +242,6 @@ public async Task<double> CalculateSemesterAverageAsync(int studentId, int semes
     //     SaveSemesterScore(studentId, subjectId, "Annual", roundedAnnualAverage, academicYear);
     //
     //     return roundedAnnualAverage;
-    // }
-
-    // private void SaveSemesterScore(int studentId, int subjectId, string semesterName, double score, string academicYear)
-    // {
-    //     var studentSubjectScore = _context.StudentSubjectScores
-    //         .FirstOrDefault(sss =>
-    //             sss.StudentId == studentId && sss.SubjectId == subjectId && sss.AcademicYear == academicYear);
-    //
-    //     if (studentSubjectScore == null)
-    //     {
-    //         studentSubjectScore = new StudentSubjectScore
-    //         {
-    //             StudentId = studentId,
-    //             SubjectId = subjectId,
-    //             AcademicYear = academicYear
-    //         };
-    //         _context.StudentSubjectScores.Add(studentSubjectScore);
-    //     }
-    //
-    //     switch (semesterName.ToLower())
-    //     {
-    //         case "semester 1":
-    //             studentSubjectScore.Semester1Score = score;
-    //             break;
-    //         case "semester 2":
-    //             studentSubjectScore.Semester2Score = score;
-    //             break;
-    //         case "annual":
-    //             studentSubjectScore.AnnualScore = score;
-    //             break;
-    //     }
-    //
-    //     _context.SaveChanges();
     // }
     public async Task<IEnumerable<SemesterDto>> GetAllSemestersAsync()
     {

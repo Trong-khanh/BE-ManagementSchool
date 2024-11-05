@@ -156,7 +156,10 @@ namespace ManagementSchool.Migrations
                     b.Property<int?>("ScoreId")
                         .HasColumnType("int");
 
-                    b.Property<double>("SemesterAverage")
+                    b.Property<double?>("SemesterAverage1")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("SemesterAverage2")
                         .HasColumnType("float");
 
                     b.Property<int>("SemesterId")
@@ -433,28 +436,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "8b87ad82-94a4-428b-ba57-3107a3445148",
+                            Id = "3074ff86-0ca4-48b3-808f-07439fcb5dfa",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "56407f14-4eb7-4cfb-9015-a38d8fb53d03",
+                            Id = "81a8777f-f183-42af-8ce7-e6e3a9603cd6",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "044e1eff-b922-4c59-afc9-a2c7566603f4",
+                            Id = "d6791944-6640-43b5-a5c6-d6ae2dff3441",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "82e0b33f-8e51-459c-9ab7-a2b83270dbe6",
+                            Id = "20f3333a-f4b6-46a3-91be-879d35c63c07",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"

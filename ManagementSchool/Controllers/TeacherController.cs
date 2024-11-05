@@ -25,7 +25,7 @@ public class TeacherController : ControllerBase
         try
         {
             var semesters = await _teacherService.GetAllSemestersAsync();
-            
+
             // Check if data exists
             if (semesters == null || !semesters.Any())
             {
@@ -40,7 +40,7 @@ public class TeacherController : ControllerBase
             return StatusCode(500, "Internal server error: " + ex.Message);
         }
     }
-    
+
     [HttpGet("GetStudentsInAssignedClasses")]
     public async Task<IActionResult> GetStudentsInAssignedClasses()
     {
@@ -73,10 +73,11 @@ public class TeacherController : ControllerBase
             return BadRequest(new { Message = ex.Message });
         }
     }
-    
+
     [HttpGet(" GetScoreStudent/{studentId}")]
-    public async Task<IActionResult> GetScoresForStudent(int studentId, [FromQuery] int? subjectId = null, [FromQuery] int? semesterId = null)
-    
+    public async Task<IActionResult> GetScoresForStudent(int studentId, [FromQuery] int? subjectId = null,
+        [FromQuery] int? semesterId = null)
+
     {
         try
         {
@@ -85,6 +86,7 @@ public class TeacherController : ControllerBase
             {
                 return NotFound("Không tìm thấy điểm cho sinh viên.");
             }
+
             return Ok(scores);
         }
         catch (Exception ex)
@@ -92,7 +94,7 @@ public class TeacherController : ControllerBase
             return BadRequest(new { message = $"Lỗi khi tải dữ liệu: {ex.Message}" });
         }
     }
-    
+
     [HttpGet("CalculateSemesterAverage")]
     public async Task<IActionResult> CalculateSemesterAverage(
         int studentId,
@@ -124,39 +126,23 @@ public class TeacherController : ControllerBase
         catch (Exception ex)
         {
             // Xử lý bất kỳ ngoại lệ nào khác có thể xảy ra
-            return StatusCode(500, new { Message = "An error occurred while calculating the semester average.", Details = ex.Message });
+            return StatusCode(500,
+                new { Message = "An error occurred while calculating the semester average.", Details = ex.Message });
         }
-    } 
+    }
 }
 
-    // [HttpGet("semester-average")]
-    // public ActionResult<double> GetSemesterAverage(int studentId, int subjectId, string semesterName,
-    //     string academicYear)
-    // {
-    //     try
-    //     {
-    //         // Call the service method with the logged-in user's claims and academic year
-    //         var average =
-    //             _teacherService.CalculateSemesterAverage(studentId, subjectId, semesterName, User, academicYear);
-    //         return Ok(average);
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return BadRequest(ex.Message);
-    //     }
-    // }
-
-    // [HttpGet("annual-average")]
-    // public ActionResult<double> GetAnnualAverage(int studentId, int subjectId, string academicYear)
-    // {
-    //     try
-    //     {
-    //         // Call the service method with the logged-in user's claims and academic year
-    //         var average = _teacherService.CalculateAnnualAverage(studentId, subjectId, User, academicYear);
-    //         return Ok(average);
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return BadRequest(ex.Message);
-    //     }
-    // }
+// [HttpGet("annual-average")]
+// public ActionResult<double> GetAnnualAverage(int studentId, int subjectId, string academicYear)
+// {
+//     try
+//     {
+//         // Call the service method with the logged-in user's claims and academic year
+//         var average = _teacherService.CalculateAnnualAverage(studentId, subjectId, User, academicYear);
+//         return Ok(average);
+//     }
+//     catch (Exception ex)
+//     {
+//         return BadRequest(ex.Message);
+//     }
+// }
