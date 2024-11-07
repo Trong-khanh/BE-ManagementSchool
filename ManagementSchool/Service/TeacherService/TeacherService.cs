@@ -18,7 +18,6 @@ public class TeacherService : ITeacherService
         _logger = logger;
     }
 
-
     public async Task<List<StudentInfoDto>> GetAssignedClassesStudentsAsync(ClaimsPrincipal user)
     {
         var teacherEmail = user.FindFirstValue(ClaimTypes.Email);
@@ -98,151 +97,136 @@ public class TeacherService : ITeacherService
         return scores;
     }
 
-public async Task<double> CalculateSemesterAverageAsync(int studentId, int semesterId, ClaimsPrincipal user)
-{
-    // Lấy email từ claims trong JWT token
-    var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-    if (emailClaim == null)
-        throw new UnauthorizedAccessException("Email claim not found in token.");
-
-    // Truy vấn giáo viên dựa trên email để lấy subjectId
-    var teacher = await _context.Teachers
-        .FirstOrDefaultAsync(t => t.Email == emailClaim);
-    if (teacher == null)
-        throw new UnauthorizedAccessException("Teacher does not exist.");
-
-    // Lấy subjectId từ teacher
-    var subjectId = teacher.SubjectId;
-
-    // Lấy năm học và học kỳ từ bảng Semester dựa trên semesterId
-    var semester = await _context.Semesters
-        .FirstOrDefaultAsync(s => s.SemesterId == semesterId);
-    if (semester == null)
-        throw new ArgumentException("Specified semester does not exist.");
-
-    string academicYear = semester.AcademicYear;
-
-    // Lấy điểm số của sinh viên trong học kỳ 
-    var scores = await _context.Scores
-        .Where(s => s.StudentId == studentId && s.SubjectId == subjectId && s.SemesterId == semesterId)
-        .ToListAsync();
-
-    if (!scores.Any())
-        throw new ArgumentException("No scores found for the specified criteria.");
-
-    // Check for each required exam type
-    bool hasTestWhenClassBegins = scores.Any(s => s.ExamType == ExamType.TestWhenClassBegins);
-    bool hasFifteenMinutesTest = scores.Any(s => s.ExamType == ExamType.FifteenMinutesTest);
-    bool hasFortyFiveMinutesTest = scores.Any(s => s.ExamType == ExamType.FortyFiveMinutesTest);
-    bool hasSemesterTest = scores.Any(s => s.ExamType == ExamType.SemesterTest);
-
-    // Collect missing exam types
-    List<string> missingExamTypes = new List<string>();
-    if (!hasTestWhenClassBegins) missingExamTypes.Add("TestWhenClassBegins");
-    if (!hasFifteenMinutesTest) missingExamTypes.Add("FifteenMinutesTest");
-    if (!hasFortyFiveMinutesTest) missingExamTypes.Add("FortyFiveMinutesTest");
-    if (!hasSemesterTest) missingExamTypes.Add("SemesterTest");
-
-    // If any exam types are missing, throw an exception
-    if (missingExamTypes.Any())
+    public async Task<double> CalculateSemesterAverageAsync(int studentId, int semesterId, ClaimsPrincipal user)
     {
-        string missingTypesMessage = string.Join(", ", missingExamTypes);
-        throw new InvalidOperationException($"Missing exam types: {missingTypesMessage}. All types are required to calculate the average.");
-    }
+        // Lấy email từ claims trong JWT token
+        var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        if (emailClaim == null)
+            throw new UnauthorizedAccessException("Email claim not found in token.");
 
-    double totalScore = 0;
-    double countTestWhenClassBegins = 0;
-    double countFifteenMinutesTest = 0;
+        // Truy vấn giáo viên dựa trên email để lấy subjectId
+        var teacher = await _context.Teachers
+            .FirstOrDefaultAsync(t => t.Email == emailClaim);
+        if (teacher == null)
+            throw new UnauthorizedAccessException("Teacher does not exist.");
 
-    // Tính toán tổng điểm và số lượng bài kiểm tra
-    foreach (var score in scores)
-    {
-        switch (score.ExamType)
+        // Lấy subjectId từ teacher
+        var subjectId = teacher.SubjectId;
+
+        // Lấy thông tin học kỳ từ bảng Semester dựa trên semesterId
+        var semester = await _context.Semesters
+            .FirstOrDefaultAsync(s => s.SemesterId == semesterId);
+        if (semester == null)
+            throw new ArgumentException("Specified semester does not exist.");
+
+        string academicYear = semester.AcademicYear;
+        var semesterType = semester.SemesterType; // Sử dụng SemesterType để xác định kỳ học
+
+        // Lấy điểm số của sinh viên trong học kỳ
+        var scores = await _context.Scores
+            .Where(s => s.StudentId == studentId && s.SubjectId == subjectId && s.SemesterId == semesterId)
+            .ToListAsync();
+
+        if (!scores.Any())
+            throw new ArgumentException("No scores found for the specified criteria.");
+
+        // Check for each required exam type
+        bool hasTestWhenClassBegins = scores.Any(s => s.ExamType == ExamType.TestWhenClassBegins);
+        bool hasFifteenMinutesTest = scores.Any(s => s.ExamType == ExamType.FifteenMinutesTest);
+        bool hasFortyFiveMinutesTest = scores.Any(s => s.ExamType == ExamType.FortyFiveMinutesTest);
+        bool hasSemesterTest = scores.Any(s => s.ExamType == ExamType.SemesterTest);
+
+        // Collect missing exam types
+        List<string> missingExamTypes = new List<string>();
+        if (!hasTestWhenClassBegins) missingExamTypes.Add("TestWhenClassBegins");
+        if (!hasFifteenMinutesTest) missingExamTypes.Add("FifteenMinutesTest");
+        if (!hasFortyFiveMinutesTest) missingExamTypes.Add("FortyFiveMinutesTest");
+        if (!hasSemesterTest) missingExamTypes.Add("SemesterTest");
+
+        // If any exam types are missing, throw an exception
+        if (missingExamTypes.Any())
         {
-            case ExamType.TestWhenClassBegins:
-                totalScore += score.ScoreValue;
-                countTestWhenClassBegins += 1;
-                break;
-            case ExamType.FifteenMinutesTest:
-                totalScore += score.ScoreValue;
-                countFifteenMinutesTest += 1;
-                break;
-            case ExamType.FortyFiveMinutesTest:
-                totalScore += 2 * score.ScoreValue;
-                break;
-            case ExamType.SemesterTest:
-                totalScore += 3 * score.ScoreValue;
-                break;
-            default:
-                throw new ArgumentException("Invalid exam type encountered in score data.");
+            string missingTypesMessage = string.Join(", ", missingExamTypes);
+            throw new InvalidOperationException(
+                $"Missing exam types: {missingTypesMessage}. All types are required to calculate the average.");
         }
-    }
 
-    // Tính toán điểm trung bình
-    var denominator = countTestWhenClassBegins + countFifteenMinutesTest + 5;
-    if (denominator == 0)
-        throw new InvalidOperationException("Invalid score data. Not enough tests to calculate the average.");
+        double totalScore = 0;
+        double countTestWhenClassBegins = 0;
+        double countFifteenMinutesTest = 0;
 
-    var average = totalScore / denominator;
-    var roundedAverage = Math.Round(average, 1);
-
-    // Lưu điểm trung bình vào bảng StudentAverageScores
-    var studentAverageScore = await _context.StudentAverageScores
-        .FirstOrDefaultAsync(s => s.StudentId == studentId && s.SubjectId == subjectId && s.AcademicYear == academicYear);
-
-    if (studentAverageScore == null)
-    {
-        studentAverageScore = new StudentAverageScore
+        // Tính toán tổng điểm và số lượng bài kiểm tra
+        foreach (var score in scores)
         {
-            StudentId = studentId,
-            SubjectId = subjectId,
-            AcademicYear = academicYear,
-            SemesterId = semesterId,
-            SemesterAverage1 = semesterId == 1 ? roundedAverage : (double?)null,
-            SemesterAverage2 = semesterId == 2 ? roundedAverage : (double?)null
-        };
-        await _context.StudentAverageScores.AddAsync(studentAverageScore);
-    }
-    else
-    {
-        if (semesterId == 1)
-            studentAverageScore.SemesterAverage1 = roundedAverage;
-        else if (semesterId == 2)
-            studentAverageScore.SemesterAverage2 = roundedAverage;
+            switch (score.ExamType)
+            {
+                case ExamType.TestWhenClassBegins:
+                    totalScore += score.ScoreValue;
+                    countTestWhenClassBegins += 1;
+                    break;
+                case ExamType.FifteenMinutesTest:
+                    totalScore += score.ScoreValue;
+                    countFifteenMinutesTest += 1;
+                    break;
+                case ExamType.FortyFiveMinutesTest:
+                    totalScore += 2 * score.ScoreValue;
+                    break;
+                case ExamType.SemesterTest:
+                    totalScore += 3 * score.ScoreValue;
+                    break;
+                default:
+                    throw new ArgumentException("Invalid exam type encountered in score data.");
+            }
+        }
+
+        // Tính toán điểm trung bình
+        var denominator = countTestWhenClassBegins + countFifteenMinutesTest + 5;
+        if (denominator == 0)
+            throw new InvalidOperationException("Invalid score data. Not enough tests to calculate the average.");
+
+        var average = totalScore / denominator;
+        var roundedAverage = Math.Round(average, 1);
+
+        // Tìm bản ghi SubjectsAverageScore hiện tại cho học sinh, môn học, và năm học
+        var subjectsAverageScore = await _context.SubjectsAverageScores
+            .FirstOrDefaultAsync(s =>
+                s.StudentId == studentId && s.SubjectId == subjectId && s.AcademicYear == academicYear);
+
+        if (subjectsAverageScore == null)
+        {
+            // Nếu chưa có bản ghi, tạo một bản ghi mới cho cả hai kỳ học
+            subjectsAverageScore = new SubjectsAverageScore
+            {
+                StudentId = studentId,
+                SubjectId = subjectId,
+                AcademicYear = academicYear,
+                SemesterId = semesterId,
+                SemesterAverage1 = semesterType == SemesterType.Semester1 ? roundedAverage : (double?)null,
+                SemesterAverage2 = semesterType == SemesterType.Semester2 ? roundedAverage : (double?)null
+            };
+            await _context.SubjectsAverageScores.AddAsync(subjectsAverageScore);
+        }
+        else
+        {
+            // Nếu bản ghi đã tồn tại, chỉ cập nhật cột phù hợp dựa trên SemesterType
+            if (semesterType == SemesterType.Semester1)
+                subjectsAverageScore.SemesterAverage1 = roundedAverage;
+            else if (semesterType == SemesterType.Semester2)
+                subjectsAverageScore.SemesterAverage2 = roundedAverage;
+        }
+
+        // Tính toán điểm trung bình cả năm nếu cả hai học kỳ đều có giá trị
+        if (subjectsAverageScore.SemesterAverage1.HasValue && subjectsAverageScore.SemesterAverage2.HasValue)
+        {
+            subjectsAverageScore.AnnualAverage = Math.Round(
+                (subjectsAverageScore.SemesterAverage1.Value + subjectsAverageScore.SemesterAverage2.Value) / 2, 1);
+        }
+
+        await _context.SaveChangesAsync();
+
+        return roundedAverage;
     }
 
-    // Tính toán điểm trung bình cả năm nếu có đủ hai học kỳ
-    if (studentAverageScore.SemesterAverage1.HasValue && studentAverageScore.SemesterAverage2.HasValue)
-    {
-        studentAverageScore.AnnualAverage = Math.Round((studentAverageScore.SemesterAverage1.Value + studentAverageScore.SemesterAverage2.Value) / 2, 1);
-    }
-
-    await _context.SaveChangesAsync();
-
-    return roundedAverage;
-}
-    // public double CalculateAnnualAverage(int studentId, int subjectId, ClaimsPrincipal user, string academicYear)
-    // {
-    //     var emailClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-    //     if (emailClaim == null)
-    //         throw new UnauthorizedAccessException("Email claim not found in token.");
-    //
-    //     var teacherEmail = emailClaim;
-    //
-    //     var teacherSubject = _context.Teachers.FirstOrDefault(t => t.Email == teacherEmail && t.SubjectId == subjectId);
-    //     if (teacherSubject == null)
-    //         throw new UnauthorizedAccessException("Teacher is not assigned to this subject.");
-    //
-    //     var semester1Average = CalculateSemesterAverage(studentId, subjectId, "Semester 1", user, academicYear);
-    //     var semester2Average = CalculateSemesterAverage(studentId, subjectId, "Semester 2", user, academicYear);
-    //
-    //     var annualAverage = (semester1Average + 2 * semester2Average) / 3;
-    //     var roundedAnnualAverage = Math.Round(annualAverage, 1);
-    //
-    //     SaveSemesterScore(studentId, subjectId, "Annual", roundedAnnualAverage, academicYear);
-    //
-    //     return roundedAnnualAverage;
-    // }
     public async Task<IEnumerable<SemesterDto>> GetAllSemestersAsync()
     {
         return await _context.Semesters

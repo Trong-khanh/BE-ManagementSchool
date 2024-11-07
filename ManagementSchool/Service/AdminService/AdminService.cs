@@ -45,7 +45,7 @@ public class AdminService : IAdminService
 
         return student;
     }
-    
+
     public async Task<Student> UpdateStudentAsync(int studentId, StudentDtos studentDto)
     {
         var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentId == studentId);
@@ -69,7 +69,7 @@ public class AdminService : IAdminService
         await _context.SaveChangesAsync();
         return student;
     }
-    
+
     public async Task<bool> DeleteStudentAsync(int studentId)
     {
         var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentId == studentId);
@@ -171,18 +171,6 @@ public class AdminService : IAdminService
         return true;
     }
 
-    public async Task<bool> DeleteTeacherByNameAsync(string teacherName)
-    {
-        var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Name == teacherName);
-        if (teacher == null)
-            return false;
-
-        _context.Teachers.Remove(teacher);
-        await _context.SaveChangesAsync();
-
-        return true;
-    }
-    
     public async Task<TeacherDto?> UpdateTeacherAsync(int teacherId, TeacherDto teacherDto)
     {
         if (teacherDto == null)
@@ -230,25 +218,6 @@ public class AdminService : IAdminService
         return teachers.Select(t => new TeacherWithSubjectDto
         {
             TeacherId = t.TeacherId,
-            Name = t.Name,
-            Email = t.Email,
-            SubjectId = t.SubjectId,
-            SubjectName = t.Subject.SubjectName
-        });
-    }
-
-    public async Task<IEnumerable<TeacherDto>> GetTeachersBySubjectAsync(string subjectName)
-    {
-        if (string.IsNullOrWhiteSpace(subjectName))
-            throw new ArgumentException("Subject name cannot be empty or whitespace.", nameof(subjectName));
-
-        var teachers = await _context.Teachers
-            .Include(t => t.Subject)
-            .Where(t => t.Subject.SubjectName.ToLower() == subjectName.ToLower())
-            .ToListAsync();
-
-        return teachers.Select(t => new TeacherDto
-        {
             Name = t.Name,
             Email = t.Email,
             SubjectId = t.SubjectId,
@@ -416,7 +385,7 @@ public class AdminService : IAdminService
 
         return semester;
     }
-    
+
     public async Task<bool> DeleteSemesterAsync(int semesterId)
     {
         var semester = await _context.Semesters.FindAsync(semesterId);
@@ -441,7 +410,7 @@ public class AdminService : IAdminService
             })
             .ToListAsync();
     }
-    
+
     public async Task<SemesterDto> GetSemesterByIdAsync(int semesterId)
     {
         // Find the semester using the provided semesterId
@@ -467,101 +436,6 @@ public class AdminService : IAdminService
             .Include(s => s.Class) // Include the related class
             .ToListAsync();
     }
-
-    // public async Task CalculateAndSaveFinalGradesAsync(string className, string academicYear)
-    // {
-    //     var students = await _context.Students
-    //         .Include(s => s.StudentSubjectScores)
-    //         .Where(s => s.Class.ClassName == className && s.AcademicYear == academicYear)
-    //         .ToListAsync();
-    //
-    //     if (!students.Any())
-    //     {
-    //         Console.WriteLine($"No students found for class {className} and academic year {academicYear}.");
-    //         return;
-    //     }
-    //
-    //     foreach (var student in students)
-    //     {
-    //         Console.WriteLine($"Processing student ID {student.StudentId}...");
-    //         var scores = student.StudentSubjectScores;
-    //
-    //         if (!scores.Any())
-    //         {
-    //             Console.WriteLine($"No scores found for student ID {student.StudentId}.");
-    //             continue;
-    //         }
-    //
-    //         var finalGrade = scores.Average(s => s.AnnualScore.HasValue ? s.AnnualScore.Value : 0);
-    //         var hasAnyFail = scores.Any(s => s.AnnualScore.HasValue && s.AnnualScore.Value < 5);
-    //         var hasAllAboveFive = scores.All(s => s.AnnualScore.HasValue && s.AnnualScore.Value >= 5);
-    //         var hasAllAboveSixPointFive = scores.All(s => s.AnnualScore.HasValue && s.AnnualScore.Value >= 6.5);
-    //
-    //         var status = "Next Class";
-    //         var classification = "Bad";
-    //
-    //         if (finalGrade < 5)
-    //         {
-    //             status = "Resit";
-    //             classification = "Very Bad";
-    //         }
-    //         else if (finalGrade < 6.5)
-    //         {
-    //             if (hasAnyFail)
-    //             {
-    //                 status = "Resit";
-    //                 classification = "Very Bad";
-    //             }
-    //             else
-    //             {
-    //                 status = "Next Class";
-    //                 classification = "Bad";
-    //             }
-    //         }
-    //         else if (finalGrade < 8)
-    //         {
-    //             if (hasAllAboveFive)
-    //             {
-    //                 status = "Next Class";
-    //                 classification = "Good";
-    //             }
-    //             else
-    //             {
-    //                 status = "Next Class";
-    //                 classification = "Bad";
-    //             }
-    //         }
-    //         else if (finalGrade >= 8)
-    //         {
-    //             if (hasAllAboveSixPointFive)
-    //             {
-    //                 status = "Next Class";
-    //                 classification = "Very Good";
-    //             }
-    //             else
-    //             {
-    //                 status = "Next Class";
-    //                 classification = "Good";
-    //             }
-    //         }
-    //
-    //         var summary = new SummaryOfYear
-    //         {
-    //             StudentId = student.StudentId,
-    //             FinalGrade = (int)finalGrade,
-    //             Classification = classification,
-    //             Status = status,
-    //             AcademicYear = academicYear
-    //         };
-    //
-    //         _context.SummariesOfYear.Add(summary);
-    //         Console.WriteLine(
-    //             $"Summary created for student ID {student.StudentId}, Status: {summary.Status}, Classification: {summary.Classification}.");
-    //     }
-    //
-    //     await _context.SaveChangesAsync();
-    //     Console.WriteLine("Changes saved successfully.");
-    // }
 
     public async Task<Class> AddClassAsync(ClassDto newClassDto)
     {
@@ -600,7 +474,6 @@ public class AdminService : IAdminService
         return true;
     }
 
-
     public async Task<IEnumerable<Class>> GetAllClassesAsync()
     {
         return await _context.Classes.ToListAsync();
@@ -613,6 +486,7 @@ public class AdminService : IAdminService
             throw new KeyNotFoundException($"Class with ID {classId} not found.");
         return result;
     }
+
 
     public async Task<bool> UpgradeClassAsync(int oldClassId, string oldAcademicYear, int newClassId,
         string newAcademicYear)
@@ -663,6 +537,63 @@ public class AdminService : IAdminService
 
         return true;
     }
+
+public async Task CalculateAndSaveAverageScoresAsync(int studentId, string academicYear)
+{
+    // Lấy điểm của học sinh trong năm học hiện tại cho tất cả các môn
+    var scores = await _context.SubjectsAverageScores
+        .Where(s => s.StudentId == studentId && s.AcademicYear == academicYear)
+        .ToListAsync();
+
+    // Lọc điểm cho học kỳ 1
+    var semester1Scores = scores
+        .Where(s => s.SemesterAverage1.HasValue)
+        .ToList();
+
+    // Lọc điểm cho học kỳ 2
+    var semester2Scores = scores
+        .Where(s => s.SemesterAverage2.HasValue)
+        .ToList();
+
+    // Tính điểm trung bình cho học kỳ 1 nếu có đủ 12 môn
+    double? averageSemester1 = semester1Scores.Count == 12
+        ? semester1Scores.Sum(s => s.SemesterAverage1.Value) / 12
+        : (double?)null;
+
+    // Tính điểm trung bình cho học kỳ 2 nếu có đủ 12 môn
+    double? averageSemester2 = semester2Scores.Count == 12
+        ? semester2Scores.Sum(s => s.SemesterAverage2.Value) / 12
+        : (double?)null;
+
+    // Tính điểm trung bình cả năm học nếu cả hai học kỳ đều có đủ 12 môn
+    double? averageAcademicYear = (averageSemester1.HasValue && averageSemester2.HasValue)
+        ? (averageSemester1 + (averageSemester2 * 2)) / 3
+        : (double?)null;
+
+    // Tìm hoặc tạo mới bản ghi AverageScore cho sinh viên trong năm học hiện tại
+    var averageScore = await _context.AverageScores
+        .FirstOrDefaultAsync(a => a.StudentId == studentId && a.Student.AcademicYear == academicYear);
+
+    if (averageScore == null)
+    {
+        averageScore = new AverageScore
+        {
+            StudentId = studentId,
+            AverageSemester1 = averageSemester1,
+            AverageSemester2 = averageSemester2,
+            AverageAcademicYear = averageAcademicYear
+        };
+        _context.AverageScores.Add(averageScore);
+    }
+    else
+    {
+        averageScore.AverageSemester1 = averageSemester1;
+        averageScore.AverageSemester2 = averageSemester2;
+        averageScore.AverageAcademicYear = averageAcademicYear;
+    }
+
+    await _context.SaveChangesAsync();
+}
 
     public class ValidateException : Exception
     {

@@ -14,8 +14,6 @@ public interface IAdminService
     Task<bool> DeleteTeacherAsync(int teacherId);
     Task<TeacherDto?> UpdateTeacherAsync(int teacherId, TeacherDto teacherDto);
     Task<IEnumerable<TeacherWithSubjectDto>> GetAllTeachersAsync();
-    Task<bool> DeleteTeacherByNameAsync(string teacherName);
-    Task<IEnumerable<TeacherDto>> GetTeachersBySubjectAsync(string subjectName);
     Task AssignTeacherToClassAsync(TeacherClassAssignDto assignDto);
     Task<List<TeacherClassAssignDto>> GetTeacherClassAssignedAsync();
     Task UpdateTeacherClassAssignmentAsync(UpdateTeacherAssignDto assignDto);
@@ -26,14 +24,12 @@ public interface IAdminService
     Task<bool> DeleteSemesterAsync(int semesterId);
     Task<IEnumerable<SemesterDto>> GetAllSemestersAsync();
     Task<SemesterDto> GetSemesterByIdAsync(int semesterId);
-
     Task<IEnumerable<Student>> GetAllStudentsAsync();
-
-    // Task CalculateAndSaveFinalGradesAsync(string className, string academicYear);
     Task<bool> UpgradeClassAsync(int oldClassId, string oldAcademicYear, int newClassId, string newAcademicYear);
-    Task<Class> AddClassAsync(ClassDto newClassDto); // Thay đổi để nhận ClassDto
-    Task<Class> UpdateClassAsync(int classId, ClassDto updatedClassDto); // Thay đổi để nhận ClassDto
+    Task<Class> AddClassAsync(ClassDto newClassDto);
+    Task<Class> UpdateClassAsync(int classId, ClassDto updatedClassDto);
     Task<bool> DeleteClassAsync(int classId);
     Task<IEnumerable<Class>> GetAllClassesAsync();
     Task<Class> GetClassByIdAsync(int classId);
+    Task CalculateAndSaveAverageScoresAsync(int studentId, string academicYear);
 }

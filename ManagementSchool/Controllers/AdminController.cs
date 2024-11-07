@@ -159,38 +159,6 @@ public class AdminController : ControllerBase
         }
     }
 
-    [HttpDelete("DeleteTeacherByName/{teacherName}")]
-    public async Task<IActionResult> DeleteTeacherByName(string teacherName)
-    {
-        try
-        {
-            var result = await _adminService.DeleteTeacherByNameAsync(teacherName);
-            if (!result) return NotFound("Teacher not found.");
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"An error occurred: {ex.Message}");
-        }
-    }
-
-    [HttpGet("GetTeachersBySubject/{subjectName}")]
-    public async Task<IActionResult> GetTeachersBySubject(string subjectName)
-    {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(subjectName))
-                return BadRequest("Subject name cannot be empty.");
-
-            var teachers = await _adminService.GetTeachersBySubjectAsync(subjectName);
-            return Ok(teachers);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"An error occurred: {ex.Message}");
-        }
-    }
-
     // END CRUD TEACHER
 
     //====================================================================================================
@@ -341,99 +309,80 @@ public class AdminController : ControllerBase
         }
     }
 
-    // // END CRUD SEMESTER //
-    // [HttpPost("calculate-grades")]
-    // public async Task<IActionResult> CalculateFinalGrades([FromQuery] string className, [FromQuery] string academicYear)
-    // {
-    //     if (string.IsNullOrWhiteSpace(className) || string.IsNullOrWhiteSpace(academicYear))
-    //         return BadRequest("Both class name and academic year are required.");
-    //
-    //     try
-    //     {
-    //         await _adminService.CalculateAndSaveFinalGradesAsync(className, academicYear);
-    //         return Ok("Final grades calculated and saved successfully.");
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         // Log the exception details for debugging purposes
-    //         return StatusCode(500, $"An error occurred: {ex.Message}");
-    //     }
-    // }
-    
     // Create
-        [HttpPost("AddClass")]
-        public async Task<ActionResult<Class>> AddClass([FromBody] ClassDto newClassDto) // Sử dụng ClassDto
+    [HttpPost("AddClass")]
+    public async Task<ActionResult<Class>> AddClass([FromBody] ClassDto newClassDto) // Sử dụng ClassDto
+    {
+        try
         {
-            try
-            {
-                var result = await _adminService.AddClassAsync(newClassDto);
-                return CreatedAtAction(nameof(GetClassById), new { id = result.ClassId }, result); // Trả về 201 Created
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _adminService.AddClassAsync(newClassDto);
+            return CreatedAtAction(nameof(GetClassById), new { id = result.ClassId }, result); // Trả về 201 Created
         }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 
-        // Read All
-        [HttpGet("GetAllClasses")]
-        public async Task<ActionResult<IEnumerable<Class>>> GetAllClasses()
-        {
-            var classes = await _adminService.GetAllClassesAsync();
-            return Ok(classes);
-        }
+    // Read All
+    [HttpGet("GetAllClasses")]
+    public async Task<ActionResult<IEnumerable<Class>>> GetAllClasses()
+    {
+        var classes = await _adminService.GetAllClassesAsync();
+        return Ok(classes);
+    }
 
-        // Read One
-        [HttpGet("GetClass/{id}")]
-        public async Task<ActionResult<Class>> GetClassById(int id)
+    // Read One
+    [HttpGet("GetClass/{id}")]
+    public async Task<ActionResult<Class>> GetClassById(int id)
+    {
+        try
         {
-            try
-            {
-                var result = await _adminService.GetClassByIdAsync(id);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var result = await _adminService.GetClassByIdAsync(id);
+            return Ok(result);
         }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
 
-        // Update
-        [HttpPut("UpdateClass/{id}")]
-        public async Task<IActionResult> UpdateClass(int id, [FromBody] ClassDto updatedClassDto) // Sử dụng ClassDto
+    // Update
+    [HttpPut("UpdateClass/{id}")]
+    public async Task<IActionResult> UpdateClass(int id, [FromBody] ClassDto updatedClassDto) // Sử dụng ClassDto
+    {
+        try
         {
-            try
-            {
-                var result = await _adminService.UpdateClassAsync(id, updatedClassDto);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _adminService.UpdateClassAsync(id, updatedClassDto);
+            return Ok(result);
         }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 
-        // Delete
-        [HttpDelete("DeleteClass/{id}")]
-        public async Task<IActionResult> DeleteClass(int id)
+    // Delete
+    [HttpDelete("DeleteClass/{id}")]
+    public async Task<IActionResult> DeleteClass(int id)
+    {
+        try
         {
-            try
-            {
-                var result = await _adminService.DeleteClassAsync(id);
-                if (result)
-                    return Ok("Class deleted successfully");
-                return NotFound($"Class with ID {id} not found");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _adminService.DeleteClassAsync(id);
+            if (result)
+                return Ok("Class deleted successfully");
+            return NotFound($"Class with ID {id} not found");
         }
-    
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
 
     [HttpPost("UpgradeClass")]
     public async Task<IActionResult> UpgradeClass([FromQuery] int oldClassId, [FromQuery] string oldAcademicYear,
@@ -461,4 +410,18 @@ public class AdminController : ControllerBase
             return StatusCode(500, $"An error occurred in processing the request: {ex.Message}");
         }
     }
+    
+    
+    [HttpPost("calculate")]
+    public async Task<IActionResult> CalculateAverageScore([FromQuery] int studentId, [FromQuery] string academicYear)
+    {
+        if (studentId <= 0 || string.IsNullOrEmpty(academicYear))
+        {
+            return BadRequest("Mã sinh viên hoặc năm học không hợp lệ.");
+        }
+
+        await _adminService.CalculateAndSaveAverageScoresAsync(studentId, academicYear);
+        return Ok("Đã tính và lưu điểm trung bình cho sinh viên.");
+    }
+    
 }
