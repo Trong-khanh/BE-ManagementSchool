@@ -130,19 +130,6 @@ public class TeacherController : ControllerBase
                 new { Message = "An error occurred while calculating the semester average.", Details = ex.Message });
         }
     }
+
 }
 
-// [HttpGet("annual-average")]
-// public ActionResult<double> GetAnnualAverage(int studentId, int subjectId, string academicYear)
-// {
-//     try
-//     {
-//         // Call the service method with the logged-in user's claims and academic year
-//         var average = _teacherService.CalculateAnnualAverage(studentId, subjectId, User, academicYear);
-//         return Ok(average);
-//     }
-//     catch (Exception ex)
-//     {
-//         return BadRequest(ex.Message);
-//     }
-// }
