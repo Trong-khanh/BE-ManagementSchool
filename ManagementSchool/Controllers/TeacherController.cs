@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using ManagementSchool.Dto;
+using ManagementSchool.Entities;
 using ManagementSchool.Service;
 using ManagementSchool.Service.TeacherService;
 using Microsoft.AspNetCore.Authorization;
@@ -130,6 +131,25 @@ public class TeacherController : ControllerBase
                 new { Message = "An error occurred while calculating the semester average.", Details = ex.Message });
         }
     }
+    
+    [HttpGet("GetSemesterAverage/{studentId}/semester/{semesterId}")]
+    public async Task<ActionResult<SubjectsAverageScore>> GetStudentSubjectAverageScore(int studentId, int semesterId)
+    {
+        var user = HttpContext.User;
+        try
+        {
+            var result = await _teacherService.GetStudentSubjectAverageScoreAsync(studentId, semesterId, user);
+            return Ok(result);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(ex.Message);
+        }
+    }
+        }
 
-}
 

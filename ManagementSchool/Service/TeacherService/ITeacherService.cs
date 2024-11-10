@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using ManagementSchool.Dto;
+using ManagementSchool.Entities;
 
 namespace ManagementSchool.Service.TeacherService;
 
@@ -10,7 +11,5 @@ public interface ITeacherService
     Task AddScoreForStudentAsync(ClaimsPrincipal user, ScoreDto scoreDto);
     Task<List<ScoreDto>> GetScoresForStudentAsync(int studentId, int? subjectId = null, int? semesterId = null);
     Task<double> CalculateSemesterAverageAsync(int studentId, int semesterId, ClaimsPrincipal user);
-
-    //
-    // double CalculateAnnualAverage(int studentId, int subjectId, ClaimsPrincipal user, string academicYear);
+    Task<SemesterAverageScoreDto> GetStudentSubjectAverageScoreAsync(int studentId, int semesterId, ClaimsPrincipal user);
 }
