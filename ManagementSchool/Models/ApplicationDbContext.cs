@@ -137,12 +137,12 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .HasOne(s => s.Subject)
             .WithMany(a => a.AverageScores)
             .HasForeignKey(s => s.SubjectId);
-        
+
         // Thiết lập quan hệ giữa Student và AverageScore
         modelBuilder.Entity<AverageScore>()
-            .HasOne(a => a.Student)                    
-            .WithMany(s => s.AverageScores)            
-            .HasForeignKey(a => a.StudentId)           
+            .HasOne(a => a.Student)
+            .WithMany(s => s.AverageScores)
+            .HasForeignKey(a => a.StudentId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Seed data for Subject 

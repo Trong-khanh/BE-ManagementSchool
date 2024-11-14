@@ -131,7 +131,7 @@ public class TeacherController : ControllerBase
                 new { Message = "An error occurred while calculating the semester average.", Details = ex.Message });
         }
     }
-    
+
     [HttpGet("GetSemesterAverage/{studentId}/semester/{semesterId}")]
     public async Task<ActionResult<SubjectsAverageScore>> GetStudentSubjectAverageScore(int studentId, int semesterId)
     {
@@ -150,6 +150,4 @@ public class TeacherController : ControllerBase
             return NotFound(ex.Message);
         }
     }
-        }
-
-
+}

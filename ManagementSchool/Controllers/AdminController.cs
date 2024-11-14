@@ -72,23 +72,6 @@ public class AdminController : ControllerBase
         }
     }
 
-    // [HttpGet("GetStudentsBySchoolYear/{yearName}")]
-    // public async Task<IActionResult> GetStudentsBySchoolYear(string yearName)
-    // {
-    //     try
-    //     {
-    //         if (string.IsNullOrWhiteSpace(yearName))
-    //             return BadRequest("Year name cannot be empty.");
-    //
-    //         var students = await _adminService.GetStudentsBySchoolYearAsync(yearName);
-    //         return Ok(students);
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return StatusCode(500, $"An error occurred: {ex.Message}");
-    //     }
-    // }
-
     [HttpGet("getaAllStudents")]
     public async Task<IActionResult> GetAllStudents()
     {
@@ -234,19 +217,6 @@ public class AdminController : ControllerBase
         }
     }
 
-    [HttpDelete("ResetAllTeacherClassAssignments")]
-    public async Task<IActionResult> ResetAllTeacherClassAssignments()
-    {
-        try
-        {
-            await _adminService.ResetAllTeacherClassAssignmentsAsync();
-            return Ok("All teacher-class assignments reset successfully.");
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"An error occurred: {ex.Message}");
-        }
-    }
 
     // END ASSIGN TEACHER TO CLASS
 
@@ -311,7 +281,7 @@ public class AdminController : ControllerBase
 
     // Create
     [HttpPost("AddClass")]
-    public async Task<ActionResult<Class>> AddClass([FromBody] ClassDto newClassDto) // Sử dụng ClassDto
+    public async Task<ActionResult<Class>> AddClass([FromBody] ClassDto newClassDto)
     {
         try
         {
@@ -349,7 +319,7 @@ public class AdminController : ControllerBase
 
     // Update
     [HttpPut("UpdateClass/{id}")]
-    public async Task<IActionResult> UpdateClass(int id, [FromBody] ClassDto updatedClassDto) // Sử dụng ClassDto
+    public async Task<IActionResult> UpdateClass(int id, [FromBody] ClassDto updatedClassDto)
     {
         try
         {
@@ -410,18 +380,42 @@ public class AdminController : ControllerBase
             return StatusCode(500, $"An error occurred in processing the request: {ex.Message}");
         }
     }
-    
-    
-    [HttpPost("calculate")]
-    public async Task<IActionResult> CalculateAverageScore([FromQuery] int studentId, [FromQuery] string academicYear)
+
+
+// Endpoint Controller để tính điểm trung bình và trả về kết quả
+    [HttpPost("calculate-class-average")]
+    public async Task<IActionResult> CalculateClassAverageScore([FromQuery] string className, [FromQuery] string academicYear)
     {
-        if (studentId <= 0 || string.IsNullOrEmpty(academicYear))
+        if (string.IsNullOrEmpty(className) || string.IsNullOrEmpty(academicYear))
         {
-            return BadRequest("Mã sinh viên hoặc năm học không hợp lệ.");
+            return BadRequest("Class Name or AcademicYear Invalid.");
         }
 
-        await _adminService.CalculateAndSaveAverageScoresAsync(studentId, academicYear);
-        return Ok("Đã tính và lưu điểm trung bình cho sinh viên.");
+        try
+        {
+            // Tính toán và nhận danh sách kết quả từ CalculateAndSaveAverageScoresForClassAsync
+            var averageScoresList = await _adminService.CalculateAndSaveAverageScoresForClassAsync(className, academicYear);
+
+            // Trả về kết quả dưới dạng JSON
+            return Ok(averageScoresList);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Lỗi: {ex.Message}");
+        }
+    }
+    
+    [HttpGet("average-scores")]
+    public async Task<ActionResult<IEnumerable<StudentScoreDto>>> GetStudentAverageScores(int classId, string academicYear)
+    {
+        var studentScores = await _adminService.GetStudentAverageScoresAsync(classId, academicYear);
+
+        if (studentScores == null || !studentScores.Any())
+        {
+            return NotFound("No data found for the given class and academic year.");
+        }
+
+        return Ok(studentScores);
     }
     
 }

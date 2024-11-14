@@ -321,17 +321,6 @@ public class AdminService : IAdminService
         await _context.SaveChangesAsync();
     }
 
-    public async Task ResetAllTeacherClassAssignmentsAsync()
-    {
-        var allTeacherClasses = await _context.TeacherClasses.ToListAsync();
-
-        if (allTeacherClasses.Any())
-        {
-            _context.TeacherClasses.RemoveRange(allTeacherClasses);
-            await _context.SaveChangesAsync();
-        }
-    }
-
     public async Task<Semester> AddSemesterAsync(SemesterDto semesterDto)
     {
         if (semesterDto == null)
@@ -487,7 +476,6 @@ public class AdminService : IAdminService
         return result;
     }
 
-
     public async Task<bool> UpgradeClassAsync(int oldClassId, string oldAcademicYear, int newClassId,
         string newAcademicYear)
     {
@@ -538,63 +526,100 @@ public class AdminService : IAdminService
         return true;
     }
 
-public async Task CalculateAndSaveAverageScoresAsync(int studentId, string academicYear)
+public async Task<List<AverageScore>> CalculateAndSaveAverageScoresForClassAsync(string className, string academicYear)
 {
-    // Lấy điểm của học sinh trong năm học hiện tại cho tất cả các môn
-    var scores = await _context.SubjectsAverageScores
-        .Where(s => s.StudentId == studentId && s.AcademicYear == academicYear)
+    // Ghi log kiểm tra trạng thái bắt đầu
+    Console.WriteLine($"Bắt đầu tính điểm cho lớp {className} - Năm học {academicYear}");
+
+    var classEntity = await _context.Classes
+        .FirstOrDefaultAsync(c => c.ClassName == className);
+    if (classEntity == null)
+    {
+        throw new Exception("Class not found");
+    }
+
+    var studentsInClass = await _context.Students
+        .Where(s => s.ClassId == classEntity.ClassId && s.AcademicYear == academicYear)
         .ToListAsync();
 
-    // Lọc điểm cho học kỳ 1
-    var semester1Scores = scores
-        .Where(s => s.SemesterAverage1.HasValue)
-        .ToList();
+    var averageScoresList = new List<AverageScore>();
 
-    // Lọc điểm cho học kỳ 2
-    var semester2Scores = scores
-        .Where(s => s.SemesterAverage2.HasValue)
-        .ToList();
-
-    // Tính điểm trung bình cho học kỳ 1 nếu có đủ 12 môn
-    double? averageSemester1 = semester1Scores.Count == 12
-        ? semester1Scores.Sum(s => s.SemesterAverage1.Value) / 12
-        : (double?)null;
-
-    // Tính điểm trung bình cho học kỳ 2 nếu có đủ 12 môn
-    double? averageSemester2 = semester2Scores.Count == 12
-        ? semester2Scores.Sum(s => s.SemesterAverage2.Value) / 12
-        : (double?)null;
-
-    // Tính điểm trung bình cả năm học nếu cả hai học kỳ đều có đủ 12 môn
-    double? averageAcademicYear = (averageSemester1.HasValue && averageSemester2.HasValue)
-        ? (averageSemester1 + (averageSemester2 * 2)) / 3
-        : (double?)null;
-
-    // Tìm hoặc tạo mới bản ghi AverageScore cho sinh viên trong năm học hiện tại
-    var averageScore = await _context.AverageScores
-        .FirstOrDefaultAsync(a => a.StudentId == studentId && a.Student.AcademicYear == academicYear);
-
-    if (averageScore == null)
+    foreach (var student in studentsInClass)
     {
-        averageScore = new AverageScore
+        Console.WriteLine($"Đang tính điểm cho học sinh: {student.StudentId}");
+
+        var scores = await _context.SubjectsAverageScores
+            .Where(s => s.StudentId == student.StudentId && s.AcademicYear == academicYear)
+            .ToListAsync();
+
+        var semester1Scores = scores.Where(s => s.SemesterAverage1.HasValue).ToList();
+        var semester2Scores = scores.Where(s => s.SemesterAverage2.HasValue).ToList();
+
+        double? averageSemester1 = semester1Scores.Count == 12
+            ? semester1Scores.Sum(s => s.SemesterAverage1.Value) / 12
+            : (double?)null;
+
+        double? averageSemester2 = semester2Scores.Count == 12
+            ? semester2Scores.Sum(s => s.SemesterAverage2.Value) / 12
+            : (double?)null;
+
+        double? averageAcademicYear = (averageSemester1.HasValue && averageSemester2.HasValue)
+            ? (averageSemester1 + (averageSemester2 * 2)) / 3
+            : (double?)null;
+
+        var averageScore = await _context.AverageScores
+            .FirstOrDefaultAsync(a => a.StudentId == student.StudentId && a.Student.AcademicYear == academicYear);
+
+        if (averageScore == null)
         {
-            StudentId = studentId,
-            AverageSemester1 = averageSemester1,
-            AverageSemester2 = averageSemester2,
-            AverageAcademicYear = averageAcademicYear
-        };
-        _context.AverageScores.Add(averageScore);
-    }
-    else
-    {
-        averageScore.AverageSemester1 = averageSemester1;
-        averageScore.AverageSemester2 = averageSemester2;
-        averageScore.AverageAcademicYear = averageAcademicYear;
+            Console.WriteLine($"Thêm bản ghi mới cho học sinh {student.StudentId}");
+            averageScore = new AverageScore
+            {
+                StudentId = student.StudentId,
+                AverageSemester1 = averageSemester1,
+                AverageSemester2 = averageSemester2,
+                AverageAcademicYear = averageAcademicYear
+            };
+            _context.AverageScores.Add(averageScore);
+        }
+        else
+        {
+            Console.WriteLine($"Cập nhật bản ghi cho học sinh {student.StudentId}");
+            averageScore.AverageSemester1 = averageSemester1;
+            averageScore.AverageSemester2 = averageSemester2;
+            averageScore.AverageAcademicYear = averageAcademicYear;
+        }
+
+        // Thêm averageScore vào danh sách kết quả
+        averageScoresList.Add(averageScore);
     }
 
     await _context.SaveChangesAsync();
+    Console.WriteLine("Đã lưu tất cả thay đổi vào cơ sở dữ liệu.");
+
+    // Trả về danh sách các điểm trung bình đã lưu
+    return averageScoresList;
 }
 
+public async Task<IEnumerable<StudentScoreDto>> GetStudentAverageScoresAsync(int classId, string academicYear)
+{
+    var studentScores = await _context.AverageScores
+        .Include(a => a.Student) // Bao gồm thông tin học sinh
+        .Include(a => a.Student.Class) // Bao gồm thông tin lớp học
+        .Where(a => a.Student.ClassId == classId && a.Student.AcademicYear == academicYear) // Điều kiện tìm kiếm theo lớp và năm học
+        .Select(a => new StudentScoreDto
+        {
+            StudentFullName = a.Student.FullName, // Lấy tên học sinh
+            SemesterAverage1 = a.AverageSemester1, // Điểm trung bình học kỳ 1
+            SemesterAverage2 = a.AverageSemester2, // Điểm trung bình học kỳ 2
+            AnnualAverage = a.AverageAcademicYear, // Điểm trung bình năm học
+            ClassName = a.Student.Class.ClassName, // Tên lớp
+            AcademicYear = a.Student.AcademicYear // Năm học
+        })
+        .ToListAsync();
+
+    return studentScores;
+}
     public class ValidateException : Exception
     {
         public ValidateException(string message) : base(message)
@@ -602,3 +627,5 @@ public async Task CalculateAndSaveAverageScoresAsync(int studentId, string acade
         }
     }
 }
+
+    

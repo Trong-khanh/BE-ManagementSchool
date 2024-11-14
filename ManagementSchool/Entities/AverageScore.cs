@@ -6,7 +6,7 @@ public class AverageScore
     public double? AverageSemester1 { get; set; }
     public double? AverageSemester2 { get; set; }
     public double? AverageAcademicYear { get; set; }
-    
+
     public int StudentId { get; set; }
     public Student Student { get; set; }
 }

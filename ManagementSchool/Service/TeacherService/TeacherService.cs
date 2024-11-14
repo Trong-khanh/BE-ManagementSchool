@@ -274,4 +274,3 @@ public class TeacherService : ITeacherService
         return subjectScore;
     }
 }
-
