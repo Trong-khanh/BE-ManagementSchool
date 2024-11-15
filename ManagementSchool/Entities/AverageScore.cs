@@ -1,5 +1,4 @@
 namespace ManagementSchool.Entities;
-
 public class AverageScore
 {
     public int AverageScoreId { get; set; }

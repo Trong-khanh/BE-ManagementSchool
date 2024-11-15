@@ -418,4 +418,30 @@ public class AdminController : ControllerBase
         return Ok(studentScores);
     }
     
+// Endpoint để cập nhật lớp học và reset điểm
+    [HttpPost("UpdateClassAndResetScores")]
+    public async Task<IActionResult> UpdateClassAndResetScores([FromBody] UpdateClassRequestDto request)
+    {
+        if (string.IsNullOrEmpty(request.CurrentAcademicYear) || string.IsNullOrEmpty(request.CurrentClassName) || 
+            string.IsNullOrEmpty(request.NewAcademicYear) || string.IsNullOrEmpty(request.NewClassName))
+        {
+            return BadRequest("Thông tin năm học hiện tại, lớp hiện tại, năm học mới và lớp mới không được để trống.");
+        }
+
+        try
+        {
+            await _adminService.UpdateClassAndResetScoresAsync(request.CurrentAcademicYear, request.CurrentClassName, request.NewAcademicYear, request.NewClassName);
+            return Ok("Cập nhật lớp học và reset điểm thành công.");
+        }
+        catch (AdminService.ValidateException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch
+        {
+            return StatusCode(500, "Đã xảy ra lỗi trong quá trình xử lý.");
+        }
+    }
+
+    
 }

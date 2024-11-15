@@ -32,4 +32,5 @@ public interface IAdminService
     Task<Class> GetClassByIdAsync(int classId);
     Task<List<AverageScore>> CalculateAndSaveAverageScoresForClassAsync(string className, string academicYear);
     Task<IEnumerable<StudentScoreDto>> GetStudentAverageScoresAsync(int classId, string academicYear);
+    Task UpdateClassAndResetScoresAsync(string currentAcademicYear, string currentClassName, string newAcademicYear, string newClassName);
 }
