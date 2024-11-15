@@ -8,5 +8,6 @@ public class AverageScore
     public double? AverageAcademicYear { get; set; }
 
     public int StudentId { get; set; }
+    public string FullName { get; set; }
     public Student Student { get; set; }
 }

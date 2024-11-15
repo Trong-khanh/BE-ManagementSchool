@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ManagementSchool.Migrations
 {
-    public partial class db : Migration
+    public partial class studentname : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -262,7 +262,8 @@ namespace ManagementSchool.Migrations
                     AverageSemester1 = table.Column<double>(type: "float", nullable: true),
                     AverageSemester2 = table.Column<double>(type: "float", nullable: true),
                     AverageAcademicYear = table.Column<double>(type: "float", nullable: true),
-                    StudentId = table.Column<int>(type: "int", nullable: false)
+                    StudentId = table.Column<int>(type: "int", nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -499,10 +500,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "76638bfa-9e24-416c-9c94-ad0809d1a00c", "3", "Teacher", "TEACHER" },
-                    { "98d5918b-1e74-49f5-b6f1-9f0a9c9a440e", "2", "Student", "STUDENT" },
-                    { "b001a9cf-bc3e-4fdd-a087-79da6df6e390", "1", "Admin", "ADMIN" },
-                    { "ef217d71-2a1c-46f4-aa85-33aa01574a2c", "4", "Parent", "PARENT" }
+                    { "68a48364-90b7-4480-ada1-9947c201be1e", "4", "Parent", "PARENT" },
+                    { "6c713983-cc75-486b-a5c5-486959e5fd74", "3", "Teacher", "TEACHER" },
+                    { "a36c8db8-c12c-4fdc-87e5-0db4fd007773", "1", "Admin", "ADMIN" },
+                    { "f1d3df47-42cf-4012-bdbb-3101f2018270", "2", "Student", "STUDENT" }
                 });
 
             migrationBuilder.InsertData(

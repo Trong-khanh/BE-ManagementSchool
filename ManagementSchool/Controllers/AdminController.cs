@@ -405,7 +405,7 @@ public class AdminController : ControllerBase
         }
     }
     
-    [HttpGet("average-scores")]
+    [HttpGet("getAverage-scores")]
     public async Task<ActionResult<IEnumerable<StudentScoreDto>>> GetStudentAverageScores(int classId, string academicYear)
     {
         var studentScores = await _adminService.GetStudentAverageScoresAsync(classId, academicYear);

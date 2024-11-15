@@ -39,6 +39,10 @@ namespace ManagementSchool.Migrations
                     b.Property<double?>("AverageSemester2")
                         .HasColumnType("float");
 
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("StudentId")
                         .HasColumnType("int");
 
@@ -463,28 +467,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b001a9cf-bc3e-4fdd-a087-79da6df6e390",
+                            Id = "a36c8db8-c12c-4fdc-87e5-0db4fd007773",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "98d5918b-1e74-49f5-b6f1-9f0a9c9a440e",
+                            Id = "f1d3df47-42cf-4012-bdbb-3101f2018270",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "76638bfa-9e24-416c-9c94-ad0809d1a00c",
+                            Id = "6c713983-cc75-486b-a5c5-486959e5fd74",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "ef217d71-2a1c-46f4-aa85-33aa01574a2c",
+                            Id = "68a48364-90b7-4480-ada1-9947c201be1e",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"

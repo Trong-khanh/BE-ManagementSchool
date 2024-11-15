@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ManagementSchool.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241109080800_collum")]
-    partial class collum
+    [Migration("20241114152513_studentname")]
+    partial class studentname
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -40,6 +40,10 @@ namespace ManagementSchool.Migrations
 
                     b.Property<double?>("AverageSemester2")
                         .HasColumnType("float");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("int");
@@ -465,28 +469,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "df82afca-e663-4c2a-8959-e13712b94bff",
+                            Id = "a36c8db8-c12c-4fdc-87e5-0db4fd007773",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "d247493c-f181-48de-86e4-431f46147b3e",
+                            Id = "f1d3df47-42cf-4012-bdbb-3101f2018270",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "f9b1eb28-419d-4324-b5aa-cf33c4276c37",
+                            Id = "6c713983-cc75-486b-a5c5-486959e5fd74",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "93499e12-aa1b-47a1-a972-7d62371e65f8",
+                            Id = "68a48364-90b7-4480-ada1-9947c201be1e",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
