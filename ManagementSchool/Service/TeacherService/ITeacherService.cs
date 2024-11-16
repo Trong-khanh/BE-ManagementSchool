@@ -11,7 +11,6 @@ public interface ITeacherService
     Task AddScoreForStudentAsync(ClaimsPrincipal user, ScoreDto scoreDto);
     Task<List<ScoreDto>> GetScoresForStudentAsync(int studentId, int? subjectId = null, int? semesterId = null);
     Task<double> CalculateSemesterAverageAsync(int studentId, int semesterId, ClaimsPrincipal user);
-
     Task<SemesterAverageScoreDto> GetStudentSubjectAverageScoreAsync(int studentId, int semesterId,
         ClaimsPrincipal user);
 }

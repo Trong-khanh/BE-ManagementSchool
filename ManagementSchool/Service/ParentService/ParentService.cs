@@ -14,29 +14,48 @@ namespace ManagementSchool.Service.ParentService
         {
             _context = context;
         }
-
-        public async Task<List<StudentScoreInfoDto>> GetStudentInfoAsync(string className, string studentName,
-            string academicYear)
+        
+        public IEnumerable<dynamic> GetDailyScores(string studentName, string className, string academicYear)
         {
-            var studentScores = await _context.Students
-                .Where(s => s.FullName == studentName &&
-                            s.Class.ClassName == className &&
-                            s.AcademicYear == academicYear)
-                .SelectMany(s => s.Scores, (s, score) => new StudentScoreInfoDto
-                {
-                    StudentFullName = s.FullName,
-                    ClassName = s.Class.ClassName,
-                    SubjectName = score.Subject.SubjectName,
-                    AcademicYear = s.AcademicYear
-                })
-                .ToListAsync();
-
-            if (!studentScores.Any())
+            // Tìm ClassId dựa vào ClassName
+            var classEntity = _context.Classes.FirstOrDefault(c => c.ClassName == className);
+            if (classEntity == null)
             {
-                throw new Exception("No scores found for the provided student information.");
+                return null; // Không tìm thấy lớp
             }
 
-            return studentScores;
+            int classId = classEntity.ClassId;
+
+            // Tìm học sinh dựa vào ClassId và FullName
+            var student = _context.Students.FirstOrDefault(s => s.FullName == studentName && s.ClassId == classId);
+            if (student == null)
+            {
+                return null; // Không tìm thấy học sinh
+            }
+
+            // Xác minh AcademicYear trong bảng Semester
+            var validSemester = _context.Semesters.FirstOrDefault(s => s.AcademicYear == academicYear);
+            if (validSemester == null)
+            {
+                return null; // Không tìm thấy năm học trong bảng Semester
+            }
+
+            // Lấy danh sách điểm của học sinh
+            var scores = _context.Scores
+                .Where(s => s.StudentId == student.StudentId && s.Semester.AcademicYear == academicYear)
+                .Include(s => s.Subject)
+                .Include(s => s.Semester)
+                .Select(s => new
+                {
+                    SubjectName = s.Subject.SubjectName,
+                    SemesterType = s.Semester.SemesterType,
+                    ExamType = s.ExamType,
+                    ScoreValue = s.ScoreValue
+                })
+                .ToList();
+
+            return scores;
         }
+
     }
 }

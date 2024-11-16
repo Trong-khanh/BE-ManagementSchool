@@ -15,18 +15,16 @@ public class ParentController : ControllerBase
     {
         _parentService = parentService;
     }
-
-    [HttpGet("GetStudentInfo")]
-    public async Task<IActionResult> GetStudentInfo(string className, string studentName, string academicYear)
+    [HttpGet("GetsSoresDaily")]
+    public IActionResult GetDailyScores([FromQuery] string studentName, [FromQuery] string className, [FromQuery] string academicYear)
     {
-        try
+        var scores = _parentService.GetDailyScores(studentName, className, academicYear);
+
+        if (scores == null || !scores.Any())
         {
-            var studentScores = await _parentService.GetStudentInfoAsync(className, studentName, academicYear);
-            return Ok(studentScores);
+            return NotFound("Student not found .");
         }
-        catch (System.Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+
+        return Ok(scores);
     }
 }

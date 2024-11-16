@@ -5,5 +5,5 @@ namespace ManagementSchool.Service.ParentService;
 
 public interface IParentService
 {
-    Task<List<StudentScoreInfoDto>> GetStudentInfoAsync(string className, string studentName, string academicYear);
+    IEnumerable<dynamic> GetDailyScores(string studentName, string className, string academicYear);
 }
