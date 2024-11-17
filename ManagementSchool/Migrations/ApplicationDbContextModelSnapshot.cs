@@ -30,6 +30,10 @@ namespace ManagementSchool.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AverageScoreId"), 1L, 1);
 
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<double?>("AverageAcademicYear")
                         .HasColumnType("float");
 
@@ -38,10 +42,6 @@ namespace ManagementSchool.Migrations
 
                     b.Property<double?>("AverageSemester2")
                         .HasColumnType("float");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("int");
@@ -467,28 +467,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "a36c8db8-c12c-4fdc-87e5-0db4fd007773",
+                            Id = "4f5a6eee-92a6-4cee-956f-da1657e62b96",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "f1d3df47-42cf-4012-bdbb-3101f2018270",
+                            Id = "f4fe49eb-71d6-4199-94d6-f3a528575c0c",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "6c713983-cc75-486b-a5c5-486959e5fd74",
+                            Id = "6b59642c-fc4c-4b87-a628-b7b24fb2f5c7",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "68a48364-90b7-4480-ada1-9947c201be1e",
+                            Id = "f8d496a1-2582-432b-8542-1105c31120ee",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"

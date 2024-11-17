@@ -144,9 +144,6 @@ public class AdminController : ControllerBase
 
     // END CRUD TEACHER
 
-    //====================================================================================================
-    //====================================================================================================
-
     // ASSIGN TEACHER TO CLASS
 
     [HttpPost("AssignTeacherToClass")]
@@ -216,8 +213,7 @@ public class AdminController : ControllerBase
             return StatusCode(500, $"An error occurred: {ex.Message}");
         }
     }
-
-
+    
     // END ASSIGN TEACHER TO CLASS
 
     // START CRUD SEMESTER//
@@ -279,7 +275,7 @@ public class AdminController : ControllerBase
         }
     }
 
-    // Create
+    // START CRUD Class //
     [HttpPost("AddClass")]
     public async Task<ActionResult<Class>> AddClass([FromBody] ClassDto newClassDto)
     {
@@ -294,7 +290,7 @@ public class AdminController : ControllerBase
         }
     }
 
-    // Read All
+
     [HttpGet("GetAllClasses")]
     public async Task<ActionResult<IEnumerable<Class>>> GetAllClasses()
     {
@@ -302,7 +298,6 @@ public class AdminController : ControllerBase
         return Ok(classes);
     }
 
-    // Read One
     [HttpGet("GetClass/{id}")]
     public async Task<ActionResult<Class>> GetClassById(int id)
     {
@@ -317,7 +312,7 @@ public class AdminController : ControllerBase
         }
     }
 
-    // Update
+    
     [HttpPut("UpdateClass/{id}")]
     public async Task<IActionResult> UpdateClass(int id, [FromBody] ClassDto updatedClassDto)
     {
@@ -336,7 +331,7 @@ public class AdminController : ControllerBase
         }
     }
 
-    // Delete
+    
     [HttpDelete("DeleteClass/{id}")]
     public async Task<IActionResult> DeleteClass(int id)
     {
@@ -352,8 +347,7 @@ public class AdminController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
-
-
+    
     [HttpPost("UpgradeClass")]
     public async Task<IActionResult> UpgradeClass([FromQuery] int oldClassId, [FromQuery] string oldAcademicYear,
         [FromQuery] int newClassId, [FromQuery] string newAcademicYear)
@@ -380,7 +374,8 @@ public class AdminController : ControllerBase
             return StatusCode(500, $"An error occurred in processing the request: {ex.Message}");
         }
     }
-
+    
+    // END CRUD SEMESTER//
 
 // Endpoint Controller để tính điểm trung bình và trả về kết quả
     [HttpPost("calculate-class-average")]
@@ -390,12 +385,12 @@ public class AdminController : ControllerBase
         {
             return BadRequest("Class Name or AcademicYear Invalid.");
         }
-
+    
         try
         {
             // Tính toán và nhận danh sách kết quả từ CalculateAndSaveAverageScoresForClassAsync
             var averageScoresList = await _adminService.CalculateAndSaveAverageScoresForClassAsync(className, academicYear);
-
+    
             // Trả về kết quả dưới dạng JSON
             return Ok(averageScoresList);
         }
@@ -442,6 +437,5 @@ public class AdminController : ControllerBase
             return StatusCode(500, "Đã xảy ra lỗi trong quá trình xử lý.");
         }
     }
-
     
 }
