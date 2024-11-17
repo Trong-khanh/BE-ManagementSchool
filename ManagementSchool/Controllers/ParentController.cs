@@ -23,7 +23,7 @@ public class ParentController : ControllerBase
 
         if (scores == null || !scores.Any())
         {
-            return NotFound("Student not found.");
+            return NotFound($"No daily scores found for the student '{studentName}' in the academic year '{academicYear}'.");
         }
 
         return Ok(scores);
@@ -36,30 +36,28 @@ public class ParentController : ControllerBase
 
         if (averageScores == null || !averageScores.Any())
         {
-            return NotFound("No average scores found for the student.");
+            return NotFound($"No subject average scores found for the student '{studentName}' in the academic year '{academicYear}'.");
         }
 
         return Ok(averageScores);
     }
-    
+
     [HttpGet("GetAverageScores")]
     public ActionResult<IEnumerable<dynamic>> GetAverageScores(string studentName, string academicYear)
     {
         if (string.IsNullOrWhiteSpace(studentName) || string.IsNullOrWhiteSpace(academicYear))
         {
-            return BadRequest("Student name and academic year are required.");
+            return BadRequest("Both student name and academic year are required.");
         }
 
-        // Call the service to get the average scores
         var averageScores = _parentService.GetAverageScores(studentName, academicYear);
 
-        // If no average scores are found, return 404
         if (averageScores == null || !averageScores.Any())
         {
-            return NotFound("No average scores found for the given student and academic year.");
+            return NotFound($"No average scores found for the student '{studentName}' in the academic year '{academicYear}'.");
         }
 
-        // Return the average scores as a successful response
         return Ok(averageScores);
     }
+
 }

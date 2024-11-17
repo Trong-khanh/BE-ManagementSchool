@@ -3,10 +3,9 @@ using System.Text.RegularExpressions;
 using ManagementSchool.Dto;
 using ManagementSchool.Entities;
 using ManagementSchool.Models;
+using ManagementSchool.Service;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Extensions;
-
-namespace ManagementSchool.Service;
 
 public class AdminService : IAdminService
 {
@@ -17,17 +16,19 @@ public class AdminService : IAdminService
         _context = context;
     }
 
+    // Adds a new student with parent details
     public async Task<Student> AddStudentWithParentAsync(StudentDtos studentDto)
     {
-        // Validate inputs
+        // Validate inputs (student and parent's names)
         IsValidName(studentDto.FullName);
-        IsValidName(studentDto.ParentName); // Kiểm tra tên của Parent
+        IsValidName(studentDto.ParentName); // Validate parent name
 
-        // Kiểm tra nếu AcademicYear tồn tại trong Semester
+        // Check if the provided AcademicYear exists in the Semester
         var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.AcademicYear == studentDto.AcademicYear);
-        if (semester == null) throw new ValidateException("Invalid AcademicYear provided.");
+        if (semester == null)
+            throw new ValidateException("The provided AcademicYear does not exist.");
 
-        // Tạo và thêm student
+        // Create and add the new student
         var student = new Student
         {
             FullName = studentDto.FullName,
@@ -46,12 +47,13 @@ public class AdminService : IAdminService
         return student;
     }
 
+    // Updates the student details
     public async Task<Student> UpdateStudentAsync(int studentId, StudentDtos studentDto)
     {
         var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentId == studentId);
         if (student == null) throw new ValidateException("Student not found.");
 
-        // Cập nhật thông tin student
+        // Update student information
         student.FullName = studentDto.FullName;
         student.Address = studentDto.Address;
         student.ClassId = await _context.Classes
@@ -59,9 +61,9 @@ public class AdminService : IAdminService
             .Select(c => c.ClassId)
             .FirstOrDefaultAsync();
 
-        // Kiểm tra nếu AcademicYear tồn tại trong Semester
+        // Validate the AcademicYear
         var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.AcademicYear == studentDto.AcademicYear);
-        if (semester == null) throw new ValidateException("Invalid AcademicYear provided.");
+        if (semester == null) throw new ValidateException("The provided AcademicYear does not exist.");
 
         student.AcademicYear = studentDto.AcademicYear;
         student.ParentName = studentDto.ParentName;
@@ -70,6 +72,7 @@ public class AdminService : IAdminService
         return student;
     }
 
+    // Deletes a student by their ID
     public async Task<bool> DeleteStudentAsync(int studentId)
     {
         var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentId == studentId);
@@ -81,9 +84,10 @@ public class AdminService : IAdminService
         return true;
     }
 
+    // Fetches students by class name and academic year
     public async Task<IEnumerable<Student>> GetStudentsByClassAsync(string className, string academicYear)
     {
-        // Decode the className in case it was URL-encoded.
+        // Decode URL-encoded class name
         className = WebUtility.UrlDecode(className);
 
         if (string.IsNullOrWhiteSpace(className))
@@ -92,35 +96,25 @@ public class AdminService : IAdminService
         if (string.IsNullOrWhiteSpace(academicYear))
             throw new ArgumentException("Academic year cannot be empty.");
 
-        // Find the class in the database.
+        // Find the class in the database
         var classInDb = await _context.Classes
             .FirstOrDefaultAsync(c => c.ClassName == className);
 
-        // If the class is not found, throw an exception.
         if (classInDb == null)
             throw new ArgumentException($"Class '{className}' not found.");
 
-        // Find the students in the specified class and academic year.
+        // Get the students for the specified class and academic year
         var students = await _context.Students
             .Where(s => s.ClassId == classInDb.ClassId && s.AcademicYear == academicYear)
             .ToListAsync();
 
-        // If no students are found for the specified class and academic year,
-        // you may choose to handle this case differently (e.g., return an empty list, throw an exception, etc.).
         if (students.Count == 0)
-            // Here, I'm throwing an exception to indicate that no students were found for the specified criteria.
             throw new Exception($"No students found for class '{className}' in academic year '{academicYear}'.");
 
         return students;
     }
-
-    public async Task<Student> GetStudentByIdAsync(int studentId)
-    {
-        return await _context.Students
-            .Include(s => s.Class)
-            .FirstOrDefaultAsync(s => s.StudentId == studentId);
-    }
-
+    
+    // Adds a teacher and associates with a subject
     public async Task<TeacherDto?> AddTeacherAsync(TeacherDto teacherDto)
     {
         if (teacherDto == null)
@@ -159,6 +153,7 @@ public class AdminService : IAdminService
         };
     }
 
+    // Deletes a teacher by their ID
     public async Task<bool> DeleteTeacherAsync(int teacherId)
     {
         var teacher = await _context.Teachers.FindAsync(teacherId);
@@ -171,6 +166,7 @@ public class AdminService : IAdminService
         return true;
     }
 
+    // Updates teacher details
     public async Task<TeacherDto?> UpdateTeacherAsync(int teacherId, TeacherDto teacherDto)
     {
         if (teacherDto == null)
@@ -209,6 +205,7 @@ public class AdminService : IAdminService
         return result;
     }
 
+    // Fetches all teachers with their subject details
     public async Task<IEnumerable<TeacherWithSubjectDto>> GetAllTeachersAsync()
     {
         var teachers = await _context.Teachers
@@ -225,28 +222,29 @@ public class AdminService : IAdminService
         });
     }
 
+    // Assigns a teacher to a class
     public async Task AssignTeacherToClassAsync(TeacherClassAssignDto assignmentDto)
     {
-        // Find the teacher by full name and email
+        // Find teacher by full name and email
         var teacher = await _context.Teachers
-            .Include(t => t.Subject) // Bao gồm cả môn học
+            .Include(t => t.Subject)
             .Include(t => t.TeacherClasses)
             .ThenInclude(tc => tc.Class)
             .FirstOrDefaultAsync(t => t.Name == assignmentDto.TeacherFullName && t.Email == assignmentDto.TeacherEmail);
 
         if (teacher == null)
-            throw new ValidateException("Teacher with the provided full name and email not found.");
+            throw new ValidateException("Teacher with the provided name and email not found.");
 
         var classEntity = await _context.Classes
             .FirstOrDefaultAsync(c => c.ClassName == assignmentDto.ClassName);
         if (classEntity == null)
             throw new ValidateException("Class not found.");
 
-        // Check if the teacher is already assigned to the class for that subject
+        // Check if teacher is already assigned to this class
         if (teacher.TeacherClasses.Any(tc => tc.Class.ClassName == assignmentDto.ClassName))
-            throw new ValidateException("Teacher is already assigned to this class for their subject.");
+            throw new ValidateException("Teacher is already assigned to this class.");
 
-        // Assign the teacher to the class
+        // Assign teacher to the class
         var teacherClass = new TeacherClass
         {
             TeacherId = teacher.TeacherId,
@@ -257,6 +255,7 @@ public class AdminService : IAdminService
         assignmentDto.SubjectName = teacher.Subject.SubjectName;
     }
 
+    // Gets all teacher assignments to classes
     public async Task<List<TeacherClassAssignDto>> GetTeacherClassAssignedAsync()
     {
         return await _context.TeacherClasses
@@ -267,46 +266,50 @@ public class AdminService : IAdminService
             {
                 TeacherFullName = tc.Teacher.Name,
                 TeacherEmail = tc.Teacher.Email,
-                ClassName = tc.Class.ClassName,
-                SubjectName = tc.Teacher.Subject.SubjectName
+                SubjectName = tc.Teacher.Subject.SubjectName,
+                ClassName = tc.Class.ClassName
             })
             .ToListAsync();
     }
 
     public async Task UpdateTeacherClassAssignmentAsync(UpdateTeacherAssignDto assignDto)
     {
-        // Tìm giáo viên bằng tên và email
+        // Find the teacher by full name and email
         var teacher = await _context.Teachers
             .Include(t => t.TeacherClasses)
             .ThenInclude(tc => tc.Class)
             .FirstOrDefaultAsync(t => t.Name == assignDto.TeacherFullName && t.Email == assignDto.TeacherEmail);
 
+        // If the teacher is not found, throw an error
         if (teacher == null)
             throw new ValidateException("Teacher not found.");
 
-        // Kiểm tra lớp mà giáo viên hiện đang được gán
+        // Check if the teacher is currently assigned to the class
         var currentClassAssignment = teacher.TeacherClasses
             .FirstOrDefault(tc => tc.Class.ClassName == assignDto.CurrentClassName);
 
+        // If the teacher is not assigned to the class, throw an error
         if (currentClassAssignment == null)
             throw new ValidateException("Teacher is not assigned to this class.");
 
-        // Tìm lớp mới để gán cho giáo viên
+        // Find the new class to assign to the teacher
         var newClassEntity = await _context.Classes
             .FirstOrDefaultAsync(c => c.ClassName == assignDto.NewClassName);
 
+        // If the new class is not found, throw an error
         if (newClassEntity == null)
             throw new ValidateException("New class not found.");
 
-        // Cập nhật lớp cho giáo viên
+        // Update the teacher's class assignment
         currentClassAssignment.ClassId = newClassEntity.ClassId;
 
-        // Lưu thay đổi vào cơ sở dữ liệu
+        // Save changes to the database
         await _context.SaveChangesAsync();
     }
 
     public async Task DeleteTeacherFromClassAsync(TeacherClassAssignDto assignmentDto)
     {
+        // Find the teacher-class assignment
         var teacherClass = await _context.TeacherClasses
             .Include(tc => tc.Teacher)
             .Include(tc => tc.Class)
@@ -314,19 +317,22 @@ public class AdminService : IAdminService
                                        tc.Teacher.Email == assignmentDto.TeacherEmail &&
                                        tc.Class.ClassName == assignmentDto.ClassName);
 
+        // If the teacher is not assigned to the class, throw an error
         if (teacherClass == null)
             throw new ValidateException("Teacher is not assigned to this class.");
 
+        // Remove the teacher from the class
         _context.TeacherClasses.Remove(teacherClass);
         await _context.SaveChangesAsync();
     }
 
     public async Task<Semester> AddSemesterAsync(SemesterDto semesterDto)
     {
+        // Ensure semesterDto is not null
         if (semesterDto == null)
             throw new ValidateException("The semesterDto field is required.");
 
-        // Validate StartDate and EndDate
+        // Validate that the end date is after the start date
         if (semesterDto.EndDate <= semesterDto.StartDate)
             throw new ValidateException("EndDate must be greater than StartDate.");
 
@@ -334,6 +340,7 @@ public class AdminService : IAdminService
         if (!Enum.TryParse<SemesterType>(semesterDto.SemesterType.Replace(" ", ""), out var semesterType))
             throw new ValidateException("Invalid SemesterType specified.");
 
+        // Create a new semester and save to the database
         var semester = new Semester
         {
             SemesterType = semesterType,
@@ -350,14 +357,16 @@ public class AdminService : IAdminService
 
     public async Task<Semester> UpdateSemesterAsync(int semesterId, SemesterDto semesterDto)
     {
+        // Ensure semesterDto is not null
         if (semesterDto == null)
             throw new ValidateException("The semesterDto object must be provided.");
 
+        // Find the semester by ID
         var semester = await _context.Semesters.FindAsync(semesterId);
         if (semester == null)
             throw new ValidateException("Semester not found.");
 
-        // Validate StartDate and EndDate
+        // Validate that the start date is before the end date
         if (semesterDto.StartDate >= semesterDto.EndDate)
             throw new ValidateException("StartDate must be before EndDate.");
 
@@ -365,7 +374,8 @@ public class AdminService : IAdminService
         if (!Enum.TryParse<SemesterType>(semesterDto.SemesterType.Replace(" ", ""), out var semesterType))
             throw new ValidateException("Invalid SemesterType specified.");
 
-        semester.SemesterType = semesterType; // Update enum
+        // Update the semester details
+        semester.SemesterType = semesterType;
         semester.StartDate = semesterDto.StartDate;
         semester.EndDate = semesterDto.EndDate;
         semester.AcademicYear = semesterDto.AcademicYear;
@@ -377,9 +387,12 @@ public class AdminService : IAdminService
 
     public async Task<bool> DeleteSemesterAsync(int semesterId)
     {
+        // Find the semester by ID
         var semester = await _context.Semesters.FindAsync(semesterId);
-        if (semester == null) return false;
+        if (semester == null)
+            return false; // Return false if semester is not found
 
+        // Remove the semester from the database
         _context.Semesters.Remove(semester);
         await _context.SaveChangesAsync();
 
@@ -388,6 +401,7 @@ public class AdminService : IAdminService
 
     public async Task<IEnumerable<SemesterDto>> GetAllSemestersAsync()
     {
+        // Retrieve all semesters and map them to SemesterDto
         return await _context.Semesters
             .Select(s => new SemesterDto
             {
@@ -402,14 +416,14 @@ public class AdminService : IAdminService
 
     public async Task<SemesterDto> GetSemesterByIdAsync(int semesterId)
     {
-        // Find the semester using the provided semesterId
+        // Find the semester by ID
         var semester = await _context.Semesters.FindAsync(semesterId);
 
-        // Check if the semester was found
+        // If the semester is not found, throw an error
         if (semester == null)
             throw new ValidateException("Semester not found.");
 
-        // Return a new SemesterDto with the details
+        // Return the semester details as a SemesterDto
         return new SemesterDto
         {
             SemesterType = semester.SemesterType.ToString(),
@@ -421,16 +435,19 @@ public class AdminService : IAdminService
 
     public async Task<IEnumerable<Student>> GetAllStudentsAsync()
     {
+        // Retrieve all students with their assigned classes
         return await _context.Students
-            .Include(s => s.Class) // Include the related class
+            .Include(s => s.Class)
             .ToListAsync();
     }
 
     public async Task<Class> AddClassAsync(ClassDto newClassDto)
     {
+        // Ensure the class name is not empty
         if (string.IsNullOrWhiteSpace(newClassDto.ClassName))
             throw new ArgumentException("Class name cannot be empty.");
 
+        // Create a new class and save to the database
         var newClass = new Class
         {
             ClassName = newClassDto.ClassName
@@ -443,10 +460,12 @@ public class AdminService : IAdminService
 
     public async Task<Class> UpdateClassAsync(int classId, ClassDto updatedClassDto)
     {
+        // Find the existing class by ID
         var existingClass = await _context.Classes.FindAsync(classId);
         if (existingClass == null)
             throw new KeyNotFoundException($"Class with ID {classId} not found.");
 
+        // Update the class name
         existingClass.ClassName = updatedClassDto.ClassName;
         await _context.SaveChangesAsync();
         return existingClass;
@@ -454,10 +473,12 @@ public class AdminService : IAdminService
 
     public async Task<bool> DeleteClassAsync(int classId)
     {
+        // Find the class to delete
         var classToDelete = await _context.Classes.FindAsync(classId);
         if (classToDelete == null)
             throw new KeyNotFoundException($"Class with ID {classId} not found.");
 
+        // Remove the class from the database
         _context.Classes.Remove(classToDelete);
         await _context.SaveChangesAsync();
         return true;
@@ -465,11 +486,13 @@ public class AdminService : IAdminService
 
     public async Task<IEnumerable<Class>> GetAllClassesAsync()
     {
+        // Retrieve all classes
         return await _context.Classes.ToListAsync();
     }
 
     public async Task<Class> GetClassByIdAsync(int classId)
     {
+        // Find the class by ID
         var result = await _context.Classes.FindAsync(classId);
         if (result == null)
             throw new KeyNotFoundException($"Class with ID {classId} not found.");
@@ -479,23 +502,26 @@ public class AdminService : IAdminService
     public async Task<bool> UpgradeClassAsync(int oldClassId, string oldAcademicYear, int newClassId,
         string newAcademicYear)
     {
-        // Check new academic year exists
+        // Check if the new academic year exists
         var semesterExists = await _context.Semesters.AnyAsync(s => s.AcademicYear == newAcademicYear);
         if (!semesterExists)
         {
             throw new ValidateException("New academic year does not exist.");
         }
 
+        // Retrieve student summaries for the old class and academic year
         var summaries = await _context.SummariesOfYear
             .Include(s => s.Student)
             .Where(s => s.Student.ClassId == oldClassId && s.AcademicYear == oldAcademicYear)
             .ToListAsync();
 
+        // If no summaries are found, throw an error
         if (summaries.Count == 0)
         {
             throw new ValidateException("Class or Academic Year does not exist.");
         }
 
+        // Update the class and academic year for the students
         foreach (var summary in summaries)
         {
             if (summary.Status == "Next Class")
@@ -509,110 +535,121 @@ public class AdminService : IAdminService
             }
         }
 
+        // Save changes to the database
         await _context.SaveChangesAsync();
         return true;
     }
 
     public bool IsValidName(string name)
     {
+        // Check if the name is empty or consists only of whitespaces
         if (string.IsNullOrWhiteSpace(name))
             throw new ValidateException("Name cannot be empty.");
 
         // Regex pattern for validating name (adjust according to your requirements)
         var nameRegex = @"^[a-zA-Z\s]+$";
+        // Validate the name against the regex pattern
         if (!Regex.IsMatch(name, nameRegex))
             throw new ValidateException("Name contains invalid characters.");
 
         return true;
     }
 
-public async Task<List<AverageScore>> CalculateAndSaveAverageScoresForClassAsync(string className, string academicYear)
-{
-    // Log to check the status
-    Console.WriteLine($"Bắt đầu tính điểm cho lớp {className} - Năm học {academicYear}");
-
-    // Fetch the class entity by class name
-    var classEntity = await _context.Classes
-        .FirstOrDefaultAsync(c => c.ClassName == className);
-    if (classEntity == null)
+    public async Task<List<AverageScore>> CalculateAndSaveAverageScoresForClassAsync(string className,
+        string academicYear)
     {
-        throw new Exception("Class not found");
-    }
+        // Log to check the status of the calculation
+        Console.WriteLine($"Starting to calculate scores for class {className} - Academic Year {academicYear}");
 
-    // Fetch all students in the class for the given academic year
-    var studentsInClass = await _context.Students
-        .Where(s => s.ClassId == classEntity.ClassId && s.AcademicYear == academicYear)
-        .ToListAsync();
+        // Fetch the class entity by class name
+        var classEntity = await _context.Classes
+            .FirstOrDefaultAsync(c => c.ClassName == className);
 
-    var averageScoresList = new List<AverageScore>();
+        // If class not found, throw exception
+        if (classEntity == null)
+        {
+            throw new Exception("Class not found");
+        }
 
-    foreach (var student in studentsInClass)
-    {
-        Console.WriteLine($"Đang tính điểm cho học sinh: {student.StudentId}");
-
-        // Fetch the average scores for the student for the given academic year
-        var scores = await _context.SubjectsAverageScores
-            .Where(s => s.StudentId == student.StudentId && s.AcademicYear == academicYear)
+        // Fetch all students in the class for the specified academic year
+        var studentsInClass = await _context.Students
+            .Where(s => s.ClassId == classEntity.ClassId && s.AcademicYear == academicYear)
             .ToListAsync();
 
-        var semester1Scores = scores.Where(s => s.SemesterAverage1.HasValue).ToList();
-        var semester2Scores = scores.Where(s => s.SemesterAverage2.HasValue).ToList();
+        var averageScoresList = new List<AverageScore>();
 
-        // Calculate the averages for Semester 1, Semester 2, and Academic Year
-        decimal? averageSemester1 = semester1Scores.Count == 12
-            ? Math.Round((decimal)(semester1Scores.Sum(s => s.SemesterAverage1.Value) / 12), 1)
-            : (decimal?)null;
-
-        decimal? averageSemester2 = semester2Scores.Count == 12
-            ? Math.Round((decimal)(semester2Scores.Sum(s => s.SemesterAverage2.Value) / 12), 1)
-            : (decimal?)null;
-
-        decimal? averageAcademicYear = (averageSemester1.HasValue && averageSemester2.HasValue)
-            ? Math.Round((decimal)((averageSemester1 + (averageSemester2 * 2)) / 3), 1)
-            : (decimal?)null;
-
-        // Convert the decimal? values back to double? before assigning to AverageScore properties
-        double? finalAverageSemester1 = averageSemester1.HasValue ? (double?)averageSemester1.Value : null;
-        double? finalAverageSemester2 = averageSemester2.HasValue ? (double?)averageSemester2.Value : null;
-        double? finalAverageAcademicYear = averageAcademicYear.HasValue ? (double?)averageAcademicYear.Value : null;
-
-        // Find the existing average score or create a new one if it doesn't exist
-        var averageScore = await _context.AverageScores
-            .FirstOrDefaultAsync(a => a.StudentId == student.StudentId && a.AcademicYear == academicYear);
-
-        if (averageScore == null)
+        // Loop through each student to calculate their average scores
+        foreach (var student in studentsInClass)
         {
-            Console.WriteLine($"Thêm bản ghi mới cho học sinh {student.StudentId}");
-            averageScore = new AverageScore
+            Console.WriteLine($"Calculating scores for student: {student.StudentId}");
+
+            // Fetch the average scores for the student for the given academic year
+            var scores = await _context.SubjectsAverageScores
+                .Where(s => s.StudentId == student.StudentId && s.AcademicYear == academicYear)
+                .ToListAsync();
+
+            var semester1Scores = scores.Where(s => s.SemesterAverage1.HasValue).ToList();
+            var semester2Scores = scores.Where(s => s.SemesterAverage2.HasValue).ToList();
+
+            // Calculate the averages for Semester 1, Semester 2, and Academic Year
+            decimal? averageSemester1 = semester1Scores.Count == 12
+                ? Math.Round((decimal)(semester1Scores.Sum(s => s.SemesterAverage1.Value) / 12), 1)
+                : (decimal?)null;
+
+            decimal? averageSemester2 = semester2Scores.Count == 12
+                ? Math.Round((decimal)(semester2Scores.Sum(s => s.SemesterAverage2.Value) / 12), 1)
+                : (decimal?)null;
+
+            decimal? averageAcademicYear = (averageSemester1.HasValue && averageSemester2.HasValue)
+                ? Math.Round((decimal)((averageSemester1 + (averageSemester2 * 2)) / 3), 1)
+                : (decimal?)null;
+
+            // Convert decimal? values back to double? before assigning to AverageScore properties
+            double? finalAverageSemester1 = averageSemester1.HasValue ? (double?)averageSemester1.Value : null;
+            double? finalAverageSemester2 = averageSemester2.HasValue ? (double?)averageSemester2.Value : null;
+            double? finalAverageAcademicYear = averageAcademicYear.HasValue ? (double?)averageAcademicYear.Value : null;
+
+            // Find existing average score or create a new one if it doesn't exist
+            var averageScore = await _context.AverageScores
+                .FirstOrDefaultAsync(a => a.StudentId == student.StudentId && a.AcademicYear == academicYear);
+
+            // If average score not found, add new record
+            if (averageScore == null)
             {
-                StudentId = student.StudentId,
-                AverageSemester1 = finalAverageSemester1,
-                AverageSemester2 = finalAverageSemester2,
-                AverageAcademicYear = finalAverageAcademicYear,
-                AcademicYear = academicYear
-            };
-            _context.AverageScores.Add(averageScore);
-        }
-        else
-        {
-            Console.WriteLine($"Cập nhật bản ghi cho học sinh {student.StudentId}");
-            averageScore.AverageSemester1 = finalAverageSemester1;
-            averageScore.AverageSemester2 = finalAverageSemester2;
-            averageScore.AverageAcademicYear = finalAverageAcademicYear;
+                Console.WriteLine($"Adding new record for student {student.StudentId}");
+                averageScore = new AverageScore
+                {
+                    StudentId = student.StudentId,
+                    AverageSemester1 = finalAverageSemester1,
+                    AverageSemester2 = finalAverageSemester2,
+                    AverageAcademicYear = finalAverageAcademicYear,
+                    AcademicYear = academicYear
+                };
+                _context.AverageScores.Add(averageScore);
+            }
+            else
+            {
+                // If record exists, update it
+                Console.WriteLine($"Updating record for student {student.StudentId}");
+                averageScore.AverageSemester1 = finalAverageSemester1;
+                averageScore.AverageSemester2 = finalAverageSemester2;
+                averageScore.AverageAcademicYear = finalAverageAcademicYear;
+            }
+
+            // Add the calculated average score to the result list
+            averageScoresList.Add(averageScore);
         }
 
-        // Add the calculated average score to the result list
-        averageScoresList.Add(averageScore);
+        // Save all changes to the database
+        await _context.SaveChangesAsync();
+
+        // Return the list of calculated and saved average scores
+        return averageScoresList;
     }
 
-    // Save all changes to the database
-    await _context.SaveChangesAsync();
-
-    // Return the list of calculated and saved average scores
-    return averageScoresList;
-}
     public async Task<IEnumerable<StudentScoreDto>> GetStudentAverageScoresAsync(int classId, string academicYear)
     {
+        // Fetch all average scores for students in the specified class and academic year
         var studentScores = await _context.AverageScores
             .Include(a => a.Student)
             .Include(a => a.Student.Class)
@@ -633,18 +670,19 @@ public async Task<List<AverageScore>> CalculateAndSaveAverageScoresForClassAsync
     public async Task UpdateClassAndResetScoresAsync(string currentAcademicYear, string currentClassName,
         string newAcademicYear, string newClassName)
     {
-        // Lấy ID lớp mới từ tên lớp mới
+        // Get new class ID by the new class name
         var newClassId = await _context.Classes
             .Where(c => c.ClassName == newClassName)
             .Select(c => c.ClassId)
             .FirstOrDefaultAsync();
 
+        // If new class not found, throw exception
         if (newClassId == 0)
         {
-            throw new ValidateException("Lớp học mới không tồn tại.");
+            throw new ValidateException("New class does not exist.");
         }
 
-        // Lấy danh sách học sinh trong lớp hiện tại và năm học hiện tại
+        // Get list of students in the current class and academic year
         var studentsInCurrentClassAndYear = await _context.Students
             .Where(s => s.AcademicYear == currentAcademicYear && s.Class.ClassName == currentClassName)
             .Include(s => s.AverageScores)
@@ -652,57 +690,59 @@ public async Task<List<AverageScore>> CalculateAndSaveAverageScoresForClassAsync
             .Include(s => s.Scores)
             .ToListAsync();
 
+        // Loop through each student to check conditions and update their class or reset scores
         foreach (var student in studentsInCurrentClassAndYear)
         {
             var averageScore = student.AverageScores.FirstOrDefault();
             if (averageScore == null) continue;
 
-            // Kiểm tra điều kiện lên lớp
+            // Check if the student qualifies to move to the next class
             bool canMoveToNextClass = averageScore.AverageAcademicYear >= 6.5 &&
                                       averageScore.AverageSemester2 >= 6.5;
 
+            // If the student can move to the next class, validate subject scores
             if (canMoveToNextClass)
             {
-                // Kiểm tra thêm điều kiện về điểm các môn học
                 bool subjectScoresValid = student.SubjectsAverageScores.All(sas =>
                     sas.SemesterAverage2 >= 5 && sas.AnnualAverage >= 5);
 
-                // Nếu đủ điều kiện lên lớp, cập nhật thông tin học sinh
+                // If subject scores are valid, update student information
                 if (subjectScoresValid)
                 {
-                    student.ClassId = newClassId; // Cập nhật lớp mới
-                    student.AcademicYear = newAcademicYear; // Cập nhật năm học mới
-                    continue; // Chuyển sang học sinh tiếp theo
+                    student.ClassId = newClassId; // Update to new class
+                    student.AcademicYear = newAcademicYear; // Update to new academic year
+                    continue; // Move to the next student
                 }
             }
 
-            // Nếu không đủ điều kiện, reset điểm và cập nhật năm học mới
-            // Xóa dữ liệu điểm trong bảng Score
+            // If the student does not qualify, reset their scores and update the academic year
+            // Remove scores from Score table
             if (student.Scores != null && student.Scores.Any())
             {
                 _context.Scores.RemoveRange(student.Scores);
             }
 
-            // Xóa dữ liệu điểm trung bình trong bảng AverageScore
+            // Remove average score record
             if (averageScore != null)
             {
                 _context.AverageScores.Remove(averageScore);
             }
 
-            // Xóa dữ liệu điểm trung bình các môn học trong bảng SubjectsAverageScore
+            // Remove subject average scores
             if (student.SubjectsAverageScores != null && student.SubjectsAverageScores.Any())
             {
                 _context.SubjectsAverageScores.RemoveRange(student.SubjectsAverageScores);
             }
 
-            // Cập nhật năm học mới cho học sinh (lớp giữ nguyên)
+            // Update the academic year while keeping the class unchanged
             student.AcademicYear = newAcademicYear;
         }
 
-        // Lưu thay đổi vào cơ sở dữ liệu
+        // Save changes to the database
         await _context.SaveChangesAsync();
     }
 
+// Custom exception class for validation errors
     public class ValidateException : Exception
     {
         public ValidateException(string message) : base(message)

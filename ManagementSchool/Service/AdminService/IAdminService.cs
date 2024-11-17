@@ -9,7 +9,6 @@ public interface IAdminService
     Task<bool> DeleteStudentAsync(int studentId);
     Task<Student> UpdateStudentAsync(int studentId, StudentDtos studentDtos);
     Task<IEnumerable<Student>> GetStudentsByClassAsync(string className, string academicYear);
-    Task<Student> GetStudentByIdAsync(int studentId);
     Task<TeacherDto?> AddTeacherAsync(TeacherDto teacherDto);
     Task<bool> DeleteTeacherAsync(int teacherId);
     Task<TeacherDto?> UpdateTeacherAsync(int teacherId, TeacherDto teacherDto);
@@ -32,5 +31,6 @@ public interface IAdminService
     Task<Class> GetClassByIdAsync(int classId);
     Task<List<AverageScore>> CalculateAndSaveAverageScoresForClassAsync(string className, string academicYear);
     Task<IEnumerable<StudentScoreDto>> GetStudentAverageScoresAsync(int classId, string academicYear);
-    Task UpdateClassAndResetScoresAsync(string currentAcademicYear, string currentClassName, string newAcademicYear, string newClassName);
+    Task UpdateClassAndResetScoresAsync(string currentAcademicYear, string currentClassName, string newAcademicYear,
+        string newClassName);
 }
