@@ -19,26 +19,34 @@ public class AdminService : IAdminService
     // Adds a new student with parent details
     public async Task<Student> AddStudentWithParentAsync(StudentDtos studentDto)
     {
-        // Validate inputs (student and parent's names)
-        IsValidName(studentDto.FullName);
-        IsValidName(studentDto.ParentName); // Validate parent name
+        // Validate inputs
+        if (!IsValidName(studentDto.FullName) || !IsValidName(studentDto.ParentName))
+            throw new ValidateException("Name contains invalid characters.");
+        if (!IsValidEmail(studentDto.ParentEmail))
+            throw new ValidateException("Invalid email format.");
 
-        // Check if the provided AcademicYear exists in the Semester
+        // Check if AcademicYear exists
         var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.AcademicYear == studentDto.AcademicYear);
         if (semester == null)
             throw new ValidateException("The provided AcademicYear does not exist.");
+
+        // Get ClassId
+        var classId = await _context.Classes
+            .Where(c => c.ClassName == studentDto.ClassName)
+            .Select(c => c.ClassId)
+            .FirstOrDefaultAsync();
+        if (classId == 0)
+            throw new ValidateException("Class not found.");
 
         // Create and add the new student
         var student = new Student
         {
             FullName = studentDto.FullName,
             Address = studentDto.Address,
-            ClassId = await _context.Classes
-                .Where(c => c.ClassName == studentDto.ClassName)
-                .Select(c => c.ClassId)
-                .FirstOrDefaultAsync(),
+            ClassId = classId,
             AcademicYear = studentDto.AcademicYear,
-            ParentName = studentDto.ParentName
+            ParentName = studentDto.ParentName,
+            ParentEmail = studentDto.ParentEmail
         };
 
         _context.Students.Add(student);
@@ -51,22 +59,31 @@ public class AdminService : IAdminService
     public async Task<Student> UpdateStudentAsync(int studentId, StudentDtos studentDto)
     {
         var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentId == studentId);
-        if (student == null) throw new ValidateException("Student not found.");
+        if (student == null)
+            throw new ValidateException("Student not found.");
 
-        // Update student information
-        student.FullName = studentDto.FullName;
-        student.Address = studentDto.Address;
-        student.ClassId = await _context.Classes
+        if (!IsValidName(studentDto.FullName) || !IsValidName(studentDto.ParentName))
+            throw new ValidateException("Name contains invalid characters.");
+        if (!IsValidEmail(studentDto.ParentEmail))
+            throw new ValidateException("Invalid email format.");
+
+        var classId = await _context.Classes
             .Where(c => c.ClassName == studentDto.ClassName)
             .Select(c => c.ClassId)
             .FirstOrDefaultAsync();
+        if (classId == 0)
+            throw new ValidateException("Class not found.");
 
-        // Validate the AcademicYear
         var semester = await _context.Semesters.FirstOrDefaultAsync(s => s.AcademicYear == studentDto.AcademicYear);
-        if (semester == null) throw new ValidateException("The provided AcademicYear does not exist.");
+        if (semester == null)
+            throw new ValidateException("The provided AcademicYear does not exist.");
 
+        student.FullName = studentDto.FullName;
+        student.Address = studentDto.Address;
+        student.ClassId = classId;
         student.AcademicYear = studentDto.AcademicYear;
         student.ParentName = studentDto.ParentName;
+        student.ParentEmail = studentDto.ParentEmail;
 
         await _context.SaveChangesAsync();
         return student;
@@ -113,7 +130,7 @@ public class AdminService : IAdminService
 
         return students;
     }
-    
+
     // Adds a teacher and associates with a subject
     public async Task<TeacherDto?> AddTeacherAsync(TeacherDto teacherDto)
     {
@@ -435,9 +452,18 @@ public class AdminService : IAdminService
 
     public async Task<IEnumerable<Student>> GetAllStudentsAsync()
     {
-        // Retrieve all students with their assigned classes
         return await _context.Students
             .Include(s => s.Class)
+            .Select(s => new Student
+            {
+                StudentId = s.StudentId,
+                FullName = s.FullName,
+                Address = s.Address,
+                AcademicYear = s.AcademicYear,
+                ParentName = s.ParentName,
+                ParentEmail = s.ParentEmail, // Include ParentEmail
+                Class = s.Class
+            })
             .ToListAsync();
     }
 
@@ -540,20 +566,32 @@ public class AdminService : IAdminService
         return true;
     }
 
+// Validate name format
     public bool IsValidName(string name)
     {
-        // Check if the name is empty or consists only of whitespaces
         if (string.IsNullOrWhiteSpace(name))
             throw new ValidateException("Name cannot be empty.");
 
-        // Regex pattern for validating name (adjust according to your requirements)
         var nameRegex = @"^[a-zA-Z\s]+$";
-        // Validate the name against the regex pattern
         if (!Regex.IsMatch(name, nameRegex))
             throw new ValidateException("Name contains invalid characters.");
 
         return true;
     }
+
+// Validate email format
+    public bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ValidateException("Email cannot be empty.");
+
+        var emailRegex = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+        if (!Regex.IsMatch(email, emailRegex))
+            throw new ValidateException("Invalid email format.");
+
+        return true;
+    }
+
 
     public async Task<List<AverageScore>> CalculateAndSaveAverageScoresForClassAsync(string className,
         string academicYear)

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ManagementSchool.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241117014734_db")]
+    [Migration("20241117171808_db")]
     partial class db
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -157,6 +157,10 @@ namespace ManagementSchool.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ParentEmail")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -469,28 +473,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "4f5a6eee-92a6-4cee-956f-da1657e62b96",
+                            Id = "0177eced-5679-4194-bdd5-6a6de0938ee9",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "f4fe49eb-71d6-4199-94d6-f3a528575c0c",
+                            Id = "846d284b-ab99-40ed-9ab2-bb351993475e",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "6b59642c-fc4c-4b87-a628-b7b24fb2f5c7",
+                            Id = "c0de685c-7b91-4f91-95e2-0023c34dff51",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "f8d496a1-2582-432b-8542-1105c31120ee",
+                            Id = "ca6c7ef3-854f-495c-86ef-183292fd370e",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"

@@ -216,7 +216,8 @@ namespace ManagementSchool.Migrations
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ClassId = table.Column<int>(type: "int", nullable: false),
                     AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ParentName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ParentName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ParentEmail = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -500,10 +501,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "4f5a6eee-92a6-4cee-956f-da1657e62b96", "1", "Admin", "ADMIN" },
-                    { "6b59642c-fc4c-4b87-a628-b7b24fb2f5c7", "3", "Teacher", "TEACHER" },
-                    { "f4fe49eb-71d6-4199-94d6-f3a528575c0c", "2", "Student", "STUDENT" },
-                    { "f8d496a1-2582-432b-8542-1105c31120ee", "4", "Parent", "PARENT" }
+                    { "0177eced-5679-4194-bdd5-6a6de0938ee9", "1", "Admin", "ADMIN" },
+                    { "846d284b-ab99-40ed-9ab2-bb351993475e", "2", "Student", "STUDENT" },
+                    { "c0de685c-7b91-4f91-95e2-0023c34dff51", "3", "Teacher", "TEACHER" },
+                    { "ca6c7ef3-854f-495c-86ef-183292fd370e", "4", "Parent", "PARENT" }
                 });
 
             migrationBuilder.InsertData(

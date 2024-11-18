@@ -44,6 +44,7 @@ public class AuthenticateController : ControllerBase
         _context = context;
     }
 
+
     [HttpPost]
     public async Task<IActionResult> Register([FromBody] RegisterUser registerUser, string role)
     {
@@ -88,8 +89,37 @@ public class AuthenticateController : ControllerBase
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var confirmationLink = Url.Action(nameof(ConfirmEmail), "Authenticate",
                 new { token, email = user.Email }, Request.Scheme);
-            var message = new Message(new[] { user.Email }, "Email Confirmation", confirmationLink);
-            _emailService.SendEmail(message);
+
+            // Nội dung HTML cho email
+            var confirmationHtml = $@"
+        <html>
+        <head>
+            <style>
+                .btn {{
+                    background-color: #4CAF50;
+                    border: none;
+                    color: white;
+                    padding: 10px 20px;
+                    text-align: center;
+                    text-decoration: none;
+                    display: inline-block;
+                    font-size: 16px;
+                    margin: 4px 2px;
+                    cursor: pointer;
+                    border-radius: 5px;
+                }}
+            </style>
+        </head>
+        <body>
+            <h2>Welcome to Management School!</h2>
+            <p>Please confirm your email address by clicking the button below:</p>
+            <a href='{confirmationLink}' class='btn'>Confirm Email</a>
+        </body>
+        </html>";
+
+            // Tạo và gửi email
+            var message = new Message(new[] { user.Email }, "Email Confirmation", confirmationHtml, isHtml: true);
+            _emailService.SendEmailAsync(message);
 
             return StatusCode(StatusCodes.Status200OK,
                 new Response
@@ -104,21 +134,101 @@ public class AuthenticateController : ControllerBase
     }
 
 
-    [HttpGet("ConfirmEmail")]
-    public async Task<IActionResult> ConfirmEmail(string token, string email)
+[HttpGet("ConfirmEmail")]
+public async Task<IActionResult> ConfirmEmail(string token, string email)
+{
+    var user = await _userManager.FindByEmailAsync(email);
+    
+    // Nếu tìm thấy người dùng
+    if (user != null)
     {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user != null)
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        
+        // Nếu xác nhận email thành công
+        if (result.Succeeded)
         {
-            var result = await _userManager.ConfirmEmailAsync(user, token);
-            if (result.Succeeded)
-                return StatusCode(StatusCodes.Status200OK,
-                    new Response { Status = "Success", Message = "Email Verified Successfully" });
-        }
+            var confirmationHtml = $@"
+            <html>
+            <head>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                        background-color: #f4f4f4;
+                        padding: 50px;
+                    }}
+                    .message {{
+                        background-color: #4CAF50;
+                        color: white;
+                        padding: 15px;
+                        border-radius: 5px;
+                        display: inline-block;
+                        margin-top: 20px;
+                    }}
+                    h2 {{
+                        color: #333;
+                    }}
+                    a {{
+                        color: #4CAF50;
+                        text-decoration: none;
+                        font-weight: bold;
+                        margin-top: 20px;
+                        display: inline-block;
+                    }}
+                    a:hover {{
+                        color: #45a049;
+                    }}
+                </style>
+            </head>
+            <body>
+                <h2>Email Verification Successful!</h2>
+                <div class='message'>
+                    Your email has been successfully verified. You can now log in to your account.
+                </div>
+                <a href='http://localhost:3000/login'>Go to Login</a>
+            </body>
+            </html>";
 
-        return StatusCode(StatusCodes.Status500InternalServerError,
-            new Response { Status = "Error", Message = "This User Doesnot Exist" });
+            return Content(confirmationHtml, "text/html");
+        }
     }
+
+    // Nếu không tìm thấy người dùng hoặc xác nhận không thành công
+    var errorHtml = $@"
+    <html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                text-align: center;
+                background-color: #f4f4f4;
+                padding: 50px;
+            }}
+            .message {{
+                background-color: #f44336;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                display: inline-block;
+                margin-top: 20px;
+            }}
+            h2 {{
+                color: #333;
+            }}
+        </style>
+    </head>
+    <body>
+        <h2>Email Verification Failed!</h2>
+        <div class='message'>
+            We could not verify your email. Please try again or contact support.
+        </div>
+    </body>
+    </html>";
+
+    return Content(errorHtml, "text/html");
+}
+
+
 
     [HttpPost("Login")]
     public async Task<IActionResult> Login([FromBody] LoginUser loginUser)

@@ -13,10 +13,10 @@ namespace ManagementSchool.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly IAdminService _adminService;
-
     public AdminController(IAdminService adminService)
     {
         _adminService = adminService;
+        
     }
 
     // START CRUD STUDENT 

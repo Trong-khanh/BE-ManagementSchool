@@ -9,6 +9,7 @@ public class Student
     public Class Class { get; set; }
     public string AcademicYear { get; set; }
     public string ParentName { get; set; }
+    public string ParentEmail { get; set; }
     public ICollection<Subject> Subjects { get; set; }
     public ICollection<StudentSubject> StudentSubjects { get; set; }
     public ICollection<Score> Scores { get; set; }
