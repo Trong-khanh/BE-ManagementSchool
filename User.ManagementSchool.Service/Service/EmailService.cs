@@ -14,36 +14,41 @@ public class EmailService : IEmailService
         _emailConfiguration = emailConfiguration;
     }
 
-    public void SendEmail(Message message)
+    public async Task SendEmailAsync(Message message)
     {
         var emailMessage = CreateEmailMessage(message);
-        Send(emailMessage);
+        await SendAsync(emailMessage); 
     }
-
     private MimeMessage CreateEmailMessage(Message message)
     {
         var emailMessage = new MimeMessage();
-        emailMessage.From.Add(new MailboxAddress("Email confirmation", _emailConfiguration.From));
+        emailMessage.From.Add(new MailboxAddress("Email Confirmation", _emailConfiguration.From));
         emailMessage.To.AddRange(message.To);
         emailMessage.Subject = message.Subject;
-        emailMessage.Body = new TextPart(TextFormat.Text) { Text = message.Content };
+
+        emailMessage.Body = message.IsHtml
+            ? new TextPart(TextFormat.Html) { Text = message.Content }
+            : new TextPart(TextFormat.Text) { Text = message.Content };
+
         return emailMessage;
     }
 
-    private void Send(MimeMessage mailMessage)
+
+    private async Task SendAsync(MimeMessage mailMessage)
     {
         using var client = new SmtpClient();
         try
         {
-            client.Connect(_emailConfiguration.SmtpServer, _emailConfiguration.Port, true);
+            await client.ConnectAsync(_emailConfiguration.SmtpServer, _emailConfiguration.Port, true); 
             client.AuthenticationMechanisms.Remove("XOAUTH2");
-            client.Authenticate(_emailConfiguration.Username, _emailConfiguration.Password);
-            client.Send(mailMessage);
+            await client.AuthenticateAsync(_emailConfiguration.Username, _emailConfiguration.Password); 
+            await client.SendAsync(mailMessage);
         }
         finally
         {
-            client.Disconnect(true);
+            await client.DisconnectAsync(true); 
             client.Dispose();
         }
     }
+
 }

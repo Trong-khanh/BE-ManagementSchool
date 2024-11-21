@@ -1,3 +1,4 @@
+using ManagementSchool.Dto;
 using ManagementSchool.Service.ParentService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +11,7 @@ namespace ManagementSchool.Controllers;
 public class ParentController : ControllerBase
 {
     private readonly IParentService _parentService;
+   
 
     public ParentController(IParentService parentService)
     {
@@ -59,5 +61,5 @@ public class ParentController : ControllerBase
 
         return Ok(averageScores);
     }
-
+    
 }

@@ -152,3 +152,7 @@
 /Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/obj/Debug/net6.0/ManagementSchool.csproj.CopyComplete
 /Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/obj/Debug/net6.0/ManagementSchool.genruntimeconfig.cache
 /Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/obj/Debug/net6.0/ref/ManagementSchool.dll
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/bin/Debug/net6.0/BraintreeHttp-Dotnet.dll
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/bin/Debug/net6.0/Source.dll
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/bin/Debug/net6.0/PayPalCheckoutSdk.dll
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/bin/Debug/net6.0/PayPalHttp-Dotnet.dll

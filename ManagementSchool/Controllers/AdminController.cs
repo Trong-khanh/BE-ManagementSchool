@@ -1,6 +1,7 @@
 using ManagementSchool.Dto;
 using ManagementSchool.Entities;
 using ManagementSchool.Service;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +14,11 @@ namespace ManagementSchool.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly IAdminService _adminService;
+  
+
     public AdminController(IAdminService adminService)
     {
         _adminService = adminService;
-        
     }
 
     // START CRUD STUDENT 
@@ -50,28 +52,6 @@ public class AdminController : ControllerBase
         catch (AdminService.ValidateException ex)
         {
             return BadRequest($"Validation Error: {ex.Message}");
-        }
-    }
-
-    // Get students by class and academic year.
-    [HttpGet("GetStudentsByClass/{className}/{academicYear}")]
-    public async Task<IActionResult> GetStudentsByClass(string className, string academicYear)
-    {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(className))
-                return BadRequest("Class name cannot be empty.");
-
-            var students = await _adminService.GetStudentsByClassAsync(className, academicYear);
-            return Ok(students);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest($"Error: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
 
@@ -459,4 +439,7 @@ public class AdminController : ControllerBase
             return StatusCode(500, "An error occurred during processing.");
         }
     }
+    
+    
 }
+    

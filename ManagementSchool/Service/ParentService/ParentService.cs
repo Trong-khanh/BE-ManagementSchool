@@ -1,18 +1,23 @@
-using System.Linq;
-using System.Threading.Tasks;
+
 using ManagementSchool.Models;
-using ManagementSchool.Dto; // Thêm namespace để sử dụng DTOs
+using ManagementSchool.Dto;
+using ManagementSchool.Entities;
 using Microsoft.EntityFrameworkCore;
+using PayPal.Core;
+using PayPal.v1.Payments;
+
 
 namespace ManagementSchool.Service.ParentService
 {
     public class ParentService : IParentService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public ParentService(ApplicationDbContext context)
+        public ParentService(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         public IEnumerable<dynamic> GetDailyScores(string studentName, string academicYear)
@@ -90,7 +95,9 @@ namespace ManagementSchool.Service.ParentService
                 {
                     AverageSemester1 = s.AverageSemester1.HasValue ? s.AverageSemester1.ToString() : "Not available",
                     AverageSemester2 = s.AverageSemester2.HasValue ? s.AverageSemester2.ToString() : "Not available",
-                    AverageAcademicYear = s.AverageAcademicYear.HasValue ? s.AverageAcademicYear.ToString() : "Not available"
+                    AverageAcademicYear = s.AverageAcademicYear.HasValue
+                        ? s.AverageAcademicYear.ToString()
+                        : "Not available"
                 })
                 .ToList();
 

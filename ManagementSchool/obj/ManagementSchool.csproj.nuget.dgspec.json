@@ -64,6 +64,10 @@
               "target": "Package",
               "version": "[13.0.3, )"
             },
+            "PayPalCheckoutSdk": {
+              "target": "Package",
+              "version": "[1.0.4, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.5.0, )"
@@ -129,6 +133,14 @@
             "NETCore.MailKit": {
               "target": "Package",
               "version": "[2.1.0, )"
+            },
+            "PayPal": {
+              "target": "Package",
+              "version": "[2.0.0-rc2, )"
+            },
+            "PayPalCheckoutSdk": {
+              "target": "Package",
+              "version": "[1.0.4, )"
             }
           },
           "imports": [

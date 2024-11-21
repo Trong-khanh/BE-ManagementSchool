@@ -10,8 +10,7 @@ using Microsoft.OpenApi.Extensions;
 public class AdminService : IAdminService
 {
     private readonly ApplicationDbContext _context;
-
-    public AdminService(ApplicationDbContext context)
+    public AdminService(ApplicationDbContext context )
     {
         _context = context;
     }
@@ -99,36 +98,6 @@ public class AdminService : IAdminService
         await _context.SaveChangesAsync();
 
         return true;
-    }
-
-    // Fetches students by class name and academic year
-    public async Task<IEnumerable<Student>> GetStudentsByClassAsync(string className, string academicYear)
-    {
-        // Decode URL-encoded class name
-        className = WebUtility.UrlDecode(className);
-
-        if (string.IsNullOrWhiteSpace(className))
-            throw new ArgumentException("Class name cannot be empty.");
-
-        if (string.IsNullOrWhiteSpace(academicYear))
-            throw new ArgumentException("Academic year cannot be empty.");
-
-        // Find the class in the database
-        var classInDb = await _context.Classes
-            .FirstOrDefaultAsync(c => c.ClassName == className);
-
-        if (classInDb == null)
-            throw new ArgumentException($"Class '{className}' not found.");
-
-        // Get the students for the specified class and academic year
-        var students = await _context.Students
-            .Where(s => s.ClassId == classInDb.ClassId && s.AcademicYear == academicYear)
-            .ToListAsync();
-
-        if (students.Count == 0)
-            throw new Exception($"No students found for class '{className}' in academic year '{academicYear}'.");
-
-        return students;
     }
 
     // Adds a teacher and associates with a subject
@@ -591,7 +560,6 @@ public class AdminService : IAdminService
 
         return true;
     }
-
 
     public async Task<List<AverageScore>> CalculateAndSaveAverageScoresForClassAsync(string className,
         string academicYear)

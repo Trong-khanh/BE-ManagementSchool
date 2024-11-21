@@ -3,6 +3,7 @@ using ManagementSchool.Service.RefreshToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using PayPal.v1.Invoices;
 
 namespace ManagementSchool.Models;
 
@@ -27,12 +28,11 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<SummaryOfYear> SummariesOfYear { get; set; }
     public DbSet<SubjectsAverageScore> SubjectsAverageScores { get; set; }
     public DbSet<AverageScore> AverageScores { get; set; }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         SeedRoles(modelBuilder);
-
+        
         // Relationship with Student
         modelBuilder.Entity<Student>()
             .HasOne(c => c.Class)
@@ -102,6 +102,12 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .HasOne(s => s.Semester)
             .WithMany(s => s.Scores)
             .HasForeignKey(s => s.SemesterId);
+        
+        modelBuilder.Entity<Score>()
+            .HasOne(s => s.SubjectsAverageScore)
+            .WithMany(sa => sa.Scores)
+            .HasForeignKey(s => s.SubjectsAverageScoreId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Relationship between Student and SummaryOfYear
         modelBuilder.Entity<SummaryOfYear>()

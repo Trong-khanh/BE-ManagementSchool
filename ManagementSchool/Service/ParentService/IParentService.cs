@@ -9,5 +9,3 @@ public interface IParentService
     IEnumerable<dynamic> GetSubjectsAverageScores(string studentName, string academicYear);
     IEnumerable<dynamic> GetAverageScores(string studentName, string academicYear);
 }
-    
- 
