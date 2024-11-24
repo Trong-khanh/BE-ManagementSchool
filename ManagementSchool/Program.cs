@@ -6,6 +6,7 @@ using ManagementSchool.Service.ParentService;
 using ManagementSchool.Service.RefreshToken;
 using ManagementSchool.Service.StudentService;
 using ManagementSchool.Service.TeacherService;
+using ManagementSchool.Service.TuitionFeeNotificationService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -58,6 +59,7 @@ var emailConfig = configuration.GetSection("EmailConfiguration").Get<EmailConfig
 builder.Services.AddSingleton(emailConfig);
 
 // Service DI
+builder.Services.AddScoped<ITuitionFeeNotificationService, TuitionFeeNotificationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<IAdminService, AdminService>();

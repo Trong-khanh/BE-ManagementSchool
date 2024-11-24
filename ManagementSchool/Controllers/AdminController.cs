@@ -1,7 +1,7 @@
 using ManagementSchool.Dto;
 using ManagementSchool.Entities;
 using ManagementSchool.Service;
-
+using ManagementSchool.Service.TuitionFeeNotificationService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +14,13 @@ namespace ManagementSchool.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly IAdminService _adminService;
-  
 
-    public AdminController(IAdminService adminService)
+    private readonly ITuitionFeeNotificationService _tuitionFeeNotificationService;
+
+    public AdminController(IAdminService adminService, ITuitionFeeNotificationService tuitionFeeNotificationService)
     {
         _adminService = adminService;
+        _tuitionFeeNotificationService = tuitionFeeNotificationService;
     }
 
     // START CRUD STUDENT 
@@ -439,7 +441,74 @@ public class AdminController : ControllerBase
             return StatusCode(500, "An error occurred during processing.");
         }
     }
-    
-    
+
+    // Endpoint to create a new tuition fee notification
+    [HttpPost("CreateFeeNotification")]
+    public async Task<IActionResult> CreateTuitionFeeNotification([FromBody] CreateTuitionFeeNotificationDto request)
+    {
+        if (request == null)
+        {
+            return BadRequest("Invalid data.");
+        }
+
+        var result =
+            await _tuitionFeeNotificationService.CreateTuitionFeeNotificationAsync(request.SemesterId, request.Amount,
+                request.Content);
+
+        if (result)
+        {
+            return Ok(new { message = "Tuition fee notification created successfully." });
+        }
+
+        return Conflict(new { message = "Notification already exists or semester not found." });
+    }
+
+    // Endpoint to update an existing tuition fee notification
+    [HttpPut("UpdateFeeNotification")]
+    public async Task<IActionResult> UpdateTuitionFeeNotification([FromBody] UpdateTuitionFeeNotificationDto request)
+    {
+        if (request == null)
+        {
+            return BadRequest("Invalid data.");
+        }
+
+        var result =
+            await _tuitionFeeNotificationService.UpdateTuitionFeeNotificationAsync(request.SemesterId, request.Amount,
+                request.Content);
+
+        if (result)
+        {
+            return Ok(new { message = "Tuition fee notification updated successfully." });
+        }
+
+        return NotFound(new { message = "Notification not found or semester not found." });
+    }
+
+    // Endpoint to get a tuition fee notification by semester
+    [HttpGet("{semesterId}GetFeeNotification")]
+    public async Task<IActionResult> GetTuitionFeeNotificationBySemester(int semesterId)
+    {
+        var notification = await _tuitionFeeNotificationService.GetTuitionFeeNotificationBySemesterAsync(semesterId);
+
+        if (notification == null)
+        {
+            return NotFound(new { message = "No notification found for the specified semester." });
+        }
+
+        return Ok(notification);
+    }
+
+// Endpoint to get all tuition fee notifications
+    [HttpGet("GetAllFeeNotifications")]
+    public async Task<IActionResult> GetAllTuitionFeeNotifications()
+    {
+        var notifications = await _tuitionFeeNotificationService.GetAllTuitionFeeNotificationsAsync();
+
+        if (notifications == null || notifications.Count == 0)
+        {
+            return NotFound(new { message = "No tuition fee notifications found." });
+        }
+
+        return Ok(notifications);
+    }
 }
-    

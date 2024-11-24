@@ -10,5 +10,6 @@ namespace ManagementSchool.Entities
         public ICollection<Score> Scores { get; set; }
         public ICollection<ClassSemester> ClassSemesters { get; set; }
         public ICollection<SubjectsAverageScore> AverageScores { get; set; }
+        public TuitionFeeNotification TuitionFeeNotification { get; set; }
     }
 }

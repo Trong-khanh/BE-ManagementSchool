@@ -28,10 +28,26 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<SummaryOfYear> SummariesOfYear { get; set; }
     public DbSet<SubjectsAverageScore> SubjectsAverageScores { get; set; }
     public DbSet<AverageScore> AverageScores { get; set; }
+    public DbSet<TuitionFeeNotification> TuitionFeeNotifications { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         SeedRoles(modelBuilder);
+        modelBuilder.Entity<TuitionFeeNotification>()
+            .Property(t => t.Amount)
+            .HasPrecision(18, 2);
+        
+        // Thiết lập mối quan hệ một - một giữa Semester và TuitionFeeNotification
+        modelBuilder.Entity<TuitionFeeNotification>()
+            .HasOne(t => t.Semester)  // Mỗi TuitionFeeNotification thuộc về một Semester
+            .WithOne(s => s.TuitionFeeNotification)  // Mỗi Semester có một TuitionFeeNotification
+            .HasForeignKey<TuitionFeeNotification>(t => t.SemesterId)  // Khóa ngoại trong TuitionFeeNotification
+            .IsRequired();  // Ràng buộc rằng mỗi Semester phải có một TuitionFeeNotification
+
+        // (Tuỳ chọn) Có thể thêm ràng buộc unique cho SemesterId trong TuitionFeeNotification
+        modelBuilder.Entity<TuitionFeeNotification>()
+            .HasIndex(t => t.SemesterId)  // Tạo index cho khóa ngoại SemesterId
+            .IsUnique();  // Đảm bảo mỗi SemesterId chỉ xuất hiện một lần trong TuitionFeeNotification
         
         // Relationship with Student
         modelBuilder.Entity<Student>()
