@@ -475,15 +475,15 @@ public class AdminController : ControllerBase
         return NotFound(new { message = "Notification not found or semester not found." });
     }
 
-    // Endpoint to get a tuition fee notification by semester
-    [HttpGet("{semesterId}GetFeeNotification")]
-    public async Task<IActionResult> GetTuitionFeeNotificationBySemester(int semesterId)
+    // Endpoint to get a tuition fee notification 
+    [HttpGet("GetTuitionFeeNotification")]
+    public async Task<IActionResult> GetTuitionFeeNotification(SemesterType semesterType, string academicYear)
     {
-        var notification = await _tuitionFeeNotificationService.GetTuitionFeeNotificationBySemesterAsync(semesterId);
+        var notification = await _tuitionFeeNotificationService.GetTuitionFeeNotificationAsync(semesterType, academicYear);
 
         if (notification == null)
         {
-            return NotFound(new { message = "No notification found for the specified semester." });
+            return NotFound(new { message = "Tuition fee notification not found." });
         }
 
         return Ok(notification);

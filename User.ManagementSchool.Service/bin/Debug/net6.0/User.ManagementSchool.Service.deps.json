@@ -10,7 +10,8 @@
         "dependencies": {
           "NETCore.MailKit": "2.1.0",
           "PayPal": "2.0.0-rc2",
-          "PayPalCheckoutSdk": "1.0.4"
+          "PayPalCheckoutSdk": "1.0.4",
+          "RestSharp": "112.1.0"
         },
         "runtime": {
           "User.ManagementSchool.Service.dll": {}
@@ -117,6 +118,14 @@
           }
         }
       },
+      "RestSharp/112.1.0": {
+        "runtime": {
+          "lib/net6.0/RestSharp.dll": {
+            "assemblyVersion": "112.1.0.0",
+            "fileVersion": "112.1.0.0"
+          }
+        }
+      },
       "System.Formats.Asn1/6.0.0": {},
       "System.Runtime.CompilerServices.Unsafe/6.0.0": {},
       "System.Security.Cryptography.Pkcs/6.0.0": {
@@ -215,6 +224,13 @@
       "sha512": "sha512-eZZBCABzVOek+id9Xy04HhmgykF0wZg9wpByzrWN7q8qEI0Qen9b7tfd7w8VA3dOeesumMG7C5ZPy0jk7PSRHw==",
       "path": "portable.bouncycastle/1.9.0",
       "hashPath": "portable.bouncycastle.1.9.0.nupkg.sha512"
+    },
+    "RestSharp/112.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-bOUGNZqhhv/QeCXHTKEUil846yBjwWXpzPKjO67kFvaAOoF361z7jLY5BMnuZ6WD2WQRA750sNMcK7MSPCQ5Mg==",
+      "path": "restsharp/112.1.0",
+      "hashPath": "restsharp.112.1.0.nupkg.sha512"
     },
     "System.Formats.Asn1/6.0.0": {
       "type": "package",

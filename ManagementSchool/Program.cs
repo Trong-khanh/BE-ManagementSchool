@@ -1,7 +1,9 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using ManagementSchool.Entities.MomoOptonModel;
 using ManagementSchool.Models;
 using ManagementSchool.Service;
+using ManagementSchool.Service.MomoService;
 using ManagementSchool.Service.ParentService;
 using ManagementSchool.Service.RefreshToken;
 using ManagementSchool.Service.StudentService;
@@ -18,7 +20,9 @@ using User.ManagementSchool.Service.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+//Connect MoMoAPI 
+builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
+builder.Services.AddScoped<IMomoService, MomoService>();
 
 // For Entity Framework
 var configuration = builder.Configuration;
@@ -53,6 +57,7 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
     };
 });
+
 
 //Add Email Configuration
 var emailConfig = configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();

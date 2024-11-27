@@ -156,3 +156,4 @@
 /Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/bin/Debug/net6.0/Source.dll
 /Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/bin/Debug/net6.0/PayPalCheckoutSdk.dll
 /Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/bin/Debug/net6.0/PayPalHttp-Dotnet.dll
+/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/bin/Debug/net6.0/RestSharp.dll

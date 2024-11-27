@@ -22,7 +22,7 @@ namespace ManagementSchool.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("ManagementSchool.Entities.AverageScore", b =>
+            modelBuilder.Entity("ManagementSchool.Models.AverageScore", b =>
                 {
                     b.Property<int>("AverageScoreId")
                         .ValueGeneratedOnAdd()
@@ -53,7 +53,7 @@ namespace ManagementSchool.Migrations
                     b.ToTable("AverageScores");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Class", b =>
+            modelBuilder.Entity("ManagementSchool.Models.Class", b =>
                 {
                     b.Property<int>("ClassId")
                         .ValueGeneratedOnAdd()
@@ -70,7 +70,7 @@ namespace ManagementSchool.Migrations
                     b.ToTable("Classes");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.ClassSemester", b =>
+            modelBuilder.Entity("ManagementSchool.Models.ClassSemester", b =>
                 {
                     b.Property<int>("ClassId")
                         .HasColumnType("int");
@@ -85,7 +85,7 @@ namespace ManagementSchool.Migrations
                     b.ToTable("ClassSemesters");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.ClassSubject", b =>
+            modelBuilder.Entity("ManagementSchool.Models.ClassSubject", b =>
                 {
                     b.Property<int>("ClassSubjectId")
                         .ValueGeneratedOnAdd()
@@ -108,7 +108,7 @@ namespace ManagementSchool.Migrations
                     b.ToTable("ClassSubjects");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Semester", b =>
+            modelBuilder.Entity("ManagementSchool.Models.Semester", b =>
                 {
                     b.Property<int>("SemesterId")
                         .ValueGeneratedOnAdd()
@@ -135,7 +135,7 @@ namespace ManagementSchool.Migrations
                     b.ToTable("Semesters");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Student", b =>
+            modelBuilder.Entity("ManagementSchool.Models.Student", b =>
                 {
                     b.Property<int>("StudentId")
                         .ValueGeneratedOnAdd()
@@ -173,7 +173,7 @@ namespace ManagementSchool.Migrations
                     b.ToTable("Students");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.StudentSubject", b =>
+            modelBuilder.Entity("ManagementSchool.Models.StudentSubject", b =>
                 {
                     b.Property<int>("StudentSubjectId")
                         .ValueGeneratedOnAdd()
@@ -196,7 +196,7 @@ namespace ManagementSchool.Migrations
                     b.ToTable("StudentSubjects");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Subject", b =>
+            modelBuilder.Entity("ManagementSchool.Models.Subject", b =>
                 {
                     b.Property<int>("SubjectId")
                         .ValueGeneratedOnAdd()
@@ -280,7 +280,7 @@ namespace ManagementSchool.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.SubjectsAverageScore", b =>
+            modelBuilder.Entity("ManagementSchool.Models.SubjectsAverageScore", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -321,7 +321,7 @@ namespace ManagementSchool.Migrations
                     b.ToTable("SubjectsAverageScores");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.SummaryOfYear", b =>
+            modelBuilder.Entity("ManagementSchool.Models.SummaryOfYear", b =>
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
@@ -354,7 +354,7 @@ namespace ManagementSchool.Migrations
                     b.ToTable("SummariesOfYear");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Teacher", b =>
+            modelBuilder.Entity("ManagementSchool.Models.Teacher", b =>
                 {
                     b.Property<int>("TeacherId")
                         .ValueGeneratedOnAdd()
@@ -380,7 +380,7 @@ namespace ManagementSchool.Migrations
                     b.ToTable("Teachers");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.TeacherClass", b =>
+            modelBuilder.Entity("ManagementSchool.Models.TeacherClass", b =>
                 {
                     b.Property<int>("TeacherClassId")
                         .ValueGeneratedOnAdd()
@@ -403,7 +403,7 @@ namespace ManagementSchool.Migrations
                     b.ToTable("TeacherClasses");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.TuitionFeeNotification", b =>
+            modelBuilder.Entity("ManagementSchool.Models.TuitionFeeNotification", b =>
                 {
                     b.Property<int>("TuitionFeeNotificationId")
                         .ValueGeneratedOnAdd()
@@ -738,9 +738,9 @@ namespace ManagementSchool.Migrations
                     b.ToTable("Scores");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.AverageScore", b =>
+            modelBuilder.Entity("ManagementSchool.Models.AverageScore", b =>
                 {
-                    b.HasOne("ManagementSchool.Entities.Student", "Student")
+                    b.HasOne("ManagementSchool.Models.Student", "Student")
                         .WithMany("AverageScores")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -749,15 +749,15 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.ClassSemester", b =>
+            modelBuilder.Entity("ManagementSchool.Models.ClassSemester", b =>
                 {
-                    b.HasOne("ManagementSchool.Entities.Class", "Class")
+                    b.HasOne("ManagementSchool.Models.Class", "Class")
                         .WithMany("ClassSemesters")
                         .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ManagementSchool.Entities.Semester", "Semester")
+                    b.HasOne("ManagementSchool.Models.Semester", "Semester")
                         .WithMany("ClassSemesters")
                         .HasForeignKey("SemesterId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -768,15 +768,15 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Semester");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.ClassSubject", b =>
+            modelBuilder.Entity("ManagementSchool.Models.ClassSubject", b =>
                 {
-                    b.HasOne("ManagementSchool.Entities.Class", "Class")
+                    b.HasOne("ManagementSchool.Models.Class", "Class")
                         .WithMany("ClassSubjects")
                         .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ManagementSchool.Entities.Subject", "Subject")
+                    b.HasOne("ManagementSchool.Models.Subject", "Subject")
                         .WithMany("ClassSubjects")
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -787,9 +787,9 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Subject");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Student", b =>
+            modelBuilder.Entity("ManagementSchool.Models.Student", b =>
                 {
-                    b.HasOne("ManagementSchool.Entities.Class", "Class")
+                    b.HasOne("ManagementSchool.Models.Class", "Class")
                         .WithMany("Students")
                         .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -798,15 +798,15 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Class");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.StudentSubject", b =>
+            modelBuilder.Entity("ManagementSchool.Models.StudentSubject", b =>
                 {
-                    b.HasOne("ManagementSchool.Entities.Student", "Student")
+                    b.HasOne("ManagementSchool.Models.Student", "Student")
                         .WithMany("StudentSubjects")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ManagementSchool.Entities.Subject", "Subject")
+                    b.HasOne("ManagementSchool.Models.Subject", "Subject")
                         .WithMany("StudentSubjects")
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -817,28 +817,28 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Subject");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Subject", b =>
+            modelBuilder.Entity("ManagementSchool.Models.Subject", b =>
                 {
-                    b.HasOne("ManagementSchool.Entities.Student", null)
+                    b.HasOne("ManagementSchool.Models.Student", null)
                         .WithMany("Subjects")
                         .HasForeignKey("StudentId");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.SubjectsAverageScore", b =>
+            modelBuilder.Entity("ManagementSchool.Models.SubjectsAverageScore", b =>
                 {
-                    b.HasOne("ManagementSchool.Entities.Semester", "Semester")
+                    b.HasOne("ManagementSchool.Models.Semester", "Semester")
                         .WithMany("AverageScores")
                         .HasForeignKey("SemesterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ManagementSchool.Entities.Student", "Student")
+                    b.HasOne("ManagementSchool.Models.Student", "Student")
                         .WithMany("SubjectsAverageScores")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ManagementSchool.Entities.Subject", "Subject")
+                    b.HasOne("ManagementSchool.Models.Subject", "Subject")
                         .WithMany("AverageScores")
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -851,9 +851,9 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Subject");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.SummaryOfYear", b =>
+            modelBuilder.Entity("ManagementSchool.Models.SummaryOfYear", b =>
                 {
-                    b.HasOne("ManagementSchool.Entities.Student", "Student")
+                    b.HasOne("ManagementSchool.Models.Student", "Student")
                         .WithMany("SummariesOfYear")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -862,9 +862,9 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Teacher", b =>
+            modelBuilder.Entity("ManagementSchool.Models.Teacher", b =>
                 {
-                    b.HasOne("ManagementSchool.Entities.Subject", "Subject")
+                    b.HasOne("ManagementSchool.Models.Subject", "Subject")
                         .WithMany("Teachers")
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -873,15 +873,15 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Subject");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.TeacherClass", b =>
+            modelBuilder.Entity("ManagementSchool.Models.TeacherClass", b =>
                 {
-                    b.HasOne("ManagementSchool.Entities.Class", "Class")
+                    b.HasOne("ManagementSchool.Models.Class", "Class")
                         .WithMany("TeacherClasses")
                         .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ManagementSchool.Entities.Teacher", "Teacher")
+                    b.HasOne("ManagementSchool.Models.Teacher", "Teacher")
                         .WithMany("TeacherClasses")
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -892,11 +892,11 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Teacher");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.TuitionFeeNotification", b =>
+            modelBuilder.Entity("ManagementSchool.Models.TuitionFeeNotification", b =>
                 {
-                    b.HasOne("ManagementSchool.Entities.Semester", "Semester")
+                    b.HasOne("ManagementSchool.Models.Semester", "Semester")
                         .WithOne("TuitionFeeNotification")
-                        .HasForeignKey("ManagementSchool.Entities.TuitionFeeNotification", "SemesterId")
+                        .HasForeignKey("ManagementSchool.Models.TuitionFeeNotification", "SemesterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -965,25 +965,25 @@ namespace ManagementSchool.Migrations
 
             modelBuilder.Entity("Score", b =>
                 {
-                    b.HasOne("ManagementSchool.Entities.Semester", "Semester")
+                    b.HasOne("ManagementSchool.Models.Semester", "Semester")
                         .WithMany("Scores")
                         .HasForeignKey("SemesterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ManagementSchool.Entities.Student", "Student")
+                    b.HasOne("ManagementSchool.Models.Student", "Student")
                         .WithMany("Scores")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ManagementSchool.Entities.Subject", "Subject")
+                    b.HasOne("ManagementSchool.Models.Subject", "Subject")
                         .WithMany("Scores")
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ManagementSchool.Entities.SubjectsAverageScore", "SubjectsAverageScore")
+                    b.HasOne("ManagementSchool.Models.SubjectsAverageScore", "SubjectsAverageScore")
                         .WithMany("Scores")
                         .HasForeignKey("SubjectsAverageScoreId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -998,7 +998,7 @@ namespace ManagementSchool.Migrations
                     b.Navigation("SubjectsAverageScore");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Class", b =>
+            modelBuilder.Entity("ManagementSchool.Models.Class", b =>
                 {
                     b.Navigation("ClassSemesters");
 
@@ -1009,7 +1009,7 @@ namespace ManagementSchool.Migrations
                     b.Navigation("TeacherClasses");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Semester", b =>
+            modelBuilder.Entity("ManagementSchool.Models.Semester", b =>
                 {
                     b.Navigation("AverageScores");
 
@@ -1021,7 +1021,7 @@ namespace ManagementSchool.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Student", b =>
+            modelBuilder.Entity("ManagementSchool.Models.Student", b =>
                 {
                     b.Navigation("AverageScores");
 
@@ -1036,7 +1036,7 @@ namespace ManagementSchool.Migrations
                     b.Navigation("SummariesOfYear");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Subject", b =>
+            modelBuilder.Entity("ManagementSchool.Models.Subject", b =>
                 {
                     b.Navigation("AverageScores");
 
@@ -1049,12 +1049,12 @@ namespace ManagementSchool.Migrations
                     b.Navigation("Teachers");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.SubjectsAverageScore", b =>
+            modelBuilder.Entity("ManagementSchool.Models.SubjectsAverageScore", b =>
                 {
                     b.Navigation("Scores");
                 });
 
-            modelBuilder.Entity("ManagementSchool.Entities.Teacher", b =>
+            modelBuilder.Entity("ManagementSchool.Models.Teacher", b =>
                 {
                     b.Navigation("TeacherClasses");
                 });

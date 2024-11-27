@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "DU7yIsZjL5E=",
+  "dgSpecHash": "Adj0E/vjLuM=",
   "success": true,
   "projectFilePath": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/ManagementSchool.csproj",
   "expectedPackageFiles": [
@@ -52,6 +52,7 @@
     "/Users/thanletrongkhanh/.nuget/packages/paypalcheckoutsdk/1.0.4/paypalcheckoutsdk.1.0.4.nupkg.sha512",
     "/Users/thanletrongkhanh/.nuget/packages/paypalhttp/1.0.1/paypalhttp.1.0.1.nupkg.sha512",
     "/Users/thanletrongkhanh/.nuget/packages/portable.bouncycastle/1.9.0/portable.bouncycastle.1.9.0.nupkg.sha512",
+    "/Users/thanletrongkhanh/.nuget/packages/restsharp/112.1.0/restsharp.112.1.0.nupkg.sha512",
     "/Users/thanletrongkhanh/.nuget/packages/swashbuckle.aspnetcore/6.5.0/swashbuckle.aspnetcore.6.5.0.nupkg.sha512",
     "/Users/thanletrongkhanh/.nuget/packages/swashbuckle.aspnetcore.swagger/6.5.0/swashbuckle.aspnetcore.swagger.6.5.0.nupkg.sha512",
     "/Users/thanletrongkhanh/.nuget/packages/swashbuckle.aspnetcore.swaggergen/6.5.0/swashbuckle.aspnetcore.swaggergen.6.5.0.nupkg.sha512",

@@ -49,6 +49,10 @@
             "PayPalCheckoutSdk": {
               "target": "Package",
               "version": "[1.0.4, )"
+            },
+            "RestSharp": {
+              "target": "Package",
+              "version": "[112.1.0, )"
             }
           },
           "imports": [

@@ -1,3 +1,4 @@
+using ManagementSchool.Dto;
 using ManagementSchool.Entities;
 using ManagementSchool.Models;
 using Microsoft.EntityFrameworkCore;
@@ -50,7 +51,7 @@ public class TuitionFeeNotificationService : ITuitionFeeNotificationService
 
         return true;
     }
-    
+     
     public async Task<bool> UpdateTuitionFeeNotificationAsync(SemesterType semesterType, string academicYear, decimal amount, string content)
     {
         // Tìm kỳ học dựa trên SemesterType và AcademicYear
@@ -65,7 +66,7 @@ public class TuitionFeeNotificationService : ITuitionFeeNotificationService
 
         if (existingNotification == null)
         {
-            return false; // Không tìm thấy thông báo học phí để cập nhật
+            return false; 
         }
 
         // Cập nhật thông báo học phí
@@ -79,15 +80,29 @@ public class TuitionFeeNotificationService : ITuitionFeeNotificationService
         return true;
     }
     
-    public async Task<TuitionFeeNotification> GetTuitionFeeNotificationBySemesterAsync(int semesterId)
+    public async Task<TuitionFeeNotificationDto> GetTuitionFeeNotificationAsync(SemesterType semesterType, string academicYear)
     {
-        return await _context.TuitionFeeNotifications
-            .FirstOrDefaultAsync(n => n.SemesterId == semesterId);
+        var notification = await _context.TuitionFeeNotifications
+            .Include(n => n.Semester)
+            .FirstOrDefaultAsync(n => n.Semester.SemesterType == semesterType && n.Semester.AcademicYear == academicYear);
+
+        if (notification == null)
+        {
+            return null;
+        }
+
+        return new TuitionFeeNotificationDto
+        {
+            SemesterName = notification.Semester.SemesterType.ToString(),
+            AcademicYear = notification.Semester.AcademicYear,
+            Amount = notification.Amount,
+            CreatedDate = notification.CreatedDate,
+            NotificationContent = notification.NotificationContent
+        };
     }
     
     public async Task<List<TuitionFeeNotification>> GetAllTuitionFeeNotificationsAsync()
     {
         return await _context.TuitionFeeNotifications.ToListAsync();
     }
-
 }
