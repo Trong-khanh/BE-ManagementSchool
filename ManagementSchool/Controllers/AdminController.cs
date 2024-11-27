@@ -255,21 +255,6 @@ public class AdminController : ControllerBase
         return Ok(semesters);
     }
 
-    // Get a semester by ID.
-    [HttpGet("GetSemesterById/{semesterId}")]
-    public async Task<IActionResult> GetSemesterById(int semesterId)
-    {
-        try
-        {
-            var semester = await _adminService.GetSemesterByIdAsync(semesterId);
-            return Ok(semester);
-        }
-        catch (AdminService.ValidateException ex)
-        {
-            return NotFound($"Error: {ex.Message}");
-        }
-    }
-
     // END CRUD SEMESTER
 
     // START CRUD CLASS
@@ -451,9 +436,12 @@ public class AdminController : ControllerBase
             return BadRequest("Invalid data.");
         }
 
-        var result =
-            await _tuitionFeeNotificationService.CreateTuitionFeeNotificationAsync(request.SemesterId, request.Amount,
-                request.Content);
+        var result = await _tuitionFeeNotificationService.CreateTuitionFeeNotificationAsync(
+            request.SemesterType, 
+            request.AcademicYear, 
+            request.Amount, 
+            request.Content
+        );
 
         if (result)
         {
@@ -472,9 +460,12 @@ public class AdminController : ControllerBase
             return BadRequest("Invalid data.");
         }
 
-        var result =
-            await _tuitionFeeNotificationService.UpdateTuitionFeeNotificationAsync(request.SemesterId, request.Amount,
-                request.Content);
+        var result = await _tuitionFeeNotificationService.UpdateTuitionFeeNotificationAsync(
+            request.SemesterType, 
+            request.AcademicYear, 
+            request.Amount, 
+            request.Content
+        );
 
         if (result)
         {

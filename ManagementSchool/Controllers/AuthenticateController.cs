@@ -44,8 +44,8 @@ public class AuthenticateController : ControllerBase
         _context = context;
     }
 
-
-    [HttpPost]
+ 
+    [HttpPost("Regsiter") ]
     public async Task<IActionResult> Register([FromBody] RegisterUser registerUser, string role)
     {
         // Check if user already exists

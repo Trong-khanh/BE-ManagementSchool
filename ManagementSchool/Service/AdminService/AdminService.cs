@@ -99,6 +99,24 @@ public class AdminService : IAdminService
 
         return true;
     }
+    
+    //Get all student
+    public async Task<IEnumerable<Student>> GetAllStudentsAsync()
+    {
+        return await _context.Students
+            .Include(s => s.Class)
+            .Select(s => new Student
+            {
+                StudentId = s.StudentId,
+                FullName = s.FullName,
+                Address = s.Address,
+                AcademicYear = s.AcademicYear,
+                ParentName = s.ParentName,
+                ParentEmail = s.ParentEmail, // Include ParentEmail
+                Class = s.Class
+            })
+            .ToListAsync();
+    }
 
     // Adds a teacher and associates with a subject
     public async Task<TeacherDto?> AddTeacherAsync(TeacherDto teacherDto)
@@ -396,42 +414,6 @@ public class AdminService : IAdminService
                 StartDate = s.StartDate,
                 EndDate = s.EndDate,
                 AcademicYear = s.AcademicYear
-            })
-            .ToListAsync();
-    }
-
-    public async Task<SemesterDto> GetSemesterByIdAsync(int semesterId)
-    {
-        // Find the semester by ID
-        var semester = await _context.Semesters.FindAsync(semesterId);
-
-        // If the semester is not found, throw an error
-        if (semester == null)
-            throw new ValidateException("Semester not found.");
-
-        // Return the semester details as a SemesterDto
-        return new SemesterDto
-        {
-            SemesterType = semester.SemesterType.ToString(),
-            StartDate = semester.StartDate,
-            EndDate = semester.EndDate,
-            AcademicYear = semester.AcademicYear
-        };
-    }
-
-    public async Task<IEnumerable<Student>> GetAllStudentsAsync()
-    {
-        return await _context.Students
-            .Include(s => s.Class)
-            .Select(s => new Student
-            {
-                StudentId = s.StudentId,
-                FullName = s.FullName,
-                Address = s.Address,
-                AcademicYear = s.AcademicYear,
-                ParentName = s.ParentName,
-                ParentEmail = s.ParentEmail, // Include ParentEmail
-                Class = s.Class
             })
             .ToListAsync();
     }

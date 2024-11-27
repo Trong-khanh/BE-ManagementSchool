@@ -13,28 +13,36 @@ public class TuitionFeeNotificationService : ITuitionFeeNotificationService
         _context = context;
     }
 
-    public async Task<bool> CreateTuitionFeeNotificationAsync(int semesterId, decimal amount, string content)
+    public async Task<bool> CreateTuitionFeeNotificationAsync(string semesterType, string academicYear, decimal amount, string content)
     {
-        // Kiểm tra xem kỳ học có tồn tại không
-        var semester = await _context.Semesters.FindAsync(semesterId);
-        if (semester == null) return false; // Không tồn tại kỳ học
-
-        // Kiểm tra nếu đã có thông báo học phí
-        var existingNotification = await _context.TuitionFeeNotifications
-            .FirstOrDefaultAsync(n => n.SemesterId == semesterId);
-        if (existingNotification != null)
+        // Parse semester type from string to enum
+        if (!Enum.TryParse<SemesterType>(semesterType.Replace(" ", ""), true, out var semester))
         {
-            return false; // Đã có thông báo học phí cho kỳ học này
+            return false; // Invalid semester type
         }
 
-        // Tạo thông báo học phí mới
+        // Find the semester in the database
+        var semesterFromDb = await _context.Semesters
+            .FirstOrDefaultAsync(s => s.SemesterType == semester && s.AcademicYear == academicYear);
+
+        if (semesterFromDb == null) return false; 
+
+        // Check if a tuition fee notification already exists for this semester
+        var existingNotification = await _context.TuitionFeeNotifications
+            .FirstOrDefaultAsync(n => n.SemesterId == semesterFromDb.SemesterId);
+        if (existingNotification != null)
+        {
+            return false; 
+        }
+
+        // Create a new notification
         var notification = new TuitionFeeNotification
         {
-            SemesterId = semesterId,
+            SemesterId = semesterFromDb.SemesterId,
             Amount = amount,
             NotificationContent = content,
             CreatedDate = DateTime.Now,
-            IsSent = false // Trạng thái ban đầu chưa gửi
+            IsSent = false // Notification is initially not sent
         };
 
         _context.TuitionFeeNotifications.Add(notification);
@@ -42,16 +50,18 @@ public class TuitionFeeNotificationService : ITuitionFeeNotificationService
 
         return true;
     }
-
-    public async Task<bool> UpdateTuitionFeeNotificationAsync(int semesterId, decimal amount, string content)
+    
+    public async Task<bool> UpdateTuitionFeeNotificationAsync(SemesterType semesterType, string academicYear, decimal amount, string content)
     {
-        // Kiểm tra xem kỳ học có tồn tại không
-        var semester = await _context.Semesters.FindAsync(semesterId);
-        if (semester == null) return false;
+        // Tìm kỳ học dựa trên SemesterType và AcademicYear
+        var semester = await _context.Semesters
+            .FirstOrDefaultAsync(s => s.SemesterType == semesterType && s.AcademicYear == academicYear);
+
+        if (semester == null) return false; // Không tồn tại kỳ học
 
         // Lấy thông báo học phí đã tồn tại
         var existingNotification = await _context.TuitionFeeNotifications
-            .FirstOrDefaultAsync(n => n.SemesterId == semesterId);
+            .FirstOrDefaultAsync(n => n.SemesterId == semester.SemesterId);
 
         if (existingNotification == null)
         {
@@ -68,7 +78,7 @@ public class TuitionFeeNotificationService : ITuitionFeeNotificationService
 
         return true;
     }
-
+    
     public async Task<TuitionFeeNotification> GetTuitionFeeNotificationBySemesterAsync(int semesterId)
     {
         return await _context.TuitionFeeNotifications

@@ -20,7 +20,6 @@ public interface IAdminService
     Task<Semester> UpdateSemesterAsync(int semesterId, SemesterDto semesterDto);
     Task<bool> DeleteSemesterAsync(int semesterId);
     Task<IEnumerable<SemesterDto>> GetAllSemestersAsync();
-    Task<SemesterDto> GetSemesterByIdAsync(int semesterId);
     Task<IEnumerable<Student>> GetAllStudentsAsync();
     Task<bool> UpgradeClassAsync(int oldClassId, string oldAcademicYear, int newClassId, string newAcademicYear);
     Task<Class> AddClassAsync(ClassDto newClassDto);
