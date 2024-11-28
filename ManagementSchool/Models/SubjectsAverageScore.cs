@@ -2,8 +2,7 @@ namespace ManagementSchool.Entities;
 
 public class SubjectsAverageScore
 {
-    public int Id { get; set; }
-
+    public int SubjectsAverageScoreId { get; set; }
     public int StudentId { get; set; }
     public virtual Student Student { get; set; }
     public int SubjectId { get; set; }
@@ -15,5 +14,4 @@ public class SubjectsAverageScore
     public double? SemesterAverage1 { get; set; }
     public double? SemesterAverage2 { get; set; }
     public double? AnnualAverage { get; set; }
-    public virtual ICollection<Score> Scores { get; set; } 
 }

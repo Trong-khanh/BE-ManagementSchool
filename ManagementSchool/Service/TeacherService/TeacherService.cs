@@ -50,34 +50,43 @@ public class TeacherService : ITeacherService
             })
             .ToListAsync();
     }
-
-    public async Task AddScoreForStudentAsync(ClaimsPrincipal user, ScoreDto scoreDto)
+    
+    
+    public async Task AddScoreAsync(int studentId, int subjectId, int semesterId, ExamType examType, double scoreValue)
     {
-        // Lấy email của giáo viên từ ClaimsPrincipal
-        var teacherEmail = user.FindFirstValue(ClaimTypes.Email);
+        // Kiểm tra sự tồn tại của môn học, học sinh và kỳ học
+        var student = await _context.Students.FindAsync(studentId);
+        var subject = await _context.Subjects.FindAsync(subjectId);
+        var semester = await _context.Semesters.FindAsync(semesterId);
 
-        // Tìm giáo viên với email này và chỉ lấy các lớp mà giáo viên được phân công
-        var teacher = await _context.Teachers
-            .Include(t => t.TeacherClasses)
-            .ThenInclude(tc => tc.Class)
-            .FirstOrDefaultAsync(t => t.Email == teacherEmail);
+        if (student == null || subject == null || semester == null)
+        {
+            throw new ArgumentException("Student, Subject, or Semester not found.");
+        }
 
-        // Chuyển chuỗi ExamType thành enum
-        var examTypeEnum = Enum.Parse<ExamType>(scoreDto.ExamType);
-
-        // Tạo đối tượng Score để thêm vào cơ sở dữ liệu
+        // Tạo mới điểm cho học sinh
         var score = new Score
         {
-            StudentId = scoreDto.StudentId,
-            SubjectId = teacher.SubjectId,
-            SemesterId = scoreDto.SemesterId,
-            ScoreValue = scoreDto.ScoreValue,
-            ExamType = examTypeEnum
+            StudentId = studentId,
+            SubjectId = subjectId,
+            SemesterId = semesterId,
+            ExamType = examType,
+            ScoreValue = scoreValue
         };
+
         _context.Scores.Add(score);
         await _context.SaveChangesAsync();
     }
 
+    // Hàm để lấy điểm của học sinh theo kỳ học và môn học
+    public async Task<IEnumerable<Score>> GetScoresByStudentAsync(int studentId, int semesterId)
+    {
+        return await _context.Scores
+            .Where(s => s.StudentId == studentId && s.SemesterId == semesterId)
+            .Include(s => s.Subject)
+            .Include(s => s.Semester)
+            .ToListAsync();
+    }
     public async Task<List<ScoreDto>> GetScoresForStudentAsync(int studentId, int? subjectId = null,
         int? semesterId = null)
     {
@@ -103,7 +112,7 @@ public class TeacherService : ITeacherService
                 SubjectId = s.SubjectId,
                 SemesterId = s.SemesterId,
                 ScoreValue = s.ScoreValue,
-                ExamType = s.ExamType.ToString()
+                ExamType = s.ExamType
             })
             .ToListAsync();
 

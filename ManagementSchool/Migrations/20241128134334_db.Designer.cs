@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ManagementSchool.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241128063722_db")]
+    [Migration("20241128134334_db")]
     partial class db
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -284,11 +284,11 @@ namespace ManagementSchool.Migrations
 
             modelBuilder.Entity("ManagementSchool.Entities.SubjectsAverageScore", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("SubjectsAverageScoreId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubjectsAverageScoreId"), 1L, 1);
 
                     b.Property<string>("AcademicYear")
                         .IsRequired()
@@ -312,7 +312,7 @@ namespace ManagementSchool.Migrations
                     b.Property<int>("SubjectId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("SubjectsAverageScoreId");
 
                     b.HasIndex("SemesterId");
 
@@ -414,7 +414,6 @@ namespace ManagementSchool.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TuitionFeeNotificationId"), 1L, 1);
 
                     b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedDate")
@@ -501,28 +500,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "755a0ccd-6dfe-46db-af3b-e4243fb7a04b",
+                            Id = "c4abd707-961f-4226-9e95-44cf325aa08e",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "c3fe995d-f84b-4c3b-a051-eb3dd958245a",
+                            Id = "9a6e6d73-3423-457d-8cfe-0bb07712906e",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "5253d682-4452-48e2-888b-9c86477137b9",
+                            Id = "10521707-4dd3-47a6-8b09-69ecad22df92",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "b464e9ae-1676-43ec-9654-d37449b274a2",
+                            Id = "816be312-5aca-490b-a418-96dd084ce3a6",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"
@@ -724,9 +723,6 @@ namespace ManagementSchool.Migrations
                     b.Property<int>("SubjectId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SubjectsAverageScoreId")
-                        .HasColumnType("int");
-
                     b.HasKey("ScoreId");
 
                     b.HasIndex("SemesterId");
@@ -734,8 +730,6 @@ namespace ManagementSchool.Migrations
                     b.HasIndex("StudentId");
 
                     b.HasIndex("SubjectId");
-
-                    b.HasIndex("SubjectsAverageScoreId");
 
                     b.ToTable("Scores");
                 });
@@ -985,19 +979,11 @@ namespace ManagementSchool.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ManagementSchool.Entities.SubjectsAverageScore", "SubjectsAverageScore")
-                        .WithMany("Scores")
-                        .HasForeignKey("SubjectsAverageScoreId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Semester");
 
                     b.Navigation("Student");
 
                     b.Navigation("Subject");
-
-                    b.Navigation("SubjectsAverageScore");
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.Class", b =>
@@ -1049,11 +1035,6 @@ namespace ManagementSchool.Migrations
                     b.Navigation("StudentSubjects");
 
                     b.Navigation("Teachers");
-                });
-
-            modelBuilder.Entity("ManagementSchool.Entities.SubjectsAverageScore", b =>
-                {
-                    b.Navigation("Scores");
                 });
 
             modelBuilder.Entity("ManagementSchool.Entities.Teacher", b =>

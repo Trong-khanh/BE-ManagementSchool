@@ -33,21 +33,17 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     {
         base.OnModelCreating(modelBuilder);
         SeedRoles(modelBuilder);
-        modelBuilder.Entity<TuitionFeeNotification>()
-            .Property(t => t.Amount)
-            .HasPrecision(18, 2);
         
         // Thiết lập mối quan hệ một - một giữa Semester và TuitionFeeNotification
         modelBuilder.Entity<TuitionFeeNotification>()
-            .HasOne(t => t.Semester)  // Mỗi TuitionFeeNotification thuộc về một Semester
-            .WithOne(s => s.TuitionFeeNotification)  // Mỗi Semester có một TuitionFeeNotification
-            .HasForeignKey<TuitionFeeNotification>(t => t.SemesterId)  // Khóa ngoại trong TuitionFeeNotification
-            .IsRequired();  // Ràng buộc rằng mỗi Semester phải có một TuitionFeeNotification
-
-        // (Tuỳ chọn) Có thể thêm ràng buộc unique cho SemesterId trong TuitionFeeNotification
+            .HasOne(t => t.Semester)  
+            .WithOne(s => s.TuitionFeeNotification) 
+            .HasForeignKey<TuitionFeeNotification>(t => t.SemesterId)  
+            .IsRequired();  
+        
         modelBuilder.Entity<TuitionFeeNotification>()
-            .HasIndex(t => t.SemesterId)  // Tạo index cho khóa ngoại SemesterId
-            .IsUnique();  // Đảm bảo mỗi SemesterId chỉ xuất hiện một lần trong TuitionFeeNotification
+            .HasIndex(t => t.SemesterId) 
+            .IsUnique();  
         
         // Relationship with Student
         modelBuilder.Entity<Student>()
@@ -119,11 +115,11 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .WithMany(s => s.Scores)
             .HasForeignKey(s => s.SemesterId);
         
-        modelBuilder.Entity<Score>()
-            .HasOne(s => s.SubjectsAverageScore)
-            .WithMany(sa => sa.Scores)
-            .HasForeignKey(s => s.SubjectsAverageScoreId)
-            .OnDelete(DeleteBehavior.Restrict);
+        // modelBuilder.Entity<Score>()
+        //     .HasOne(s => s.SubjectsAverageScore)
+        //     .WithMany(sa => sa.Scores)
+        //     .HasForeignKey(s => s.SubjectsAverageScoreId)
+        //     .OnDelete(DeleteBehavior.Restrict);
 
         // Relationship between Student and SummaryOfYear
         modelBuilder.Entity<SummaryOfYear>()

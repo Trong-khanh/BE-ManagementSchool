@@ -261,7 +261,7 @@ namespace ManagementSchool.Migrations
                     TuitionFeeNotificationId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     SemesterId = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     NotificationContent = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsSent = table.Column<bool>(type: "bit", nullable: false)
@@ -369,6 +369,41 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Scores",
+                columns: table => new
+                {
+                    ScoreId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StudentId = table.Column<int>(type: "int", nullable: false),
+                    SubjectId = table.Column<int>(type: "int", nullable: false),
+                    SemesterId = table.Column<int>(type: "int", nullable: false),
+                    ScoreValue = table.Column<double>(type: "float", nullable: false),
+                    ExamType = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Scores", x => x.ScoreId);
+                    table.ForeignKey(
+                        name: "FK_Scores_Semesters_SemesterId",
+                        column: x => x.SemesterId,
+                        principalTable: "Semesters",
+                        principalColumn: "SemesterId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Scores_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "StudentId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Scores_Subjects_SubjectId",
+                        column: x => x.SubjectId,
+                        principalTable: "Subjects",
+                        principalColumn: "SubjectId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "StudentSubjects",
                 columns: table => new
                 {
@@ -398,7 +433,7 @@ namespace ManagementSchool.Migrations
                 name: "SubjectsAverageScores",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    SubjectsAverageScoreId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     StudentId = table.Column<int>(type: "int", nullable: false),
                     SubjectId = table.Column<int>(type: "int", nullable: false),
@@ -410,7 +445,7 @@ namespace ManagementSchool.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SubjectsAverageScores", x => x.Id);
+                    table.PrimaryKey("PK_SubjectsAverageScores", x => x.SubjectsAverageScoreId);
                     table.ForeignKey(
                         name: "FK_SubjectsAverageScores_Semesters_SemesterId",
                         column: x => x.SemesterId,
@@ -453,48 +488,6 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Scores",
-                columns: table => new
-                {
-                    ScoreId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StudentId = table.Column<int>(type: "int", nullable: false),
-                    SubjectId = table.Column<int>(type: "int", nullable: false),
-                    SemesterId = table.Column<int>(type: "int", nullable: false),
-                    ScoreValue = table.Column<double>(type: "float", nullable: false),
-                    ExamType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SubjectsAverageScoreId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Scores", x => x.ScoreId);
-                    table.ForeignKey(
-                        name: "FK_Scores_Semesters_SemesterId",
-                        column: x => x.SemesterId,
-                        principalTable: "Semesters",
-                        principalColumn: "SemesterId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Scores_Students_StudentId",
-                        column: x => x.StudentId,
-                        principalTable: "Students",
-                        principalColumn: "StudentId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Scores_Subjects_SubjectId",
-                        column: x => x.SubjectId,
-                        principalTable: "Subjects",
-                        principalColumn: "SubjectId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Scores_SubjectsAverageScores_SubjectsAverageScoreId",
-                        column: x => x.SubjectsAverageScoreId,
-                        principalTable: "SubjectsAverageScores",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "TeacherClasses",
                 columns: table => new
                 {
@@ -525,10 +518,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "5253d682-4452-48e2-888b-9c86477137b9", "3", "Teacher", "TEACHER" },
-                    { "755a0ccd-6dfe-46db-af3b-e4243fb7a04b", "1", "Admin", "ADMIN" },
-                    { "b464e9ae-1676-43ec-9654-d37449b274a2", "4", "Parent", "PARENT" },
-                    { "c3fe995d-f84b-4c3b-a051-eb3dd958245a", "2", "Student", "STUDENT" }
+                    { "10521707-4dd3-47a6-8b09-69ecad22df92", "3", "Teacher", "TEACHER" },
+                    { "816be312-5aca-490b-a418-96dd084ce3a6", "4", "Parent", "PARENT" },
+                    { "9a6e6d73-3423-457d-8cfe-0bb07712906e", "2", "Student", "STUDENT" },
+                    { "c4abd707-961f-4226-9e95-44cf325aa08e", "1", "Admin", "ADMIN" }
                 });
 
             migrationBuilder.InsertData(
@@ -630,11 +623,6 @@ namespace ManagementSchool.Migrations
                 column: "SubjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Scores_SubjectsAverageScoreId",
-                table: "Scores",
-                column: "SubjectsAverageScoreId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Students_ClassId",
                 table: "Students",
                 column: "ClassId");
@@ -732,6 +720,9 @@ namespace ManagementSchool.Migrations
                 name: "StudentSubjects");
 
             migrationBuilder.DropTable(
+                name: "SubjectsAverageScores");
+
+            migrationBuilder.DropTable(
                 name: "SummariesOfYear");
 
             migrationBuilder.DropTable(
@@ -745,9 +736,6 @@ namespace ManagementSchool.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
-                name: "SubjectsAverageScores");
 
             migrationBuilder.DropTable(
                 name: "Teachers");

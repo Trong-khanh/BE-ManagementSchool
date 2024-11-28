@@ -13,8 +13,4 @@ public class Score
     public virtual Student Student { get; set; }
     public virtual Subject Subject { get; set; }
     public virtual Semester Semester { get; set; }
-    
-    public int SubjectsAverageScoreId { get; set; }
-    public virtual SubjectsAverageScore SubjectsAverageScore { get; set; }
-
 }
