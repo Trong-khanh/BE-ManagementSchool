@@ -1,5 +1,7 @@
 using ManagementSchool.Dto;
+using ManagementSchool.Entities;
 using ManagementSchool.Service.ParentService;
+using ManagementSchool.Service.TuitionFeeNotificationService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,11 +13,12 @@ namespace ManagementSchool.Controllers;
 public class ParentController : ControllerBase
 {
     private readonly IParentService _parentService;
-   
+    private readonly ITuitionFeeNotificationService _tuitionFeeNotificationService;
 
-    public ParentController(IParentService parentService)
+    public ParentController(IParentService parentService, ITuitionFeeNotificationService tuitionFeeNotificationService)
     {
         _parentService = parentService;
+        _tuitionFeeNotificationService = tuitionFeeNotificationService;
     }
 
     [HttpGet("GetDailyScores")]
@@ -60,6 +63,20 @@ public class ParentController : ControllerBase
         }
 
         return Ok(averageScores);
+    }
+    
+    // Endpoint to get a tuition fee notification 
+    [HttpGet("GetTuitionFeeNotification")]
+    public async Task<IActionResult> GetTuitionFeeNotification(SemesterType semesterType, string academicYear)
+    {
+        var notification = await _tuitionFeeNotificationService.GetTuitionFeeNotificationAsync(semesterType, academicYear);
+
+        if (notification == null)
+        {
+            return NotFound(new { message = "Tuition fee notification not found." });
+        }
+
+        return Ok(notification);
     }
     
 }

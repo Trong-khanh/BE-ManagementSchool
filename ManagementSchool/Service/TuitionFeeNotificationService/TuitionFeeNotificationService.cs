@@ -100,9 +100,4 @@ public class TuitionFeeNotificationService : ITuitionFeeNotificationService
             NotificationContent = notification.NotificationContent
         };
     }
-    
-    public async Task<List<TuitionFeeNotification>> GetAllTuitionFeeNotificationsAsync()
-    {
-        return await _context.TuitionFeeNotifications.ToListAsync();
-    }
 }

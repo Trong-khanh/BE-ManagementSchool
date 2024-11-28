@@ -488,18 +488,4 @@ public class AdminController : ControllerBase
 
         return Ok(notification);
     }
-
-// Endpoint to get all tuition fee notifications
-    [HttpGet("GetAllFeeNotifications")]
-    public async Task<IActionResult> GetAllTuitionFeeNotifications()
-    {
-        var notifications = await _tuitionFeeNotificationService.GetAllTuitionFeeNotificationsAsync();
-
-        if (notifications == null || notifications.Count == 0)
-        {
-            return NotFound(new { message = "No tuition fee notifications found." });
-        }
-
-        return Ok(notifications);
-    }
 }
