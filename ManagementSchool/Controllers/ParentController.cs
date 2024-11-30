@@ -107,6 +107,7 @@ namespace ManagementSchool.Controllers
 
             // Call MoMo service to create payment
             var response = await _momoService.CreatePaymentAsync(paymentRequest);
+            Console.WriteLine("------_>" + response);
 
             if (response.Success)
             {

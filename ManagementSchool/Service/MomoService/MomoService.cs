@@ -21,67 +21,95 @@ namespace ManagementSchool.Service.MomoService
     }
 
     public async Task<MomoCreatePaymentResponseModel> CreatePaymentAsync(PaymentRequestDto paymentRequest)
+{
+    paymentRequest.OrderId = GenerateOrderId();
+    var requestId = Guid.NewGuid().ToString();
+    var rawData = $"partnerCode={_momoOptions.Value.PartnerCode}" +
+                  $"&accessKey={_momoOptions.Value.AccessKey}" +
+                  $"&requestId={requestId}" +
+                  $"&amount={paymentRequest.Amount.ToString()}" +
+                  $"&orderId={paymentRequest.OrderId}" +
+                  $"&orderInfo={paymentRequest.NotificationContent}" +
+                  $"&returnUrl={_momoOptions.Value.ReturnUrl}" +
+                  $"&notifyUrl={_momoOptions.Value.NotifyUrl}" +
+                  $"&extraData=";
+
+    var signature = GenerateSignature(rawData);
+
+    var request = new
     {
-        paymentRequest.OrderId = GenerateOrderId();
-        var requestId = Guid.NewGuid().ToString();
-        var rawData = $"partnerCode={_momoOptions.Value.PartnerCode}" +
-                      $"&accessKey={_momoOptions.Value.AccessKey}" +
-                      $"&requestId={requestId}" +
-                      $"&amount={paymentRequest.Amount.ToString()}" +
-                      $"&orderId={paymentRequest.OrderId}" +
-                      $"&orderInfo={paymentRequest.NotificationContent}" +
-                      $"&returnUrl={_momoOptions.Value.ReturnUrl}" +
-                      $"&notifyUrl={_momoOptions.Value.NotifyUrl}" +
-                      $"&extraData=";
+        partnerCode = _momoOptions.Value.PartnerCode,
+        accessKey = _momoOptions.Value.AccessKey,
+        requestId = requestId,
+        orderId = paymentRequest.OrderId,
+        amount = paymentRequest.Amount.ToString(),
+        orderInfo = paymentRequest.NotificationContent,
+        returnUrl = _momoOptions.Value.ReturnUrl,
+        notifyUrl = _momoOptions.Value.NotifyUrl,
+        requestType = _momoOptions.Value.RequestType,
+        signature = signature
+    };
 
-        
-        var signature = GenerateSignature(rawData);
-        Console.WriteLine($"Raw Data: {rawData}");
+    try
+    {
+        // Send the request to MoMo API
+        var response = await _httpClient.PostAsJsonAsync(_momoOptions.Value.MomoApiUrl, request);
+        var responseContent = await response.Content.ReadAsStringAsync();
 
-
-        var request = new
+        if (response.IsSuccessStatusCode)
         {
-            partnerCode = _momoOptions.Value.PartnerCode,
-            accessKey = _momoOptions.Value.AccessKey,
-            requestId = requestId,
-            orderId = paymentRequest.OrderId,
-            amount = paymentRequest.Amount.ToString(),
-            orderInfo = paymentRequest.NotificationContent,
-            returnUrl = _momoOptions.Value.ReturnUrl,
-            notifyUrl = _momoOptions.Value.NotifyUrl,
-            requestType = _momoOptions.Value.RequestType,
-            signature = signature
-        };
-        
-        try
-        {
-            
-            var response = await _httpClient.PostAsJsonAsync(_momoOptions.Value.MomoApiUrl, request);
+            // Deserialize the response content to your model
+            var responseData = JsonConvert.DeserializeObject<MomoCreatePaymentResponseModel>(responseContent);
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Response: {responseContent}");
-
-            if (response.IsSuccessStatusCode)
+            // Check if PayUrl exists and assign it, otherwise handle it as required
+            if (!string.IsNullOrEmpty(responseData.PayUrl))
             {
-                var responseData = await response.Content.ReadFromJsonAsync<MomoCreatePaymentResponseModel>();
-                return responseData;
+                return new MomoCreatePaymentResponseModel
+                {
+                    Success = true,
+                    Message = responseData.Message,
+                    LocalMessage = responseData.LocalMessage,
+                    PayUrl = responseData.PayUrl,
+                    RequestId = responseData.RequestId,
+                    OrderId = responseData.OrderId,
+                    Signature = responseData.Signature,
+                    QrCodeUrl = responseData.QrCodeUrl,
+                    Deeplink = responseData.Deeplink,
+                    DeeplinkWebInApp = responseData.DeeplinkWebInApp
+                };
             }
-
-            return new MomoCreatePaymentResponseModel
+            else
             {
-                Success = false,
-                Message = await response.Content.ReadAsStringAsync()
-            };
+                return new MomoCreatePaymentResponseModel
+                {
+                    Success = false,
+                    Message = "No PayUrl found in the response.",
+                    LocalMessage = "Không tìm thấy PayUrl trong phản hồi."
+                };
+            }
         }
-        catch (Exception ex)
+        else
         {
             return new MomoCreatePaymentResponseModel
             {
                 Success = false,
-                Message = ex.Message
+                Message = "Failed to create payment request.",
+                LocalMessage = "Tạo yêu cầu thanh toán thất bại.",
+                PayUrl = null
             };
         }
     }
+    catch (Exception ex)
+    {
+        return new MomoCreatePaymentResponseModel
+        {
+            Success = false,
+            Message = "Exception occurred: " + ex.Message,
+            PayUrl = null
+        };
+    }
+}
+
 
     public async Task<MomoExecuteResponseModel> PaymentExecuteAsync(IQueryCollection query)
     {
