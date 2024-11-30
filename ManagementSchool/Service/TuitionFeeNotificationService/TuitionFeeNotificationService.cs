@@ -14,7 +14,7 @@ public class TuitionFeeNotificationService : ITuitionFeeNotificationService
         _context = context;
     }
 
-    public async Task<bool> CreateTuitionFeeNotificationAsync(string semesterType, string academicYear, decimal amount, string content)
+    public async Task<bool> CreateTuitionFeeNotificationAsync(string semesterType, string academicYear, double amount, string content)
     {
         // Parse semester type from string to enum
         if (!Enum.TryParse<SemesterType>(semesterType.Replace(" ", ""), true, out var semester))
@@ -52,7 +52,7 @@ public class TuitionFeeNotificationService : ITuitionFeeNotificationService
         return true;
     }
      
-    public async Task<bool> UpdateTuitionFeeNotificationAsync(SemesterType semesterType, string academicYear, decimal amount, string content)
+    public async Task<bool> UpdateTuitionFeeNotificationAsync(SemesterType semesterType, string academicYear, double amount, string content)
     {
         // Tìm kỳ học dựa trên SemesterType và AcademicYear
         var semester = await _context.Semesters

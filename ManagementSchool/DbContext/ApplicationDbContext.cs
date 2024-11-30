@@ -23,7 +23,6 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<ClassSemester> ClassSemesters { get; set; }
     public DbSet<Score> Scores { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
-
     public DbSet<Semester> Semesters { get; set; }
     public DbSet<SummaryOfYear> SummariesOfYear { get; set; }
     public DbSet<SubjectsAverageScore> SubjectsAverageScores { get; set; }
@@ -115,11 +114,6 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
             .WithMany(s => s.Scores)
             .HasForeignKey(s => s.SemesterId);
         
-        // modelBuilder.Entity<Score>()
-        //     .HasOne(s => s.SubjectsAverageScore)
-        //     .WithMany(sa => sa.Scores)
-        //     .HasForeignKey(s => s.SubjectsAverageScoreId)
-        //     .OnDelete(DeleteBehavior.Restrict);
 
         // Relationship between Student and SummaryOfYear
         modelBuilder.Entity<SummaryOfYear>()

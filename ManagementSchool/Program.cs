@@ -13,32 +13,36 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Net.Http;
 using User.ManagementSchool.Service.Models;
 using User.ManagementSchool.Service.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Connect MoMoAPI 
+// Thêm cấu hình HttpClient
+builder.Services.AddHttpClient();
+
+// Thêm cấu hình MoMoAPI
 builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
 builder.Services.AddScoped<IMomoService, MomoService>();
 
-// For Entity Framework
+// Cấu hình DbContext và chuỗi kết nối SQL Server
 var configuration = builder.Configuration;
-builder.Services.AddDbContext<ApplicationDbContext>(
-    options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-// For Identity
+// Cấu hình Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// Add config for required email 
+// Cấu hình các tùy chọn xác thực JWT
 builder.Services.Configure<IdentityOptions>(opts => opts.SignIn.RequireConfirmedEmail = true);
 
-
-// Adding Authentication
+// Thêm cấu hình Authentication và Authorization
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -58,30 +62,22 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
-//Add Email Configuration
+// Cấu hình dịch vụ Email
 var emailConfig = configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
 builder.Services.AddSingleton(emailConfig);
 
-// Service DI
+// Đăng ký các dịch vụ trong DI container
 builder.Services.AddScoped<ITuitionFeeNotificationService, TuitionFeeNotificationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IMomoService, MomoService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IParentService, ParentService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Cấu hình Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddAuthorization(options =>
-{
-    options.DefaultPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
-});
-
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "Auth API ", Version = "v1" });
@@ -109,10 +105,12 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+// Cấu hình các tùy chọn Json serializer
 builder.Services.AddControllers()
     .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; });
-// builder.Services.AddControllers();
 
+// Cấu hình CORS cho phép origin cụ thể
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
@@ -121,10 +119,9 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod());
 });
 
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Cấu hình pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -132,12 +129,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseCors("AllowSpecificOrigin"); // Apply CORS before MVC or endpoint routing
+app.UseCors("AllowSpecificOrigin"); // Áp dụng CORS trước khi routing
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.MapControllers();
 

@@ -79,14 +79,6 @@ public class TeacherService : ITeacherService
     }
 
     // Hàm để lấy điểm của học sinh theo kỳ học và môn học
-    public async Task<IEnumerable<Score>> GetScoresByStudentAsync(int studentId, int semesterId)
-    {
-        return await _context.Scores
-            .Where(s => s.StudentId == studentId && s.SemesterId == semesterId)
-            .Include(s => s.Subject)
-            .Include(s => s.Semester)
-            .ToListAsync();
-    }
     public async Task<List<ScoreDto>> GetScoresForStudentAsync(int studentId, int? subjectId = null,
         int? semesterId = null)
     {
@@ -182,18 +174,18 @@ public class TeacherService : ITeacherService
         {
             switch (score.ExamType)
             {
-                case ExamType.TestWhenClassBegins: // Đánh giá thường xuyên
+                case ExamType.TestWhenClassBegins: 
                     totalScore += score.ScoreValue;
                     countTestWhenClassBegins += 1;
                     break;
-                case ExamType.FifteenMinutesTest: // Đánh giá thường xuyên
+                case ExamType.FifteenMinutesTest: 
                     totalScore += score.ScoreValue;
                     countFifteenMinutesTest += 1;
                     break;
-                case ExamType.FortyFiveMinutesTest: // Đánh giá giữa kỳ
+                case ExamType.FortyFiveMinutesTest: 
                     totalScore += 2 * score.ScoreValue;
                     break;
-                case ExamType.SemesterTest: // Đánh giá cuối kỳ
+                case ExamType.SemesterTest: 
                     totalScore += 3 * score.ScoreValue;
                     break;
                 default:

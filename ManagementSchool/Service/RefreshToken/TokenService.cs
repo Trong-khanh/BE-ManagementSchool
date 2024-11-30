@@ -27,7 +27,7 @@ public class TokenService
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var expiry = DateTime.Now.AddSeconds(30);
+        var expiry = DateTime.Now.AddHours(1);
 
         // Lấy claims và roles của người dùng
         var userClaims = await _userManager.GetClaimsAsync(user);

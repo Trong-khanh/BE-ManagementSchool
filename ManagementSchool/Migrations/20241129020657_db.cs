@@ -261,7 +261,7 @@ namespace ManagementSchool.Migrations
                     TuitionFeeNotificationId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     SemesterId = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Amount = table.Column<double>(type: "float", nullable: false),
                     NotificationContent = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsSent = table.Column<bool>(type: "bit", nullable: false)
@@ -325,8 +325,6 @@ namespace ManagementSchool.Migrations
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FinalGrade = table.Column<int>(type: "int", nullable: false),
-                    Classification = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StudentId = table.Column<int>(type: "int", nullable: false),
                     AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -518,10 +516,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "10521707-4dd3-47a6-8b09-69ecad22df92", "3", "Teacher", "TEACHER" },
-                    { "816be312-5aca-490b-a418-96dd084ce3a6", "4", "Parent", "PARENT" },
-                    { "9a6e6d73-3423-457d-8cfe-0bb07712906e", "2", "Student", "STUDENT" },
-                    { "c4abd707-961f-4226-9e95-44cf325aa08e", "1", "Admin", "ADMIN" }
+                    { "59e98e09-ed05-4051-8fe6-2744de638776", "2", "Student", "STUDENT" },
+                    { "7735cac4-ea1a-49da-b5e2-642a83c8d926", "4", "Parent", "PARENT" },
+                    { "8c83720f-4343-4805-a151-58973939ea6f", "3", "Teacher", "TEACHER" },
+                    { "f55e259e-0122-4680-8960-f5ae6f107f8d", "1", "Admin", "ADMIN" }
                 });
 
             migrationBuilder.InsertData(
