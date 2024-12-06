@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Net.Http;
+using ManagementSchool.Service.OrderService;
 using User.ManagementSchool.Service.Models;
 using User.ManagementSchool.Service.Service;
 
@@ -75,6 +76,8 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IParentService, ParentService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IOrderServices, OrderServices>();
+
 
 // Cấu hình Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();

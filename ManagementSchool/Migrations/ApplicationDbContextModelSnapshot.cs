@@ -108,6 +108,38 @@ namespace ManagementSchool.Migrations
                     b.ToTable("ClassSubjects");
                 });
 
+            modelBuilder.Entity("ManagementSchool.Entities.Order", b =>
+                {
+                    b.Property<string>("OrderId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AcademicYear")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NotificationContent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SemesterName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("OrderId");
+
+                    b.ToTable("Orders");
+                });
+
             modelBuilder.Entity("ManagementSchool.Entities.Semester", b =>
                 {
                     b.Property<int>("SemesterId")
@@ -491,28 +523,28 @@ namespace ManagementSchool.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "f55e259e-0122-4680-8960-f5ae6f107f8d",
+                            Id = "c4cd6b5c-4846-47a5-b541-ce667176ac11",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "59e98e09-ed05-4051-8fe6-2744de638776",
+                            Id = "5169b97a-eb38-43aa-8c54-973888019864",
                             ConcurrencyStamp = "2",
                             Name = "Student",
                             NormalizedName = "STUDENT"
                         },
                         new
                         {
-                            Id = "8c83720f-4343-4805-a151-58973939ea6f",
+                            Id = "e93017dd-e00e-4402-909d-14b071c7052d",
                             ConcurrencyStamp = "3",
                             Name = "Teacher",
                             NormalizedName = "TEACHER"
                         },
                         new
                         {
-                            Id = "7735cac4-ea1a-49da-b5e2-642a83c8d926",
+                            Id = "06a30c6c-2659-470d-a9c9-a6d231f3d9be",
                             ConcurrencyStamp = "4",
                             Name = "Parent",
                             NormalizedName = "PARENT"

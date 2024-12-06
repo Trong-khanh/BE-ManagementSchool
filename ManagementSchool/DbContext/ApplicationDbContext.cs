@@ -28,6 +28,9 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<SubjectsAverageScore> SubjectsAverageScores { get; set; }
     public DbSet<AverageScore> AverageScores { get; set; }
     public DbSet<TuitionFeeNotification> TuitionFeeNotifications { get; set; }
+    
+    public DbSet<Order> Orders { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

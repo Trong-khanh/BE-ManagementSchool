@@ -62,6 +62,23 @@ namespace ManagementSchool.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Orders",
+                columns: table => new
+                {
+                    OrderId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    SemesterName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AcademicYear = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NotificationContent = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PaymentStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Orders", x => x.OrderId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Semesters",
                 columns: table => new
                 {
@@ -516,10 +533,10 @@ namespace ManagementSchool.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "59e98e09-ed05-4051-8fe6-2744de638776", "2", "Student", "STUDENT" },
-                    { "7735cac4-ea1a-49da-b5e2-642a83c8d926", "4", "Parent", "PARENT" },
-                    { "8c83720f-4343-4805-a151-58973939ea6f", "3", "Teacher", "TEACHER" },
-                    { "f55e259e-0122-4680-8960-f5ae6f107f8d", "1", "Admin", "ADMIN" }
+                    { "06a30c6c-2659-470d-a9c9-a6d231f3d9be", "4", "Parent", "PARENT" },
+                    { "5169b97a-eb38-43aa-8c54-973888019864", "2", "Student", "STUDENT" },
+                    { "c4cd6b5c-4846-47a5-b541-ce667176ac11", "1", "Admin", "ADMIN" },
+                    { "e93017dd-e00e-4402-909d-14b071c7052d", "3", "Teacher", "TEACHER" }
                 });
 
             migrationBuilder.InsertData(
@@ -707,6 +724,9 @@ namespace ManagementSchool.Migrations
 
             migrationBuilder.DropTable(
                 name: "ClassSubjects");
+
+            migrationBuilder.DropTable(
+                name: "Orders");
 
             migrationBuilder.DropTable(
                 name: "RefreshTokens");

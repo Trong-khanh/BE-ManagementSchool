@@ -6,6 +6,7 @@ using ManagementSchool.Service.MomoService; // Thêm service MomoService
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using ManagementSchool.Service.OrderService;
 
 namespace ManagementSchool.Controllers
 {
@@ -17,14 +18,19 @@ namespace ManagementSchool.Controllers
         private readonly IParentService _parentService;
         private readonly ITuitionFeeNotificationService _tuitionFeeNotificationService;
         private readonly IMomoService _momoService; 
+        private readonly IOrderServices _orderService;
+
+
         public ParentController(
             IParentService parentService, 
             ITuitionFeeNotificationService tuitionFeeNotificationService, 
+            IOrderServices orderServices,
             IMomoService momoService) 
         {
             _parentService = parentService;
             _tuitionFeeNotificationService = tuitionFeeNotificationService;
             _momoService = momoService;
+            _orderService = orderServices;
         }
 
         [HttpGet("GetDailyScores")]
@@ -111,6 +117,21 @@ namespace ManagementSchool.Controllers
 
             if (response.Success)
             {
+// Save Order
+                var order = new Order
+                {
+                    OrderId = paymentRequest.OrderId,
+                    // ParentId = paymentRequest.OrderId,
+                    Amount = paymentRequest.Amount,
+                    SemesterName = paymentRequest.SemesterName,
+                    AcademicYear = paymentRequest.AcademicYear,
+                    NotificationContent = paymentRequest.NotificationContent,
+                    PaymentStatus = "Paid",
+                    CreatedDate = DateTime.UtcNow
+                };
+
+                await _orderService.SaveOrderAsync(order);         
+                
                 return Ok(new PaymentResponseDto
                 {
                     Success = true,
@@ -131,8 +152,11 @@ namespace ManagementSchool.Controllers
         // Endpoint to handle MoMo callback
         [HttpGet("PaymentCallback")]
         [AllowAnonymous]
-        public async Task<IActionResult> PaymentCallback([FromQuery] IQueryCollection query)
+        public async Task<IActionResult> PaymentCallback()
         {
+            // Access the query collection directly from HttpContext.Request.Query
+            var query = HttpContext.Request.Query;
+
             if (query == null || !query.ContainsKey("orderId"))
                 return BadRequest("Invalid callback request.");
 
@@ -141,14 +165,44 @@ namespace ManagementSchool.Controllers
             if (response == null)
                 return BadRequest("Failed to process payment callback.");
 
+            // Retrieve the existing order based on the orderId
+            var orderId = response.OrderId;
+            var existingOrder = await _orderService.GetOrderByIdAsync(orderId);
+
+            if (existingOrder == null)
+            {
+                return NotFound(new
+                {
+                    Message = $"Order with ID '{orderId}' not found."
+                });
+            }
+
+            // Check if the payment status is already updated
+            if (existingOrder.PaymentStatus == "Paid")
+            {
+                return Ok(new
+                {
+                    Message = "Payment has already been processed."
+                });
+            }
+
+            // Determine the payment status
+            var paymentStatus = query["resultCode"] == "0" ? "Success" : "Failed";
+
+            // Update the order status
+            existingOrder.PaymentStatus = paymentStatus;
+            await _orderService.SaveOrderAsync(existingOrder); // Assuming SaveOrderAsync updates if the order exists.
+
             return Ok(new
             {
                 OrderId = response.OrderId,
                 Amount = response.Amount,
                 FullName = response.FullName,
-                OrderInfo = response.OrderInfo
+                OrderInfo = response.OrderInfo,
+                PaymentStatus = paymentStatus
             });
         }
+
         
     }
 }
