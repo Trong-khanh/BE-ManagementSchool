@@ -3466,11 +3466,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/ManagementSchool.csproj",
+      "projectUniqueName": "/Users/thanletrongkhanh/Library/Mobile Documents/com~apple~CloudDocs/Rider Project/BE-ManagementSchool/ManagementSchool/ManagementSchool.csproj",
       "projectName": "ManagementSchool",
-      "projectPath": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/ManagementSchool.csproj",
+      "projectPath": "/Users/thanletrongkhanh/Library/Mobile Documents/com~apple~CloudDocs/Rider Project/BE-ManagementSchool/ManagementSchool/ManagementSchool.csproj",
       "packagesPath": "/Users/thanletrongkhanh/.nuget/packages/",
-      "outputPath": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/obj/",
+      "outputPath": "/Users/thanletrongkhanh/Library/Mobile Documents/com~apple~CloudDocs/Rider Project/BE-ManagementSchool/ManagementSchool/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/thanletrongkhanh/.nuget/NuGet/NuGet.Config"
@@ -3485,8 +3485,8 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj": {
-              "projectPath": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj"
+            "/Users/thanletrongkhanh/Library/Mobile Documents/com~apple~CloudDocs/Rider Project/BE-ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj": {
+              "projectPath": "/Users/thanletrongkhanh/Library/Mobile Documents/com~apple~CloudDocs/Rider Project/BE-ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj"
             }
           }
         }
@@ -3555,7 +3555,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.425/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/Users/thanletrongkhanh/.dotnet/sdk/6.0.428/RuntimeIdentifierGraph.json"
       }
     }
   }

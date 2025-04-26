@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Adj0E/vjLuM=",
+  "dgSpecHash": "bicReH2hlMw=",
   "success": true,
-  "projectFilePath": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/ManagementSchool/ManagementSchool.csproj",
+  "projectFilePath": "/Users/thanletrongkhanh/Library/Mobile Documents/com~apple~CloudDocs/Rider Project/BE-ManagementSchool/ManagementSchool/ManagementSchool.csproj",
   "expectedPackageFiles": [
     "/Users/thanletrongkhanh/.nuget/packages/braintreehttp-dotnet/0.3.0/braintreehttp-dotnet.0.3.0.nupkg.sha512",
     "/Users/thanletrongkhanh/.nuget/packages/humanizer.core/2.8.26/humanizer.core.2.8.26.nupkg.sha512",

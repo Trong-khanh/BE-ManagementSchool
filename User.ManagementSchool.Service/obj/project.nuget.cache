@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "4pMBncRWnFo=",
+  "dgSpecHash": "PAwvWq4lY24=",
   "success": true,
-  "projectFilePath": "/Users/thanletrongkhanh/RiderProjects/BE-ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj",
+  "projectFilePath": "/Users/thanletrongkhanh/Library/Mobile Documents/com~apple~CloudDocs/Rider Project/BE-ManagementSchool/User.ManagementSchool.Service/User.ManagementSchool.Service.csproj",
   "expectedPackageFiles": [
     "/Users/thanletrongkhanh/.nuget/packages/braintreehttp-dotnet/0.3.0/braintreehttp-dotnet.0.3.0.nupkg.sha512",
     "/Users/thanletrongkhanh/.nuget/packages/mailkit/3.2.0/mailkit.3.2.0.nupkg.sha512",
