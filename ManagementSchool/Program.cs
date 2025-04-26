@@ -33,7 +33,8 @@ builder.Services.AddScoped<IMomoService, MomoService>();
 // Cấu hình DbContext và chuỗi kết nối SQL Server
 var configuration = builder.Configuration;
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 // Cấu hình Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
@@ -124,6 +125,11 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
+}
 // Cấu hình pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
