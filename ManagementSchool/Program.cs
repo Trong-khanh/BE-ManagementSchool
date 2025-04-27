@@ -4,20 +4,18 @@ using ManagementSchool.Entities.MomoOptonModel;
 using ManagementSchool.Models;
 using ManagementSchool.Service;
 using ManagementSchool.Service.MomoService;
+using ManagementSchool.Service.OrderService;
 using ManagementSchool.Service.ParentService;
 using ManagementSchool.Service.RefreshToken;
 using ManagementSchool.Service.StudentService;
 using ManagementSchool.Service.TeacherService;
 using ManagementSchool.Service.TuitionFeeNotificationService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Net.Http;
-using ManagementSchool.Service.OrderService;
+using Npgsql;
 using User.ManagementSchool.Service.Models;
 using User.ManagementSchool.Service.Service;
 
@@ -30,24 +28,26 @@ builder.Services.AddHttpClient();
 builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
 builder.Services.AddScoped<IMomoService, MomoService>();
 
-// Cấu hình DbContext và chuỗi kết nối cho Railway
-var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL");
-
+// --- CONFIGURE DATABASE CONNECTION ---
 string connectionString;
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL");
 
 if (!string.IsNullOrEmpty(databaseUrl))
 {
-    var uri = new Uri(databaseUrl);
-    var userInfo = uri.UserInfo.Split(':');
+    // Railway environment
+    var hostPort = databaseUrl.Split(':');
+    var dbUser = Environment.GetEnvironmentVariable("DATABASE_USERNAME");
+    var dbPass = Environment.GetEnvironmentVariable("DATABASE_PASSWORD");
+    var dbName = Environment.GetEnvironmentVariable("DATABASE_NAME");
 
-    var builderDb = new Npgsql.NpgsqlConnectionStringBuilder
+    var builderDb = new NpgsqlConnectionStringBuilder
     {
-        Host = uri.Host,
-        Port = uri.Port,
-        Username = userInfo[0],
-        Password = userInfo[1],
-        Database = uri.AbsolutePath.TrimStart('/'),
-        SslMode = Npgsql.SslMode.Prefer,
+        Host = hostPort[0],
+        Port = int.Parse(hostPort[1]),
+        Username = dbUser,
+        Password = dbPass,
+        Database = dbName,
+        SslMode = SslMode.Prefer,
         TrustServerCertificate = true
     };
 
@@ -55,6 +55,7 @@ if (!string.IsNullOrEmpty(databaseUrl))
 }
 else
 {
+    // Local environment
     connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 }
 
@@ -82,8 +83,8 @@ builder.Services.AddAuthentication(options =>
     options.RequireHttpsMetadata = false;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false,   // Không validate Issuer
-        ValidateAudience = false, // Không validate Audience
+        ValidateIssuer = false,
+        ValidateAudience = false,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
     };
 });
@@ -143,7 +144,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin", corsPolicyBuilder =>
     {
         corsPolicyBuilder
-            .AllowAnyOrigin() // Production: có thể chỉnh cụ thể domain
+            .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
