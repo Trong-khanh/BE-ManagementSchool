@@ -29,24 +29,22 @@ builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("Mo
 builder.Services.AddScoped<IMomoService, MomoService>();
 
 // --- CONFIGURE DATABASE CONNECTION ---
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
 string connectionString;
-var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL");
 
 if (!string.IsNullOrEmpty(databaseUrl))
 {
-    // Railway environment
-    var hostPort = databaseUrl.Split(':');
-    var dbUser = Environment.GetEnvironmentVariable("DATABASE_USERNAME");
-    var dbPass = Environment.GetEnvironmentVariable("DATABASE_PASSWORD");
-    var dbName = Environment.GetEnvironmentVariable("DATABASE_NAME");
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':');
 
     var builderDb = new NpgsqlConnectionStringBuilder
     {
-        Host = hostPort[0],
-        Port = int.Parse(hostPort[1]),
-        Username = dbUser,
-        Password = dbPass,
-        Database = dbName,
+        Host = uri.Host,
+        Port = uri.Port,
+        Username = userInfo[0],
+        Password = userInfo[1],
+        Database = uri.AbsolutePath.TrimStart('/'),
         SslMode = SslMode.Prefer,
         TrustServerCertificate = true
     };
@@ -55,9 +53,9 @@ if (!string.IsNullOrEmpty(databaseUrl))
 }
 else
 {
-    // Local environment
     connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 }
+
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
