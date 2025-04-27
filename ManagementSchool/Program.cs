@@ -31,7 +31,7 @@ builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("Mo
 builder.Services.AddScoped<IMomoService, MomoService>();
 
 // Cấu hình DbContext và chuỗi kết nối cho Railway
-var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_PUBLIC_URL");
 
 string connectionString;
 
