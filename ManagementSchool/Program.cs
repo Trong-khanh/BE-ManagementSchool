@@ -154,8 +154,44 @@ var app = builder.Build();
 // Auto migrate database
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.Migrate();
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        
+        // Retry mechanism for database connection
+        var retryCount = 5;
+        var delay = TimeSpan.FromSeconds(3);
+        
+        for (int i = 0; i < retryCount; i++)
+        {
+            try
+            {
+                if (context.Database.CanConnect())
+                {
+                    context.Database.Migrate();
+                    break;
+                }
+                else 
+                {
+                    // Attempt to migrate anyway, as CanConnect might fail if DB doesn't exist but server is up
+                    context.Database.Migrate();
+                    break;
+                }
+            }
+            catch (Exception)
+            {
+                if (i == retryCount - 1) throw;
+                Console.WriteLine($"Database not ready. Retrying in {delay.TotalSeconds} seconds... ({i + 1}/{retryCount})");
+                System.Threading.Thread.Sleep(delay);
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
 }
 
 // Pipeline HTTP request
@@ -169,10 +205,14 @@ if (app.Environment.IsDevelopment())
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 app.Urls.Add($"http://*:{port}");
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // Tắt HTTPS redirection trong Docker để tránh lỗi 404
 app.UseCors("AllowSpecificOrigin");
 app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+app.MapGet("/", () => "Management School API is running!");
+
 app.Run();
