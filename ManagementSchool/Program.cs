@@ -195,11 +195,15 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Pipeline HTTP request
-if (app.Environment.IsDevelopment())
-{
+// if (app.Environment.IsDevelopment()) // Cho phép Swagger chạy cả ở Production
+// {
     app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Management School API V1");
+        c.RoutePrefix = "swagger"; // Đảm bảo đường dẫn là /swagger
+    });
+// }
 
 // Lắng nghe port Railway cung cấp
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
