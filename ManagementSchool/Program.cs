@@ -142,9 +142,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin", corsPolicyBuilder =>
     {
         corsPolicyBuilder
-            .AllowAnyOrigin()
+            .SetIsOriginAllowed(origin => true) // Chấp nhận mọi nguồn (cho phép cả localhost và vercel)
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials(); // Quan trọng: Cho phép gửi cookie/token
     });
 });
 

@@ -117,15 +117,23 @@ public class AuthenticateController : ControllerBase
         </body>
         </html>";
 
-            // Tạo và gửi email
-            var message = new Message(new[] { user.Email }, "Email Confirmation", confirmationHtml, isHtml: true);
-            _emailService.SendEmailAsync(message);
+            // Tạo và gửi email (Thêm Try-Catch để tránh lỗi 500 nếu gửi mail thất bại)
+            try 
+            {
+                var message = new Message(new[] { user.Email }, "Email Confirmation", confirmationHtml, isHtml: true);
+                _emailService.SendEmailAsync(message);
+            }
+            catch (Exception ex)
+            {
+                // Ghi log lỗi nhưng KHÔNG return lỗi 500, cho phép đăng ký thành công
+                _logger.LogError(ex, "Failed to send confirmation email to {Email}", user.Email);
+            }
 
             return StatusCode(StatusCodes.Status200OK,
                 new Response
                 {
                     Status = "Success",
-                    Message = $"User created and email confirmation sent to {user.Email} successfully."
+                    Message = $"User created successfully. (Email confirmation might fail if not configured)"
                 });
         }
 
