@@ -217,6 +217,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapGet("/", () => "Management School API is running!");
+// Tự động chuyển hướng trang chủ về Swagger để dễ dùng
+app.MapGet("/", async context =>
+{
+    context.Response.Redirect("/swagger/index.html");
+    await Task.CompletedTask;
+});
 
 app.Run();
