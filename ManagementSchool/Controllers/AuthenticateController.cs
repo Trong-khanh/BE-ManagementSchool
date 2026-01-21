@@ -71,8 +71,11 @@ public class AuthenticateController : ControllerBase
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error checking admin role existence. Role 'Admin' might not exist yet.");
-                // Nếu role Admin chưa tồn tại (lần đầu chạy), có thể bỏ qua check này hoặc trả về lỗi rõ ràng hơn
-                // Trong trường hợp này, ta sẽ tiếp tục để code phía dưới tạo user và gán role (nếu role chưa có, code dưới sẽ fail và trả về 500)
+                // Create role if it doesn't exist to prevent 500 error in next steps
+                if (!await _roleManager.RoleExistsAsync("Admin"))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole("Admin"));
+                }
             }
         }
 
@@ -88,8 +91,13 @@ public class AuthenticateController : ControllerBase
 
             var result = await _userManager.CreateAsync(user, registerUser.Password);
             if (!result.Succeeded)
+            {
+                // Log detailed errors
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                _logger.LogError("User creation failed: {Errors}", errors);
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    new Response { Status = "Error", Message = "User creation failed." });
+                    new Response { Status = "Error", Message = $"User creation failed: {errors}" });
+            }
 
             // Add role to user
             await _userManager.AddToRoleAsync(user, role);
