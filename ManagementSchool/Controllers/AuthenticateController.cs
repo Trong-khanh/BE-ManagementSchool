@@ -46,7 +46,7 @@ public class AuthenticateController : ControllerBase
 
  
     [HttpPost("Register")]
-    public async Task<IActionResult> Register([FromBody] RegisterUser registerUser, string role)
+    public async Task<IActionResult> Register([FromBody] RegisterUser registerUser, [FromQuery] string role)
     {
         // Check if user already exists
         var userExist = await _userManager.FindByNameAsync(registerUser.Email);
