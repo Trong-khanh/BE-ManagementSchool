@@ -30,32 +30,40 @@ builder.Services.AddScoped<IMomoService, MomoService>();
 
 // --- CONFIGURE DATABASE CONNECTION ---
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-
 string connectionString;
 
-if (!string.IsNullOrEmpty(databaseUrl))
-{
-    var uri = new Uri(databaseUrl);
-    var userInfo = uri.UserInfo.Split(':');
-
-    var builderDb = new NpgsqlConnectionStringBuilder
-    {
-        Host = uri.Host,
-        Port = uri.Port > 0 ? uri.Port : 5432,
-        Username = userInfo[0],
-        Password = userInfo[1],
-        Database = uri.AbsolutePath.TrimStart('/'),
-        SslMode = SslMode.Require,
-        TrustServerCertificate = true
-    };
-
-    connectionString = builderDb.ConnectionString;
-}
-else
+if (string.IsNullOrEmpty(databaseUrl))
 {
     connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 }
-
+else
+{
+    // Sử dụng NpgsqlConnectionStringBuilder để parse connection string một cách an toàn
+    // Thay vì tự parse thủ công dễ gây lỗi với các ký tự đặc biệt
+    try 
+    {
+        var databaseUri = new Uri(databaseUrl);
+        var userInfo = databaseUri.UserInfo.Split(':');
+        
+        var builderDb = new NpgsqlConnectionStringBuilder
+        {
+            Host = databaseUri.Host,
+            Port = databaseUri.Port > 0 ? databaseUri.Port : 5432,
+            Username = userInfo[0],
+            Password = userInfo[1],
+            Database = databaseUri.LocalPath.TrimStart('/'),
+            SslMode = SslMode.Require,
+            TrustServerCertificate = true
+        };
+        connectionString = builderDb.ToString();
+    }
+    catch
+    {
+        // Fallback: Nếu parse thất bại (do format khác), dùng nguyên chuỗi gốc
+        // Npgsql có thể tự xử lý format "postgres://..." trong các phiên bản mới
+        connectionString = databaseUrl;
+    }
+}
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
