@@ -57,14 +57,23 @@ public class AuthenticateController : ControllerBase
         // Check if the role is 'Admin' and ensure only one admin exists
         if (role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
         {
-            var admins = await _userManager.GetUsersInRoleAsync("Admin");
-            if (admins.Count > 0)
-                return StatusCode(StatusCodes.Status403Forbidden,
-                    new Response
-                    {
-                        Status = "Error",
-                        Message = "An admin account already exists. No additional admin accounts can be created."
-                    });
+            try 
+            {
+                var admins = await _userManager.GetUsersInRoleAsync("Admin");
+                if (admins.Count > 0)
+                    return StatusCode(StatusCodes.Status403Forbidden,
+                        new Response
+                        {
+                            Status = "Error",
+                            Message = "An admin account already exists. No additional admin accounts can be created."
+                        });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking admin role existence. Role 'Admin' might not exist yet.");
+                // Nếu role Admin chưa tồn tại (lần đầu chạy), có thể bỏ qua check này hoặc trả về lỗi rõ ràng hơn
+                // Trong trường hợp này, ta sẽ tiếp tục để code phía dưới tạo user và gán role (nếu role chưa có, code dưới sẽ fail và trả về 500)
+            }
         }
 
         // Proceed if role exists
