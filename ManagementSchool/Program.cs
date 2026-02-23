@@ -128,6 +128,57 @@ builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IOrderServices, OrderServices>();
 
 var configuredAllowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+var allowedOriginsFromFlatEnv = (Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS") ?? string.Empty)
+    .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+static string[] NormalizeOrigins(IEnumerable<string> origins)
+{
+    var normalized = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+    foreach (var rawOrigin in origins)
+    {
+        if (string.IsNullOrWhiteSpace(rawOrigin))
+        {
+            continue;
+        }
+
+        var candidate = rawOrigin.Trim().TrimEnd('/');
+        if (!candidate.Contains("://", StringComparison.Ordinal))
+        {
+            // Render users sometimes set only host, convert to a valid origin format.
+            if (candidate.StartsWith("localhost", StringComparison.OrdinalIgnoreCase) ||
+                candidate.StartsWith("127.0.0.1", StringComparison.OrdinalIgnoreCase))
+            {
+                normalized.Add($"http://{candidate}");
+            }
+            else
+            {
+                normalized.Add($"https://{candidate}");
+            }
+
+            continue;
+        }
+
+        if (Uri.TryCreate(candidate, UriKind.Absolute, out var parsedUri) &&
+            (parsedUri.Scheme == Uri.UriSchemeHttp || parsedUri.Scheme == Uri.UriSchemeHttps))
+        {
+            normalized.Add($"{parsedUri.Scheme}://{parsedUri.Authority}");
+        }
+    }
+
+    return normalized.ToArray();
+}
+
+var effectiveAllowedOrigins = NormalizeOrigins(configuredAllowedOrigins.Concat(allowedOriginsFromFlatEnv));
+if (effectiveAllowedOrigins.Length == 0)
+{
+    if (!builder.Environment.IsDevelopment())
+    {
+        throw new InvalidOperationException("Cors:AllowedOrigins or CORS_ALLOWED_ORIGINS must be configured outside development.");
+    }
+
+    effectiveAllowedOrigins = new[] { "http://localhost:3000", "http://localhost:5172", "http://localhost:5173" };
+}
 
 // Cấu hình Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -168,19 +219,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin", corsPolicyBuilder =>
     {
-        var effectiveOrigins = configuredAllowedOrigins;
-        if (effectiveOrigins.Length == 0)
-        {
-            if (!builder.Environment.IsDevelopment())
-            {
-                throw new InvalidOperationException("Cors:AllowedOrigins must be configured outside development.");
-            }
-
-            effectiveOrigins = new[] { "http://localhost:3000", "http://localhost:5172", "http://localhost:5173" };
-        }
-
         corsPolicyBuilder
-            .WithOrigins(effectiveOrigins)
+            .WithOrigins(effectiveAllowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -189,6 +229,7 @@ builder.Services.AddCors(options =>
 
 // Build app
 var app = builder.Build();
+app.Logger.LogInformation("CORS allowed origins: {Origins}", string.Join(", ", effectiveAllowedOrigins));
 
 // Auto migrate database
 using (var scope = app.Services.CreateScope())
@@ -255,8 +296,8 @@ var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 app.Urls.Add($"http://*:{port}");
 
 // app.UseHttpsRedirection(); // Tắt HTTPS redirection trong Docker để tránh lỗi 404
-app.UseCors("AllowSpecificOrigin");
 app.UseRouting();
+app.UseCors("AllowSpecificOrigin");
 
 app.UseAuthentication();
 app.UseAuthorization();
