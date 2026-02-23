@@ -314,6 +314,7 @@ public async Task<IActionResult> ConfirmEmail(string token, string email)
 
         return Ok(new
         {
+            accessToken = newAccessToken,
             AccessToken = newAccessToken
         });
     }

@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 namespace ManagementSchool.Controllers;
 
-[Authorize(Roles = "Admin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [Route("api/[controller]")]
 [ApiController]
 public class OrdersController : ControllerBase
@@ -16,14 +15,14 @@ public class OrdersController : ControllerBase
         _orderService = orderServices;
     }
 
-
+    [Authorize(Roles = "Admin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet("GetOrders")]
     public async Task<IActionResult> GetOrders()
     {
         var orders = await _orderService.GetAllOrdersAsync();
         return Ok(orders);
     }
-
+    [Authorize(Roles = "Admin,Parent", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet("GetOrderById")]
     public async Task<IActionResult> GetOrderById([FromQuery] string orderId)
     {
@@ -36,7 +35,7 @@ public class OrdersController : ControllerBase
 
         return Ok(order);
     }
-
+    [Authorize(Roles = "Admin,Parent", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet("getorders/{orderId}")]
     public async Task<IActionResult> GetOrderByIdPath(string orderId)
     {
