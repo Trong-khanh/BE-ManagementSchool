@@ -28,11 +28,24 @@ public class OrdersController : ControllerBase
     public async Task<IActionResult> GetOrderById([FromQuery] string orderId)
     {
         if (string.IsNullOrWhiteSpace(orderId))
-            return BadRequest("OrderId is required.");
+            return BadRequest(new { message = "OrderId is required." });
 
         var order = await _orderService.GetOrderByIdAsync(orderId);
         if (order == null)
-            return NotFound("Order not found.");
+            return NotFound(new { message = "Order not found." });
+
+        return Ok(order);
+    }
+
+    [HttpGet("getorders/{orderId}")]
+    public async Task<IActionResult> GetOrderByIdPath(string orderId)
+    {
+        if (string.IsNullOrWhiteSpace(orderId))
+            return BadRequest(new { message = "OrderId is required." });
+
+        var order = await _orderService.GetOrderByIdAsync(orderId);
+        if (order == null)
+            return NotFound(new { message = "Order not found." });
 
         return Ok(order);
     }

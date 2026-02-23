@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using User.ManagementSchool.Service.Models;
 using User.ManagementSchool.Service.Service;
 
@@ -284,10 +283,15 @@ public async Task<IActionResult> ConfirmEmail(string token, string email)
             var userRole = roles.FirstOrDefault() ?? "User";
             return Ok(new
             {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken.Token,
-                User = JsonConvert.SerializeObject(user),
-                Role = userRole
+                accessToken,
+                refreshToken = refreshToken.Token,
+                role = userRole,
+                user = new
+                {
+                    id = user.Id,
+                    userName = user.UserName,
+                    email = user.Email
+                }
             });
         }
 
