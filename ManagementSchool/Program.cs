@@ -208,13 +208,19 @@ using (var scope = app.Services.CreateScope())
             {
                 if (context.Database.CanConnect())
                 {
-                    context.Database.Migrate();
+                    if (context.Database.GetMigrations().Any())
+                    {
+                        context.Database.Migrate();
+                    }
                     break;
                 }
                 else 
                 {
                     // Attempt to migrate anyway, as CanConnect might fail if DB doesn't exist but server is up
-                    context.Database.Migrate();
+                    if (context.Database.GetMigrations().Any())
+                    {
+                        context.Database.Migrate();
+                    }
                     break;
                 }
             }
