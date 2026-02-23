@@ -5,6 +5,7 @@ using ManagementSchool.Service.TuitionFeeNotificationService;
 using ManagementSchool.Service.MomoService; // Thêm service MomoService
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using ManagementSchool.Service.OrderService;
 
@@ -36,11 +37,16 @@ namespace ManagementSchool.Controllers
         [HttpGet("GetDailyScores")]
         public IActionResult GetDailyScores([FromQuery] string studentName, [FromQuery] string academicYear)
         {
-            var scores = _parentService.GetDailyScores(studentName, academicYear);
+            if (string.IsNullOrWhiteSpace(studentName) || string.IsNullOrWhiteSpace(academicYear))
+            {
+                return BadRequest("Both student name and academic year are required.");
+            }
+
+            var scores = _parentService.GetDailyScores(User, studentName, academicYear);
 
             if (scores == null || !scores.Any())
             {
-                return NotFound($"No daily scores found for the student '{studentName}' in the academic year '{academicYear}'.");
+                return NotFound($"No daily scores found for student '{studentName}' in academic year '{academicYear}', or access is denied.");
             }
 
             return Ok(scores);
@@ -49,11 +55,16 @@ namespace ManagementSchool.Controllers
         [HttpGet("GetSubjectsAverageScores")]
         public IActionResult GetSubjectsAverageScores([FromQuery] string studentName, [FromQuery] string academicYear)
         {
-            var averageScores = _parentService.GetSubjectsAverageScores(studentName, academicYear);
+            if (string.IsNullOrWhiteSpace(studentName) || string.IsNullOrWhiteSpace(academicYear))
+            {
+                return BadRequest("Both student name and academic year are required.");
+            }
+
+            var averageScores = _parentService.GetSubjectsAverageScores(User, studentName, academicYear);
 
             if (averageScores == null || !averageScores.Any())
             {
-                return NotFound($"No subject average scores found for the student '{studentName}' in the academic year '{academicYear}'.");
+                return NotFound($"No subject average scores found for student '{studentName}' in academic year '{academicYear}', or access is denied.");
             }
 
             return Ok(averageScores);
@@ -67,11 +78,11 @@ namespace ManagementSchool.Controllers
                 return BadRequest("Both student name and academic year are required.");
             }
 
-            var averageScores = _parentService.GetAverageScores(studentName, academicYear);
+            var averageScores = _parentService.GetAverageScores(User, studentName, academicYear);
 
             if (averageScores == null || !averageScores.Any())
             {
-                return NotFound($"No average scores found for the student '{studentName}' in the academic year '{academicYear}'.");
+                return NotFound($"No average scores found for student '{studentName}' in academic year '{academicYear}', or access is denied.");
             }
 
             return Ok(averageScores);
@@ -100,33 +111,37 @@ namespace ManagementSchool.Controllers
             if (string.IsNullOrEmpty(paymentRequest.SemesterName) || string.IsNullOrEmpty(paymentRequest.AcademicYear))
                 return BadRequest("Semester and Academic Year are required.");
 
-            // If orderId is missing, generate it
-            if (string.IsNullOrEmpty(paymentRequest.OrderId))
-                paymentRequest.OrderId = DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-" + Guid.NewGuid().ToString("N").Substring(0, 8);
+            if (!Enum.TryParse<SemesterType>(paymentRequest.SemesterName, true, out var semesterType))
+                return BadRequest("Invalid semester name.");
+
+            var parentEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrWhiteSpace(parentEmail))
+                return Unauthorized("Parent email claim is missing.");
 
             // Retrieve tuition fee notification
             var notification = await _tuitionFeeNotificationService
-                .GetTuitionFeeNotificationAsync((SemesterType)Enum.Parse(typeof(SemesterType), paymentRequest.SemesterName), paymentRequest.AcademicYear);
+                .GetTuitionFeeNotificationAsync(semesterType, paymentRequest.AcademicYear);
 
             if (notification == null)
                 return NotFound(new { message = "Tuition fee notification not found." });
 
+            // Enforce amount from server-side notification to avoid tampering.
+            paymentRequest.Amount = (decimal)notification.Amount;
+
             // Call MoMo service to create payment
             var response = await _momoService.CreatePaymentAsync(paymentRequest);
-            Console.WriteLine("------_>" + response);
 
             if (response.Success)
             {
 // Save Order
                 var order = new Order
                 {
-                    OrderId = paymentRequest.OrderId,
-                    // ParentId = paymentRequest.OrderId,
+                    OrderId = response.OrderId,
                     Amount = paymentRequest.Amount,
                     SemesterName = paymentRequest.SemesterName,
                     AcademicYear = paymentRequest.AcademicYear,
                     NotificationContent = paymentRequest.NotificationContent,
-                    PaymentStatus = "Paid",
+                    PaymentStatus = "Pending",
                     CreatedDate = DateTime.UtcNow
                 };
 
@@ -160,6 +175,9 @@ namespace ManagementSchool.Controllers
             if (query == null || !query.ContainsKey("orderId"))
                 return BadRequest("Invalid callback request.");
 
+            if (!_momoService.ValidateCallbackSignature(query))
+                return Unauthorized("Invalid payment callback signature.");
+
             var response = await _momoService.PaymentExecuteAsync(query);
 
             if (response == null)
@@ -177,8 +195,8 @@ namespace ManagementSchool.Controllers
                 });
             }
 
-            // Check if the payment status is already updated
-            if (existingOrder.PaymentStatus == "Paid")
+            // Check if the payment status is already finalized as success.
+            if (string.Equals(existingOrder.PaymentStatus, "Success", StringComparison.OrdinalIgnoreCase))
             {
                 return Ok(new
                 {

@@ -48,8 +48,11 @@ public class AuthenticateController : ControllerBase
     [HttpPost("Register")]
     public async Task<IActionResult> Register([FromBody] RegisterUser registerUser, [FromQuery] string role)
     {
+        if (string.IsNullOrWhiteSpace(role))
+            return BadRequest(new Response { Status = "Error", Message = "Role is required." });
+
         // Check if user already exists
-        var userExist = await _userManager.FindByNameAsync(registerUser.Email);
+        var userExist = await _userManager.FindByNameAsync(registerUser.UserName);
         if (userExist != null)
             return StatusCode(StatusCodes.Status403Forbidden,
                 new Response { Status = "Error", Message = "User already exists." });
@@ -138,7 +141,7 @@ public class AuthenticateController : ControllerBase
             try 
             {
                 var message = new Message(new[] { user.Email }, "Email Confirmation", confirmationHtml, isHtml: true);
-                _emailService.SendEmailAsync(message);
+                await _emailService.SendEmailAsync(message);
             }
             catch (Exception ex)
             {

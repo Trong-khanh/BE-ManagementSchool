@@ -20,6 +20,7 @@ using User.ManagementSchool.Service.Models;
 using User.ManagementSchool.Service.Service;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
 // Thêm cấu hình HttpClient
 builder.Services.AddHttpClient();
@@ -44,13 +45,15 @@ else
     {
         var databaseUri = new Uri(databaseUrl);
         var userInfo = databaseUri.UserInfo.Split(':');
+        var username = userInfo.Length > 0 ? userInfo[0] : string.Empty;
+        var password = userInfo.Length > 1 ? userInfo[1] : string.Empty;
         
         var builderDb = new NpgsqlConnectionStringBuilder
         {
             Host = databaseUri.Host,
             Port = databaseUri.Port > 0 ? databaseUri.Port : 5432,
-            Username = userInfo[0],
-            Password = userInfo[1],
+            Username = username,
+            Password = password,
             Database = databaseUri.LocalPath.TrimStart('/'),
             SslMode = SslMode.Require,
             TrustServerCertificate = true
@@ -75,8 +78,13 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 
 // Cấu hình xác thực JWT
 builder.Services.Configure<IdentityOptions>(opts => opts.SignIn.RequireConfirmedEmail = true);
-
-var configuration = builder.Configuration;
+var jwtSecret = configuration["JWT:Secret"];
+if (string.IsNullOrWhiteSpace(jwtSecret))
+{
+    throw new InvalidOperationException("JWT:Secret must be configured.");
+}
+var jwtIssuer = configuration["JWT:validIssuer"];
+var jwtAudience = configuration["JWT:validAudience"];
 
 builder.Services.AddAuthentication(options =>
 {
@@ -86,17 +94,26 @@ builder.Services.AddAuthentication(options =>
 }).AddJwtBearer(options =>
 {
     options.SaveToken = true;
-    options.RequireHttpsMetadata = false;
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+        ValidateIssuer = !string.IsNullOrWhiteSpace(jwtIssuer),
+        ValidIssuer = jwtIssuer,
+        ValidateAudience = !string.IsNullOrWhiteSpace(jwtAudience),
+        ValidAudience = jwtAudience,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.FromMinutes(1)
     };
 });
 
 // Cấu hình dịch vụ Email
 var emailConfig = configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+if (emailConfig is null)
+{
+    throw new InvalidOperationException("EmailConfiguration must be configured.");
+}
 builder.Services.AddSingleton(emailConfig);
 
 // Đăng ký các dịch vụ
@@ -109,6 +126,8 @@ builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IParentService, ParentService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IOrderServices, OrderServices>();
+
+var configuredAllowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 
 // Cấu hình Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -149,11 +168,22 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin", corsPolicyBuilder =>
     {
+        var effectiveOrigins = configuredAllowedOrigins;
+        if (effectiveOrigins.Length == 0)
+        {
+            if (!builder.Environment.IsDevelopment())
+            {
+                throw new InvalidOperationException("Cors:AllowedOrigins must be configured outside development.");
+            }
+
+            effectiveOrigins = new[] { "http://localhost:3000", "http://localhost:5172", "http://localhost:5173" };
+        }
+
         corsPolicyBuilder
-            .SetIsOriginAllowed(origin => true) // Chấp nhận mọi nguồn (cho phép cả localhost và vercel)
+            .WithOrigins(effectiveOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); // Quan trọng: Cho phép gửi cookie/token
+            .AllowCredentials();
     });
 });
 

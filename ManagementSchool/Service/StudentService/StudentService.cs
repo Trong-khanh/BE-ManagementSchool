@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using ManagementSchool.Entities;
 using ManagementSchool.Models;
 using Microsoft.EntityFrameworkCore;
@@ -13,16 +15,19 @@ public class StudentService : IStudentService
         _context = context;
     }
 
-        public IEnumerable<dynamic> GetDailyScores(string studentName, string academicYear)
+        public IEnumerable<dynamic> GetDailyScores(ClaimsPrincipal user, string academicYear)
         {
-            // Tìm học sinh dựa vào FullName
-            var student = _context.Students.FirstOrDefault(s => s.FullName == studentName);
+            var student = ResolveStudentFromUser(user);
             if (student == null)
             {
                 return null;
             }
 
-            // Xác minh AcademicYear trong bảng Semester
+            if (string.IsNullOrWhiteSpace(academicYear))
+            {
+                return null;
+            }
+
             var validSemester = _context.Semesters.FirstOrDefault(s => s.AcademicYear == academicYear);
             if (validSemester == null)
             {
@@ -45,12 +50,11 @@ public class StudentService : IStudentService
             return scores;
         }
 
-        public IEnumerable<dynamic> GetSubjectsAverageScores(string studentName, string academicYear)
+        public IEnumerable<dynamic> GetSubjectsAverageScores(ClaimsPrincipal user, string academicYear)
         {
-            var student = _context.Students.FirstOrDefault(s => s.FullName == studentName);
+            var student = ResolveStudentFromUser(user);
             if (student == null) return null;
 
-            // Kiểm tra nếu academicYear nhập vào null hoặc rỗng, trả về null
             if (string.IsNullOrWhiteSpace(academicYear))
             {
                 return null;
@@ -71,12 +75,11 @@ public class StudentService : IStudentService
             return averageScores;
         }
 
-        public IEnumerable<dynamic> GetAverageScores(string studentName, string academicYear)
+        public IEnumerable<dynamic> GetAverageScores(ClaimsPrincipal user, string academicYear)
         {
-            var student = _context.Students.FirstOrDefault(s => s.FullName == studentName);
+            var student = ResolveStudentFromUser(user);
             if (student == null) return null;
 
-            // Kiểm tra nếu academicYear nhập vào null hoặc rỗng, trả về null
             if (string.IsNullOrWhiteSpace(academicYear))
             {
                 return null;
@@ -93,5 +96,18 @@ public class StudentService : IStudentService
                 .ToList();
 
             return averageScores;
+        }
+
+        private Student? ResolveStudentFromUser(ClaimsPrincipal user)
+        {
+            var studentName = user.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                              ?? user.FindFirstValue(ClaimTypes.Name);
+
+            if (string.IsNullOrWhiteSpace(studentName))
+            {
+                return null;
+            }
+
+            return _context.Students.FirstOrDefault(s => s.FullName == studentName);
         }
 }

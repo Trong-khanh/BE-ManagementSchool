@@ -1,0 +1,41 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
+      - PORT=80
+      - DATABASE_URL=${DATABASE_URL:-postgres://ms_user:ms_pass@db:5432/managementschool}
+      - JWT__Secret=${JWT_SECRET:-CHANGE_THIS_LONG_RANDOM_SECRET_IN_ENV}
+      - JWT__validIssuer=${JWT_VALID_ISSUER:-http://localhost:8080}
+      - JWT__validAudience=${JWT_VALID_AUDIENCE:-http://localhost:8080}
+      # Cấu hình Momo callback về localhost:8080 khi chạy Docker
+      - MomoAPI__ReturnUrl=http://localhost:8080/Checkout/PaymentCallBack
+      - MomoAPI__NotifyUrl=http://localhost:8080/Checkout/MomoNotify
+      - MomoAPI__SecretKey=${MOMO_SECRET_KEY:-MOMO_SECRET_KEY}
+      - MomoAPI__AccessKey=${MOMO_ACCESS_KEY:-MOMO_ACCESS_KEY}
+      - EmailConfiguration__Username=${SMTP_USERNAME:-SMTP_USERNAME}
+      - EmailConfiguration__Password=${SMTP_PASSWORD:-SMTP_PASSWORD}
+      - Cors__AllowedOrigins__0=http://localhost:3000
+      - Cors__AllowedOrigins__1=http://localhost:5172
+      - Cors__AllowedOrigins__2=http://localhost:5173
+    restart: on-failure
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-ms_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-ms_pass}
+      - POSTGRES_DB=${POSTGRES_DB:-managementschool}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

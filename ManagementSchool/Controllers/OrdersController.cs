@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 namespace ManagementSchool.Controllers;
 
-[Authorize(Roles = "Admin,Parent", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+[Authorize(Roles = "Admin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [Route("api/[controller]")]
 [ApiController]
 public class OrdersController : ControllerBase
@@ -25,8 +25,11 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("GetOrderById")]
-    public async Task<IActionResult> GetOrderById(string orderId)
+    public async Task<IActionResult> GetOrderById([FromQuery] string orderId)
     {
+        if (string.IsNullOrWhiteSpace(orderId))
+            return BadRequest("OrderId is required.");
+
         var order = await _orderService.GetOrderByIdAsync(orderId);
         if (order == null)
             return NotFound("Order not found.");

@@ -8,4 +8,5 @@ public interface IMomoService
 {
     Task<MomoCreatePaymentResponseModel> CreatePaymentAsync(PaymentRequestDto paymentRequest);
     Task<MomoExecuteResponseModel> PaymentExecuteAsync(IQueryCollection query);
+    bool ValidateCallbackSignature(IQueryCollection query);
 }

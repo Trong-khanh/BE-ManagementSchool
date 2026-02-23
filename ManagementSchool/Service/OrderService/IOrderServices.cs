@@ -8,6 +8,6 @@ namespace ManagementSchool.Service.OrderService
     {
         Task SaveOrderAsync(Order order);
         Task<List<Order>> GetAllOrdersAsync(); 
-        Task<Order> GetOrderByIdAsync(string orderId); 
+        Task<Order?> GetOrderByIdAsync(string orderId); 
     }
 }

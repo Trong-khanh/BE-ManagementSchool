@@ -1,10 +1,8 @@
 
+using System.Security.Claims;
 using ManagementSchool.Models;
-using ManagementSchool.Dto;
 using ManagementSchool.Entities;
 using Microsoft.EntityFrameworkCore;
-using PayPal.Core;
-using PayPal.v1.Payments;
 
 
 namespace ManagementSchool.Service.ParentService
@@ -12,24 +10,24 @@ namespace ManagementSchool.Service.ParentService
     public class ParentService : IParentService
     {
         private readonly ApplicationDbContext _context;
-        private readonly IConfiguration _configuration;
-
-        public ParentService(ApplicationDbContext context, IConfiguration configuration)
+        public ParentService(ApplicationDbContext context)
         {
             _context = context;
-            _configuration = configuration;
         }
 
-        public IEnumerable<dynamic> GetDailyScores(string studentName, string academicYear)
+        public IEnumerable<dynamic> GetDailyScores(ClaimsPrincipal user, string studentName, string academicYear)
         {
-            // Tìm học sinh dựa vào FullName
-            var student = _context.Students.FirstOrDefault(s => s.FullName == studentName);
+            var student = ResolveParentStudent(user, studentName);
             if (student == null)
             {
                 return null;
             }
 
-            // Xác minh AcademicYear trong bảng Semester
+            if (string.IsNullOrWhiteSpace(academicYear))
+            {
+                return null;
+            }
+
             var validSemester = _context.Semesters.FirstOrDefault(s => s.AcademicYear == academicYear);
             if (validSemester == null)
             {
@@ -52,12 +50,11 @@ namespace ManagementSchool.Service.ParentService
             return scores;
         }
 
-        public IEnumerable<dynamic> GetSubjectsAverageScores(string studentName, string academicYear)
+        public IEnumerable<dynamic> GetSubjectsAverageScores(ClaimsPrincipal user, string studentName, string academicYear)
         {
-            var student = _context.Students.FirstOrDefault(s => s.FullName == studentName);
+            var student = ResolveParentStudent(user, studentName);
             if (student == null) return null;
 
-            // Kiểm tra nếu academicYear nhập vào null hoặc rỗng, trả về null
             if (string.IsNullOrWhiteSpace(academicYear))
             {
                 return null;
@@ -78,12 +75,11 @@ namespace ManagementSchool.Service.ParentService
             return averageScores;
         }
 
-        public IEnumerable<dynamic> GetAverageScores(string studentName, string academicYear)
+        public IEnumerable<dynamic> GetAverageScores(ClaimsPrincipal user, string studentName, string academicYear)
         {
-            var student = _context.Students.FirstOrDefault(s => s.FullName == studentName);
+            var student = ResolveParentStudent(user, studentName);
             if (student == null) return null;
 
-            // Kiểm tra nếu academicYear nhập vào null hoặc rỗng, trả về null
             if (string.IsNullOrWhiteSpace(academicYear))
             {
                 return null;
@@ -102,6 +98,19 @@ namespace ManagementSchool.Service.ParentService
                 .ToList();
 
             return averageScores;
+        }
+
+        private Student? ResolveParentStudent(ClaimsPrincipal user, string studentName)
+        {
+            var parentEmail = user.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrWhiteSpace(parentEmail) || string.IsNullOrWhiteSpace(studentName))
+            {
+                return null;
+            }
+
+            return _context.Students.FirstOrDefault(s =>
+                s.ParentEmail == parentEmail &&
+                s.FullName == studentName);
         }
 
     }

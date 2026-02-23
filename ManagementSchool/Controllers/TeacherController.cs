@@ -76,7 +76,7 @@ public class TeacherController : ControllerBase
         }
     } 
 
-    [HttpGet(" GetScoreStudent/{studentId}")]
+    [HttpGet("GetScoreStudent/{studentId}")]
     public async Task<IActionResult> GetScoresForStudent(int studentId, [FromQuery] int? subjectId = null,
         [FromQuery] int? semesterId = null)
     {

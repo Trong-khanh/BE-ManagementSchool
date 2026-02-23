@@ -25,7 +25,11 @@ public class TokenService
 
     public async Task<string> GenerateAccessToken(IdentityUser user)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]));
+        var jwtSecret = _configuration["Jwt:Secret"];
+        if (string.IsNullOrWhiteSpace(jwtSecret))
+            throw new InvalidOperationException("Jwt:Secret is not configured.");
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var expiry = DateTime.Now.AddHours(1);
 
@@ -39,11 +43,12 @@ public class TokenService
         // Tạo list claims và thêm email như một claim mới
         var claims = new List<Claim>
             {
-                new(JwtRegisteredClaimNames.Sub, user.UserName),
+                new(JwtRegisteredClaimNames.Sub, user.UserName ?? string.Empty),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new(ClaimTypes.NameIdentifier, user.Id),
+                new(ClaimTypes.Name, user.UserName ?? string.Empty),
                 // Thêm email như một claim
-                new(ClaimTypes.Email, user.Email)
+                new(ClaimTypes.Email, user.Email ?? string.Empty)
             }
             .Union(userClaims)
             .Union(roleClaims);

@@ -15,7 +15,23 @@ namespace ManagementSchool.Service.OrderService
 
         public async Task SaveOrderAsync(Order order)
         {
-            await _context.Orders.AddAsync(order);
+            var existingOrder = await _context.Orders
+                .FirstOrDefaultAsync(o => o.OrderId == order.OrderId);
+
+            if (existingOrder == null)
+            {
+                await _context.Orders.AddAsync(order);
+            }
+            else if (!ReferenceEquals(existingOrder, order))
+            {
+                existingOrder.Amount = order.Amount;
+                existingOrder.SemesterName = order.SemesterName;
+                existingOrder.AcademicYear = order.AcademicYear;
+                existingOrder.NotificationContent = order.NotificationContent;
+                existingOrder.PaymentStatus = order.PaymentStatus;
+                existingOrder.CreatedDate = order.CreatedDate;
+            }
+
             await _context.SaveChangesAsync();
         }
 
@@ -24,7 +40,7 @@ namespace ManagementSchool.Service.OrderService
             return await _context.Orders.ToListAsync();
         }
 
-        public async Task<Order> GetOrderByIdAsync(string orderId)
+        public async Task<Order?> GetOrderByIdAsync(string orderId)
         {
             return await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
         }

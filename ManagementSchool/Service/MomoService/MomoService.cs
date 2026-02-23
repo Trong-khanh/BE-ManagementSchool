@@ -5,7 +5,6 @@ using ManagementSchool.Entities;
 using ManagementSchool.Entities.MomoOptonModel;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using RestSharp;
 
 namespace ManagementSchool.Service.MomoService
 {
@@ -22,7 +21,11 @@ namespace ManagementSchool.Service.MomoService
 
         public async Task<MomoCreatePaymentResponseModel> CreatePaymentAsync(PaymentRequestDto paymentRequest)
         {
-            paymentRequest.OrderId = GenerateOrderId();
+            if (string.IsNullOrWhiteSpace(paymentRequest.OrderId))
+            {
+                paymentRequest.OrderId = GenerateOrderId();
+            }
+
             var requestId = Guid.NewGuid().ToString();
 
             var rawData = $"partnerCode={_momoOptions.Value.PartnerCode}" +
@@ -61,6 +64,16 @@ namespace ManagementSchool.Service.MomoService
                 {
                     // Deserialize the response content to your model
                     var responseData = JsonConvert.DeserializeObject<MomoCreatePaymentResponseModel>(responseContent);
+                    if (responseData == null)
+                    {
+                        return new MomoCreatePaymentResponseModel
+                        {
+                            Success = false,
+                            Message = "Invalid response from payment provider.",
+                            LocalMessage = "Phản hồi từ cổng thanh toán không hợp lệ.",
+                            PayUrl = string.Empty
+                        };
+                    }
 
                     // Check if PayUrl exists and assign it, otherwise handle it as required
                     if (!string.IsNullOrEmpty(responseData.PayUrl))
@@ -96,7 +109,7 @@ namespace ManagementSchool.Service.MomoService
                         Success = false,
                         Message = "Failed to create payment request.",
                         LocalMessage = "Tạo yêu cầu thanh toán thất bại.",
-                        PayUrl = null
+                        PayUrl = string.Empty
                     };
                 }
             }
@@ -106,29 +119,47 @@ namespace ManagementSchool.Service.MomoService
                 {
                     Success = false,
                     Message = "Exception occurred: " + ex.Message,
-                    PayUrl = null
+                    PayUrl = string.Empty
                 };
             }
         }
 
 
-        public async Task<MomoExecuteResponseModel> PaymentExecuteAsync(IQueryCollection query)
+        public Task<MomoExecuteResponseModel> PaymentExecuteAsync(IQueryCollection query)
         {
             var orderId = query["orderId"];
             var amount = query["amount"];
             var fullName = query["fullName"];
             var orderInfo = query["orderInfo"];
 
-            return new MomoExecuteResponseModel
+            return Task.FromResult(new MomoExecuteResponseModel
             {
                 OrderId = orderId,
                 Amount = amount,
                 FullName = fullName,
                 OrderInfo = orderInfo
-            };
+            });
         }
 
-        private string GenerateOrderId() => DateTime.UtcNow.Ticks.ToString();
+        public bool ValidateCallbackSignature(IQueryCollection query)
+        {
+            var receivedSignature = query["signature"].ToString();
+            if (string.IsNullOrWhiteSpace(receivedSignature))
+            {
+                return false;
+            }
+
+            var rawData = string.Join("&", query
+                .Where(kvp => !string.Equals(kvp.Key, "signature", StringComparison.OrdinalIgnoreCase)
+                              && !string.Equals(kvp.Key, "signType", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(kvp => kvp.Key, StringComparer.Ordinal)
+                .Select(kvp => $"{kvp.Key}={kvp.Value}"));
+
+            var computedSignature = GenerateSignature(rawData);
+            return string.Equals(receivedSignature, computedSignature, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string GenerateOrderId() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
 
         private string GenerateSignature(string rawData)
         {
